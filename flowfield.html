@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>flowfield — mari herzer</title>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+
+    canvas {
+      display: block;
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #hint {
+      position: fixed;
+      bottom: 1.4rem;
+      right: 1.6rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.14em;
+      color: rgba(255, 255, 255, 0.18);
+      pointer-events: none;
+      user-select: none;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="c"></canvas>
+  <div id="hint">click · regenerate</div>
+
+  <script>
+    (function () {
+
+      // ── Perlin noise (2D) ─────────────────────────────────────────────────────
+      const _p = new Uint8Array(256);
+      for (let i = 0; i < 256; i++) _p[i] = i;
+      for (let i = 255; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [_p[i], _p[j]] = [_p[j], _p[i]];
+      }
+      const perm = new Uint8Array(512);
+      for (let i = 0; i < 512; i++) perm[i] = _p[i & 255];
+
+      function fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+      function lerp(a, b, t) { return a + t * (b - a); }
+      function grad(h, x, y) {
+        const g = h & 3;
+        const u = g < 2 ? x : y, v = g < 2 ? y : x;
+        return ((g & 1) ? -u : u) + ((g & 2) ? -v : v);
+      }
+      function noise(x, y) {
+        const X = Math.floor(x) & 255, Y = Math.floor(y) & 255;
+        const xf = x - Math.floor(x), yf = y - Math.floor(y);
+        const u = fade(xf), v = fade(yf);
+        const a = perm[X] + Y, b = perm[X + 1] + Y;
+        return lerp(
+          lerp(grad(perm[a], xf, yf), grad(perm[b], xf - 1, yf), u),
+          lerp(grad(perm[a + 1], xf, yf - 1), grad(perm[b + 1], xf - 1, yf - 1), u),
+          v
+        );
+      }
+      function fbm(x, y, oct) {
+        let v = 0, a = 0.5, f = 1, m = 0;
+        for (let i = 0; i < oct; i++) {
+          v += noise(x * f, y * f) * a;
+          m += a; a *= 0.5; f *= 2.0;
+        }
+        return v / m;
+      }
+
+      // ── Canvas setup ──────────────────────────────────────────────────────────
+      const canvas = document.getElementById('c');
+      const ctx = canvas.getContext('2d');
+      let W, H;
+
+      function resize() {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      }
+
+      // ── Audio analysis (optional — only if audioCtx is provided externally) ──
+      // When embedded in the world engine, window._flowfieldAudio is set to an
+      // AnalyserNode so the field can react to the soundtrack.
+      // Falls back gracefully if not present.
+      let _analyser = null;
+      let _freqData = null;
+
+      function getAudioEnergy() {
+        // Returns [bassEnergy, midEnergy, highEnergy], each in [0,1]
+        if (!_analyser) {
+          // Try to pick up an analyser injected by the world engine
+          if (window._flowfieldAnalyser) {
+            _analyser = window._flowfieldAnalyser;
+            _freqData = new Uint8Array(_analyser.frequencyBinCount);
+          } else {
+            return [0, 0, 0];
+          }
+        }
+        _analyser.getByteFrequencyData(_freqData);
+        const len = _freqData.length;
+        // Bass: bins 0–5%, Mid: 5–30%, High: 30–70%
+        const bassEnd = Math.floor(len * 0.05);
+        const midEnd  = Math.floor(len * 0.30);
+        const highEnd = Math.floor(len * 0.70);
+        let bass = 0, mid = 0, high = 0;
+        for (let i = 0;       i < bassEnd; i++) bass += _freqData[i];
+        for (let i = bassEnd; i < midEnd;  i++) mid  += _freqData[i];
+        for (let i = midEnd;  i < highEnd; i++) high += _freqData[i];
+        bass /= bassEnd * 255;
+        mid  /= (midEnd - bassEnd) * 255;
+        high /= (highEnd - midEnd) * 255;
+        return [bass, mid, high];
+      }
+
+      // ── Color system ──────────────────────────────────────────────────────────
+      // Desaturated palette: greyish-teal + muted ochre / slate-green + dusty violet
+      // Saturation deliberately pulled down, lightness kept in the 35–55 range
+      // so peaks never blow out to white.
+
+      function hsl(h, s, l, a) {
+        return `hsla(${h | 0},${s | 0}%,${l | 0}%,${a.toFixed(3)})`;
+      }
+
+      function lerpHSL(h1, s1, l1, h2, s2, l2, t) {
+        let dh = h2 - h1;
+        if (dh > 180) dh -= 360;
+        if (dh < -180) dh += 360;
+        return [h1 + dh * t, lerp(s1, s2, t), lerp(l1, l2, t)];
+      }
+
+      // palette A: greyed teal (185°, s38, l38) → muted ochre (50°, s45, l44)
+      // palette B: slate green (148°, s32, l36) → dusty violet (272°, s30, l38)
+      // All saturations ≤ 45 — no pure hues, nothing bleaches to white.
+      function lineColor(normPos, globalPhase, alpha, bassBoost) {
+        const blend = Math.sin(globalPhase * Math.PI * 2) * 0.5 + 0.5;
+
+        // Bass energy very slightly pushes lightness up — subtle warmth on beat
+        const lBoost = bassBoost * 8;
+
+        const [hA, sA, lA] = lerpHSL(185, 38, 38 + lBoost, 50, 45, 44 + lBoost, normPos);
+        const [hB, sB, lB] = lerpHSL(148, 32, 36 + lBoost, 272, 30, 38 + lBoost, normPos);
+
+        const [h, s, l] = lerpHSL(hA, sA, lA, hB, sB, lB, blend);
+        return hsl(h, s, l, alpha);
+      }
+
+      // ── Flow field particles ───────────────────────────────────────────────────
+
+      const NUM_LINES   = 180;
+      const TAIL        = 80;
+      const STEP_LEN    = 3.2;
+      const NOISE_ZOOM  = 0.0018;
+      const NOISE_SPEED = 0.000055;
+      const CURL_AMP    = 0.45;
+
+      let lines  = [];
+      let fieldT = 0;
+      let colorT = 0;
+
+      function randomX() { return Math.random() * W * 1.2 - W * 0.1; }
+      function randomY() { return Math.random() * H * 1.2 - H * 0.1; }
+
+      function fieldAngle(x, y, t, midBoost) {
+        const nx = x * NOISE_ZOOM, ny = y * NOISE_ZOOM;
+        const n1 = fbm(nx + t * 1.1, ny + t * 0.7, 4);
+        // Mid energy slightly increases curl intensity — more turbulence
+        const curl = CURL_AMP + midBoost * 0.6;
+        const n2 = fbm(nx + 3.7 + t * 0.6, ny + 1.9 + t * 0.9, 3);
+        return (n1 * 4.0 + n2 * curl) * Math.PI * 2;
+      }
+
+      function spawnLine(l) {
+        l.x = randomX();
+        l.y = randomY();
+        l.buf  = new Float32Array(TAIL * 2);
+        l.head = 0;
+        l.len  = 0;
+        for (let i = 0; i < TAIL; i++) {
+          const angle = fieldAngle(l.x, l.y, fieldT, 0);
+          l.x += Math.cos(angle) * STEP_LEN;
+          l.y += Math.sin(angle) * STEP_LEN;
+          l.buf[i * 2]     = l.x;
+          l.buf[i * 2 + 1] = l.y;
+        }
+        l.head = TAIL - 1;
+        l.len  = TAIL;
+        const midAngle = fieldAngle(l.x, l.y, fieldT, 0);
+        l.colorPos  = (midAngle / (Math.PI * 2) + 1) % 1;
+        l.alpha     = Math.random() * 0.05 + 0.015;
+        l.lifeSpeed = 0.004 + Math.random() * 0.008;
+        l.lifeT     = Math.random() * Math.PI * 2;
+      }
+
+      function isOffscreen(x, y) {
+        return x < -W * 0.2 || x > W * 1.2 || y < -H * 0.2 || y > H * 1.2;
+      }
+
+      function stepLine(l, midBoost) {
+        const angle = fieldAngle(l.x, l.y, fieldT, midBoost);
+        // High energy slightly speeds up movement
+        const spd = STEP_LEN;
+        l.x += Math.cos(angle) * spd;
+        l.y += Math.sin(angle) * spd;
+        l.head = (l.head + 1) % TAIL;
+        l.buf[l.head * 2]     = l.x;
+        l.buf[l.head * 2 + 1] = l.y;
+        if (l.len < TAIL) l.len++;
+        if (isOffscreen(l.x, l.y)) spawnLine(l);
+      }
+
+      function init() {
+        lines = [];
+        for (let i = 0; i < NUM_LINES; i++) {
+          const l = {};
+          spawnLine(l);
+          lines.push(l);
+        }
+      }
+
+      // ── Render ────────────────────────────────────────────────────────────────
+
+      const offCanvas = document.createElement('canvas');
+      const offCtx    = offCanvas.getContext('2d');
+
+      function syncOff() {
+        offCanvas.width  = W;
+        offCanvas.height = H;
+      }
+
+      // DECAY_ALPHA: decay at peak brightness — long trails at peak
+      const DECAY_ALPHA = 0.010;
+
+      let globalT  = 0;
+      let lastTime = performance.now();
+
+      function frame(now) {
+        requestAnimationFrame(frame);
+        const dt = Math.min(now - lastTime, 50);
+        lastTime = now;
+        globalT += dt * 0.001;
+
+        fieldT += NOISE_SPEED * dt;
+        colorT += 0.000028 * dt;
+
+        if (offCanvas.width !== W || offCanvas.height !== H) syncOff();
+
+        // Audio
+        const [bass, mid, high] = getAudioEnergy();
+
+        // ── Global pulse ──────────────────────────────────────────────────────
+        // Slow cycle, gentle ramp. Exponent 5 = gradual swell not a burst.
+        const raw         = Math.sin(globalT * 0.16) * 0.5 + 0.5;
+        const pulsed      = Math.pow(raw, 5.0) + bass * 0.04;
+        const globalPulse = Math.min(1, pulsed);
+
+        // High ceiling (0.08) aggressively clears the buffer when dark → pitch black.
+        // At peak it drops to DECAY_ALPHA so bright trails linger.
+        const currentDecay = lerp(0.08, DECAY_ALPHA, globalPulse);
+
+        offCtx.fillStyle = `rgba(0,0,0,${currentDecay})`;
+        offCtx.fillRect(0, 0, W, H);
+
+        for (let i = 0; i < NUM_LINES; i++) {
+          const l = lines[i];
+          stepLine(l, mid);
+          l.lifeT += l.lifeSpeed;
+
+          const shimmer     = Math.sin(l.lifeT * 60) * 0.5 + 0.5;
+          // Floor 0.35: enough lines stay alive and bright in the dark phase.
+          const pulseFloor  = Math.max(globalPulse, 0.35);
+          const highFlicker = 1 + high * 0.10;
+          const a  = l.alpha * (0.4 + shimmer * 0.6) * pulseFloor * highFlicker;
+          // Thinner lines: 0.28–0.55 range (was 0.55–0.90)
+          const lw = 0.28 + shimmer * 0.27;
+          const col = lineColor(l.colorPos, colorT, a, bass);
+
+          offCtx.save();
+          offCtx.globalCompositeOperation = 'lighter';
+          offCtx.strokeStyle = col;
+          offCtx.lineWidth   = lw;
+          offCtx.lineCap     = 'round';
+          offCtx.lineJoin    = 'round';
+          offCtx.beginPath();
+
+          const oldest = (l.head - l.len + 1 + TAIL) % TAIL;
+          offCtx.moveTo(l.buf[oldest * 2], l.buf[oldest * 2 + 1]);
+          for (let s = 1; s < l.len; s++) {
+            const idx = (oldest + s) % TAIL;
+            offCtx.lineTo(l.buf[idx * 2], l.buf[idx * 2 + 1]);
+          }
+          offCtx.stroke();
+          offCtx.restore();
+        }
+
+        ctx.clearRect(0, 0, W, H);
+        ctx.drawImage(offCanvas, 0, 0);
+      }
+
+      canvas.addEventListener('click', () => {
+        offCtx.clearRect(0, 0, W, H);
+        fieldT += 12.0 + Math.random() * 8.0;
+        init();
+      });
+
+      window.addEventListener('resize', () => {
+        resize();
+        syncOff();
+      });
+
+      resize();
+      syncOff();
+      init();
+      requestAnimationFrame(frame);
+
+    })();
+  </script>
+</body>
+
+</html>

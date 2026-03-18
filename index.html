@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mari Herzer</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="resources/img/favicon1.ico" type="image/x-icon">
+</head>
+
+<body>
+
+  <!-- Layer 1: animated noise background -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- Layer 2: organic creatures (dormant mode) -->
+  <canvas id="creature-canvas"></canvas>
+
+  <!-- Layer 3: world canvas (active mode, one of 3 worlds) -->
+  <canvas id="world-canvas"></canvas>
+
+  <!-- Layer 4: grain texture -->
+  <div class="noise"></div>
+
+  <!-- Layer 5: cinematic veil (darkens on play) -->
+  <div id="cinema-veil"></div>
+
+  <main class="container">
+
+    <header class="header">
+      <h1 font-family="Legitima Italic" class="site-title">Mari<br>Herzer</h1>
+      <p class="site-subtitle">produtora musical · trilheira · sintesista</p>
+    </header>
+
+    <nav class="sliding-panel">
+      <div class="panel-trigger">
+        <span class="trigger-label">mais</span>
+        <span class="trigger-arrow">↓</span>
+      </div>
+
+      <div class="panel-content">
+        <div class="nav-links">
+
+          <button class="btnS nav-item">
+            <span class="nav-slash">///</span>sobre
+          </button>
+
+          <dialog id="sobreDialog">
+            <button class="btnClose dialog-close">&#x2715;</button>
+            <div class="dialog-body">
+              <p>Mari Herzer é produtora musical, trilheira e sintesista. Um dos pontos de partida de sua prática sonora é a escuta atenta das paisagens que habitamos, pensadas como sistemas autônomos de organização rítmica/melódica, orientados por suas próprias lógicas não-humanas.</p>
+              <p>Herzer trabalha no ponto de convergência entre música eletroacústica e eletrônica e suas composições remetem a paisagens sonoras naturalistas. Com técnicas especulativas e leituras não convencionais de antropologia e dados de ciências biológicas, Herzer confecciona ecossistemas sonoros com sound design especializado para cinema.</p>
+              <p>Por oito anos, Herzer tocou e foi artista-residente da Mamba Negra, festa itinerante de música eletrônica em São Paulo. Seu álbum de estreia, <em>Cheia</em> [2022], foi lançado pelo selo MAMBArec, em que também trabalhou como curadora e mixadora. Além disso, lançou faixas por selos como Osàre! Editions (UK) e TRATRATRAX (Colômbia).</p>
+              <p>Fez a trilha sonora dos filmes <em>República dos Juízes</em> / dir. Eugenio Puppo (2022), <em>Sofia Foi</em> / dir. Pedro Geraldo (2023), premiado como melhor primeiro longa metragem no festival FIDMarseille.</p>
+            </div>
+          </dialog>
+
+          <button class="btnC nav-item">
+            <span class="nav-slash">///</span>contato
+          </button>
+
+          <dialog id="contatoDialog">
+            <button class="btnClose2 dialog-close">&#x2715;</button>
+            <div class="dialog-body dialog-body--contato">
+              <p><span class="contact-label">instagram</span><br>
+                <a href="https://instagram.com/mariherzer" target="_blank">@mariherzer</a></p>
+              <p><span class="contact-label">email</span><br>
+                <a href="mailto:mariherzer@gmail.com">mariherzer@gmail.com</a></p>
+            </div>
+          </dialog>
+
+          <a href="portfolio.html" class="nav-item">
+            <span class="nav-slash">///</span>portfolio
+          </a>
+
+        </div>
+      </div>
+    </nav>
+
+  </main>
+
+  <span class="alhamdulillah">&#x0627;&#x0644;&#x062D;&#x0645;&#x062F;&#x0644;&#x0644;&#x0647;</span>
+
+  <!-- Player UI: play button + world cycle controls -->
+  <div id="player-ui">
+    <div id="world-controls">
+      <button id="prev-world" aria-label="Mundo anterior">&#x2039;</button>
+      <span id="world-name"></span>
+      <button id="next-world" aria-label="Próximo mundo">&#x203a;</button>
+    </div>
+    <button id="play-btn" aria-label="Iniciar experiência sonora">
+      <span id="play-label">ecossistemas sonoros</span>
+      <span id="play-icon">&#x25B6;</span>
+    </button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
