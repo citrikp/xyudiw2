@@ -1,0 +1,3 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+resources/img/bgweb/bg-website.mp4 !text !filter !merge !diff
