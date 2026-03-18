@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mari Herzer — portfolio</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="resources/img/favicon1.ico" type="image/x-icon">
+</head>
+
+<body>
+
+  <canvas id="bg-canvas"></canvas>
+  <div class="noise"></div>
+
+  <main class="container">
+
+    <header class="portfolio-header">
+      <h1>portfolio</h1>
+    </header>
+
+    <ul class="portfolio-list">
+
+      <li>
+        <button class="project-btn"
+          data-type="vimeo"
+          data-url="https://player.vimeo.com/video/1173101024?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"
+          data-title="Sofia Foi"
+          data-desc="Trilha sonora original. Dir. Pedro Geraldo, 2023. Premiado como melhor primeiro longa metragem no festival FIDMarseille.">
+          <span class="nav-slash">///</span>sofia foi [2023]
+        </button>
+      </li>
+
+      <li>
+        <button class="project-btn"
+          data-type="multi-vimeo"
+          data-title="República dos Juízes"
+          data-desc="Trilha sonora original. Dir. Eugenio Puppo, 2022."
+          data-videos='[
+            {"label":"parte I","url":"https://player.vimeo.com/video/956227823?title=0&byline=0&portrait=0"},
+            {"label":"parte II","url":"https://player.vimeo.com/video/956227795?title=0&byline=0&portrait=0"},
+            {"label":"parte III","url":"https://player.vimeo.com/video/956227294?title=0&byline=0&portrait=0"},
+            {"label":"parte IV","url":"https://player.vimeo.com/video/956226051?title=0&byline=0&portrait=0"}
+          ]'>
+          <span class="nav-slash">///</span>república dos juízes [2022]
+        </button>
+      </li>
+
+      <li>
+        <button class="project-btn"
+          data-type="spotify"
+          data-url="https://open.spotify.com/embed/album/5fPrhPhA0kpPpwfwsWKjpl?utm_source=generator&theme=0"
+          data-title="Cheia"
+          data-desc="Álbum de estreia lançado pelo selo MAMBArec, 2022.">
+          <span class="nav-slash">///</span>cheia [2022]
+        </button>
+      </li>
+
+      <li>
+        <button class="project-btn"
+          data-type="audio"
+          data-title="música para escutar"
+          data-desc="Faixas para escuta direta."
+          data-tracks='[
+            {"name":"faixa 1","src":"resources/audio/01_watery.wav"},
+            {"name":"faixa 2","src":"resources/audio/02_abstract.wav"},
+            {"name":"faixa 3","src":"resources/audio/03_palaeolithic.wav"}
+          ]'>
+          <span class="nav-slash">///</span>música para escutar
+        </button>
+      </li>
+
+      <li>
+        <button class="project-btn"
+          data-type="vimeo"
+          data-url="https://player.vimeo.com/video/591961465?title=0&byline=0&portrait=0"
+          data-title="Natura &amp; CO"
+          data-desc="Trilha sonora original, 2020.">
+          <span class="nav-slash">///</span>natura &amp; co [2020]
+        </button>
+      </li>
+
+    </ul>
+
+    <a href="index.html" class="back-link">← voltar</a>
+
+  </main>
+
+  <!-- Shared embed dialog -->
+  <dialog id="embedDialog" class="embed-dialog">
+    <button class="embed-close dialog-close">✕</button>
+    <div class="embed-meta">
+      <h2 class="embed-title"></h2>
+      <p class="embed-desc"></p>
+    </div>
+    <!-- single video -->
+    <div class="embed-wrapper" id="singleWrapper" style="display:none">
+      <iframe id="pf-embedFrame" src="" frameborder="0" allowfullscreen
+        allow="autoplay; fullscreen; picture-in-picture"></iframe>
+    </div>
+    <!-- multi-video grid -->
+    <div class="video-grid" id="multiGrid" style="display:none"></div>
+    <!-- spotify -->
+    <div id="spotifyWrapper" style="display:none">
+      <iframe id="spotifyFrame" style="border-radius:8px" src="" width="100%" height="352"
+        frameBorder="0" allowfullscreen
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy"></iframe>
+    </div>
+    <!-- custom audio player -->
+    <div class="audio-player" id="audioPlayer" style="display:none"></div>
+  </dialog>
+
+  <script src="script.js"></script>
+  <script>
+  (function() {
+    const dialog      = document.getElementById('embedDialog');
+    const closeBtn    = document.querySelector('.embed-close');
+    const titleEl     = dialog.querySelector('.embed-title');
+    const descEl      = dialog.querySelector('.embed-desc');
+    const singleWrap  = document.getElementById('singleWrapper');
+    const embedFrame  = document.getElementById('pf-embedFrame');
+    const multiGrid   = document.getElementById('multiGrid');
+    const spotifyWrap = document.getElementById('spotifyWrapper');
+    const spotifyFrm  = document.getElementById('spotifyFrame');
+    const audioPlayer = document.getElementById('audioPlayer');
+
+    let currentAudio = null;
+
+    function hideAll() {
+      // Clear meta so it never bleeds outside the dialog
+      titleEl.textContent = '';
+      descEl.textContent  = '';
+      singleWrap.style.display  = 'none';
+      multiGrid.style.display   = 'none';
+      spotifyWrap.style.display = 'none';
+      audioPlayer.style.display = 'none';
+      embedFrame.src  = '';
+      spotifyFrm.src  = '';
+      multiGrid.innerHTML    = '';
+      audioPlayer.innerHTML  = '';
+      if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    }
+
+    // Start clean
+    hideAll();
+
+    document.querySelectorAll('.project-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        hideAll();
+        titleEl.textContent = btn.dataset.title || '';
+        descEl.textContent  = btn.dataset.desc  || '';
+        const type = btn.dataset.type;
+
+        if (type === 'vimeo') {
+          singleWrap.style.display = 'block';
+          // remove is-soundcloud class
+          singleWrap.classList.remove('is-soundcloud');
+          embedFrame.src = btn.dataset.url;
+
+        } else if (type === 'multi-vimeo') {
+          multiGrid.style.display = 'flex';
+          const videos = JSON.parse(btn.dataset.videos);
+          videos.forEach(v => {
+            const item = document.createElement('div');
+            const label = document.createElement('div');
+            label.className = 'video-item-label';
+            label.textContent = v.label;
+            const wrap = document.createElement('div');
+            wrap.className = 'embed-wrapper';
+            const fr = document.createElement('iframe');
+            fr.src = v.url;
+            fr.frameBorder = '0';
+            fr.allowFullscreen = true;
+            fr.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture');
+            fr.loading = 'lazy';
+            wrap.appendChild(fr);
+            item.appendChild(label);
+            item.appendChild(wrap);
+            multiGrid.appendChild(item);
+          });
+
+        } else if (type === 'spotify') {
+          spotifyWrap.style.display = 'block';
+          spotifyFrm.src = btn.dataset.url;
+
+        } else if (type === 'audio') {
+          audioPlayer.style.display = 'flex';
+          const tracks = JSON.parse(btn.dataset.tracks);
+          tracks.forEach((track, idx) => {
+            const row = document.createElement('div');
+            row.className = 'audio-track';
+
+            const playBtnEl = document.createElement('button');
+            playBtnEl.className = 'audio-play-btn';
+            playBtnEl.textContent = '▶';
+
+            const info = document.createElement('div');
+            info.className = 'audio-track-info';
+            const name = document.createElement('div');
+            name.className = 'audio-track-name';
+            name.textContent = track.name;
+            const dur = document.createElement('div');
+            dur.className = 'audio-track-duration';
+            dur.textContent = '--:--';
+            info.appendChild(name);
+            info.appendChild(dur);
+
+            const progWrap = document.createElement('div');
+            progWrap.className = 'audio-progress-wrap';
+            const progBar = document.createElement('div');
+            progBar.className = 'audio-progress-bar';
+            progWrap.appendChild(progBar);
+
+            const audio = new Audio(track.src);
+            audio.preload = 'metadata';
+
+            audio.addEventListener('loadedmetadata', () => {
+              const m = Math.floor(audio.duration / 60);
+              const s = Math.floor(audio.duration % 60).toString().padStart(2,'0');
+              dur.textContent = `${m}:${s}`;
+            });
+            audio.addEventListener('timeupdate', () => {
+              if (audio.duration) {
+                progBar.style.width = (audio.currentTime / audio.duration * 100) + '%';
+                const m = Math.floor(audio.currentTime / 60);
+                const s = Math.floor(audio.currentTime % 60).toString().padStart(2,'0');
+                dur.textContent = `${m}:${s}`;
+              }
+            });
+            audio.addEventListener('ended', () => {
+              playBtnEl.textContent = '▶';
+              playBtnEl.classList.remove('playing');
+              progBar.style.width = '0%';
+            });
+
+            playBtnEl.addEventListener('click', () => {
+              if (currentAudio && currentAudio !== audio) {
+                currentAudio.pause();
+                // reset other buttons
+                audioPlayer.querySelectorAll('.audio-play-btn').forEach(b => {
+                  b.textContent = '▶'; b.classList.remove('playing');
+                });
+                audioPlayer.querySelectorAll('.audio-progress-bar').forEach(b => {
+                  b.style.width = '0%';
+                });
+              }
+              if (audio.paused) {
+                audio.play();
+                playBtnEl.textContent = '■';
+                playBtnEl.classList.add('playing');
+                currentAudio = audio;
+              } else {
+                audio.pause();
+                playBtnEl.textContent = '▶';
+                playBtnEl.classList.remove('playing');
+              }
+            });
+
+            progWrap.addEventListener('click', e => {
+              const rect = progWrap.getBoundingClientRect();
+              const frac = (e.clientX - rect.left) / rect.width;
+              audio.currentTime = frac * audio.duration;
+            });
+
+            row.appendChild(playBtnEl);
+            row.appendChild(info);
+            row.appendChild(progWrap);
+            audioPlayer.appendChild(row);
+          });
+        }
+
+        dialog.showModal();
+      });
+    });
+
+    // Close
+    closeBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      hideAll();
+      dialog.close();
+    });
+    dialog.addEventListener('click', e => {
+      const rect = dialog.getBoundingClientRect();
+      if (e.clientX < rect.left || e.clientX > rect.right ||
+          e.clientY < rect.top  || e.clientY > rect.bottom) {
+        hideAll();
+        dialog.close();
+      }
+    });
+  })();
+  </script>
+</body>
+
+</html>
