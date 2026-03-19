@@ -27,11 +27,22 @@
   <!-- Layer 5: cinematic veil (darkens on play) -->
   <div id="cinema-veil"></div>
 
+  <!-- Language switcher -->
+  <div class="lang-switcher" id="langSwitcher">
+    <button class="lang-globe-btn" id="langGlobeBtn" aria-label="Selecionar idioma">
+      <img src="resources/img/globe.png" alt="idioma">
+    </button>
+    <div class="lang-dropdown" id="langDropdown">
+      <a href="index.html" class="active">Português</a>
+      <a href="index-en.html">English</a>
+    </div>
+  </div>
+
   <main class="container">
 
     <header class="header">
       <h1 font-family="Legitima Italic" class="site-title">Mari<br>Herzer</h1>
-      <p class="site-subtitle">produção musical · trilha sonora · sound design</p>
+      <p class="site-subtitle"><span class="subtitle-item">produção musical</span><span class="subtitle-sep"> · </span><span class="subtitle-item">trilha sonora</span><span class="subtitle-sep"> · </span><span class="subtitle-item">sound design</span></p>
     </header>
 
     <nav class="sliding-panel">
@@ -98,6 +109,19 @@
   </div>
 
   <script src="script.js"></script>
+  <script>
+  (function() {
+    const btn = document.getElementById('langGlobeBtn');
+    const dropdown = document.getElementById('langDropdown');
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      dropdown.classList.toggle('open');
+    });
+    document.addEventListener('click', function() {
+      dropdown.classList.remove('open');
+    });
+  })();
+  </script>
 </body>
 
 </html>
