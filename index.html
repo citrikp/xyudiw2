@@ -12,22 +12,12 @@
 
 <body>
 
-  <!-- Layer 1: animated noise background -->
   <canvas id="bg-canvas"></canvas>
-
-  <!-- Layer 2: organic creatures (dormant mode) -->
   <canvas id="creature-canvas"></canvas>
-
-  <!-- Layer 3: world canvas (active mode, one of 3 worlds) -->
   <canvas id="world-canvas"></canvas>
-
-  <!-- Layer 4: grain texture -->
   <div class="noise"></div>
-
-  <!-- Layer 5: cinematic veil (darkens on play) -->
   <div id="cinema-veil"></div>
 
-  <!-- Language switcher -->
   <div class="lang-switcher" id="langSwitcher">
     <button class="lang-globe-btn" id="langGlobeBtn" aria-label="Selecionar idioma">
       <img src="resources/img/globe.png" alt="idioma">
@@ -41,8 +31,11 @@
   <main class="container">
 
     <header class="header">
-      <h1 font-family="Legitima Italic" class="site-title">Mari<br>Herzer</h1>
-      <p class="site-subtitle"><span class="subtitle-item">produção musical</span><span class="subtitle-sep"> · </span><span class="subtitle-item">trilha sonora</span><span class="subtitle-sep"> · </span><span class="subtitle-item">sound design</span></p>
+      <h1 class="site-title">Mari<br>Herzer</h1>
+      <p class="site-subtitle">
+        <span class="subtitle-line">produção musical · trilha sonora</span>
+        <span class="subtitle-line">sound design</span>
+      </p>
     </header>
 
     <nav class="sliding-panel">
@@ -50,7 +43,6 @@
         <span class="trigger-label">mais</span>
         <span class="trigger-arrow">↓</span>
       </div>
-
       <div class="panel-content">
         <div class="nav-links">
 
@@ -95,7 +87,6 @@
 
   <span class="alhamdulillah">&#x0627;&#x0644;&#x062D;&#x0645;&#x062F;&#x0644;&#x0644;&#x0647;</span>
 
-  <!-- Player UI: play button + world cycle controls -->
   <div id="player-ui">
     <div id="world-controls">
       <button id="prev-world" aria-label="Mundo anterior">&#x2039;</button>
@@ -111,15 +102,23 @@
   <script src="script.js"></script>
   <script>
   (function() {
-    const btn = document.getElementById('langGlobeBtn');
-    const dropdown = document.getElementById('langDropdown');
+    var btn = document.getElementById('langGlobeBtn');
+    var dropdown = document.getElementById('langDropdown');
+    var switcher = document.getElementById('langSwitcher');
     btn.addEventListener('click', function(e) {
       e.stopPropagation();
       dropdown.classList.toggle('open');
     });
-    document.addEventListener('click', function() {
-      dropdown.classList.remove('open');
+    document.addEventListener('mousedown', function(e) {
+      if (!switcher.contains(e.target)) {
+        dropdown.classList.remove('open');
+      }
     });
+    document.addEventListener('touchstart', function(e) {
+      if (!switcher.contains(e.target)) {
+        dropdown.classList.remove('open');
+      }
+    }, { passive: true });
   })();
   </script>
 </body>

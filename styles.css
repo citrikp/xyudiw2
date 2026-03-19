@@ -178,32 +178,31 @@ body {
 
 .site-subtitle {
   font-family: var(--mono);
-  font-size: clamp(0.78rem, 2.8vw, 0.82rem);
-  letter-spacing: 0.08em;
+  font-size: clamp(0.72rem, 2.5vw, 0.78rem);
+  letter-spacing: 0.02em;
   color: #4a4e44;
   text-transform: lowercase;
   margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  line-height: 1.6;
+}
+
+.site-subtitle .subtitle-line {
+  display: block;
   white-space: nowrap;
 }
 
 @media (max-width: 600px) {
   .site-subtitle {
-    font-size: 0.85rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
-    line-height: 1.7;
-  }
-  .site-subtitle .subtitle-sep {
-    display: none;
-  }
-  .site-subtitle .subtitle-item {
-    display: block;
+    font-size: 0.78rem;
   }
   .container {
     justify-content: flex-end;
-    gap: 1.6rem;
-    padding: 6vh 7vw 7vh;
+    gap: 1.4rem;
+    /* bottom pad must clear the fixed player-ui (~6rem tall + 2.2rem offset) */
+    padding: 0 7vw 9rem;
   }
 }
 
