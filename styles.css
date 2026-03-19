@@ -141,6 +141,7 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
   gap: 3rem;
   overflow: hidden;
 }
@@ -170,7 +171,7 @@ body {
 
 @media (max-width: 600px) {
   .site-title {
-    font-size: clamp(5.2rem, 22vw, 7rem);
+    font-size: clamp(4.4rem, 18vw, 5.5rem);
     -webkit-text-stroke: 1px currentColor;
     letter-spacing: 0.02em;
   }
@@ -183,6 +184,7 @@ body {
   color: #4a4e44;
   text-transform: lowercase;
   margin-top: 0.75rem;
+  white-space: nowrap;
 }
 
 @media (max-width: 600px) {
@@ -198,6 +200,10 @@ body {
   }
   .site-subtitle .subtitle-item {
     display: block;
+  }
+  .container {
+    gap: 1.8rem;
+    padding: 6vh 7vw 5vh;
   }
 }
 
