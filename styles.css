@@ -135,13 +135,16 @@ body {
 
 .container {
   position: fixed;
+  top: 0;
+  left: 0;
   z-index: 3;
   max-width: 560px;
-  padding: 10vh 8vw 6vh;
+  padding: 8vh 8vw 6vh;
   height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 3rem;
+  justify-content: flex-start;
+  gap: 1.8rem;
   overflow: hidden;
 }
 
@@ -199,10 +202,8 @@ body {
     font-size: 0.78rem;
   }
   .container {
-    justify-content: flex-end;
-    gap: 1.4rem;
-    /* bottom pad must clear the fixed player-ui (~6rem tall + 2.2rem offset) */
-    padding: 0 7vw 9rem;
+    padding: 6vh 7vw 6vh;
+    gap: 1.2rem;
   }
 }
 
