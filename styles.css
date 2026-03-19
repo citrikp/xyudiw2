@@ -141,7 +141,6 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
   gap: 3rem;
   overflow: hidden;
 }
@@ -202,8 +201,9 @@ body {
     display: block;
   }
   .container {
-    gap: 1.8rem;
-    padding: 6vh 7vw 5vh;
+    justify-content: flex-end;
+    gap: 1.6rem;
+    padding: 6vh 7vw 7vh;
   }
 }
 
