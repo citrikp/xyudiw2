@@ -164,7 +164,7 @@ body {
   font-style: italic;
   font-weight: bold;
   font-synthesis: weight;
-  -webkit-text-stroke: 0.5px currentColor;
+  -webkit-text-stroke: 2px currentColor;
   font-size: clamp(4.2rem, 15.5vw, 6rem);
   line-height: 0.95;
   letter-spacing: 0.04em;
@@ -174,7 +174,7 @@ body {
 
 @media (max-width: 600px) {
   .site-title {
-    font-size: clamp(4.4rem, 20vw, 5.5rem);
+    font-size: clamp(4.4rem, 23vw, 5.5rem);
     -webkit-text-stroke: 1px currentColor;
     letter-spacing: 0.02em;
   }
@@ -946,6 +946,7 @@ body[data-world="2"] #world-name {
   height: 100%;
   object-fit: contain;
   display: block;
+  filter: brightness(0) saturate(100%) invert(58%) sepia(52%) saturate(500%) hue-rotate(50deg) brightness(0.6);
 }
 
 .lang-dropdown {
