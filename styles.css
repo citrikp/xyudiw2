@@ -174,7 +174,7 @@ body {
 
 @media (max-width: 600px) {
   .site-title {
-    font-size: clamp(4.4rem, 18vw, 5.5rem);
+    font-size: clamp(4.4rem, 20vw, 5.5rem);
     -webkit-text-stroke: 1px currentColor;
     letter-spacing: 0.02em;
   }
