@@ -1,118 +1,103 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mari Herzer · blog</title>
+  <title>Mari Herzer · writings on sound</title>
   <link rel="stylesheet" href="styles.css?v=202603191944">
   <link rel="icon" href="resources/img/favicon1.ico" type="image/x-icon">
 
-  
-
-
   <style>
+    html, body { overflow-y: auto !important; overflow-x: hidden; }
+
+    #player-ui { display: none !important; }
+    .lang-switcher { display: none !important; }
+
     .substack-page {
       position: relative;
       z-index: 10;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: flex-start;
-      padding: 2.5rem 2rem 6rem 2rem;
+      padding: 1.5rem 2rem 6rem 2rem;
       max-width: 680px;
     }
 
-    .substack-back {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4em;
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
       font-size: 0.78rem;
       letter-spacing: 0.12em;
-      text-transform: lowercase;
-      color: var(--color-text, #e8e0d0);
-      opacity: 0.55;
+      color: var(--ink);
+      opacity: 0.5;
       text-decoration: none;
-      margin-bottom: 2.8rem;
       transition: opacity 0.2s;
-      cursor: pointer;
-      background: none;
-      border: none;
-      padding: 0;
-      font-family: inherit;
     }
-    .substack-back:hover { opacity: 1; }
-    .substack-back::before { content: '←'; font-size: 1em; }
+    .back-link:hover { opacity: 1; }
 
     .substack-header {
-      margin-bottom: 2.2rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid rgba(15,15,14,0.15);
+      padding-bottom: 1.2rem;
     }
     .substack-header h2 {
-      font-size: clamp(1.6rem, 5vw, 2.4rem);
+      font-size: clamp(1.4rem, 4vw, 2rem);
       font-weight: 400;
-      letter-spacing: 0.04em;
-      margin: 0 0 0.5rem 0;
+      letter-spacing: 0.06em;
       line-height: 1.1;
-      color: var(--color-text, #e8e0d0);
-    }
-    .substack-header p {
-      font-size: 0.8rem;
-      letter-spacing: 0.1em;
-      opacity: 0.45;
       margin: 0;
       text-transform: lowercase;
     }
 
-    .substack-divider {
-      width: 2.5rem;
-      height: 1px;
-      background: currentColor;
-      opacity: 0.25;
-      margin-bottom: 2rem;
+    .rss-post {
+      margin-bottom: 3.5rem;
+      padding-bottom: 3rem;
+      border-bottom: 1px solid rgba(15,15,14,0.1);
     }
+    .rss-post:last-child { border-bottom: none; }
 
-    .substack-feed-wrapper {
-      width: 100%;
-      max-width: 560px;
-    }
-
-    #substack-feed-embed {
-      --color-bg: transparent !important;
-      background: transparent !important;
-    }
-
-    .substack-subscribe {
-      margin-top: 2.8rem;
-      padding-top: 1.8rem;
-      border-top: 1px solid rgba(232, 224, 208, 0.12);
+    .rss-post-header {
       display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
+      align-items: baseline;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
     }
-    .substack-subscribe p {
-      font-size: 0.78rem;
+    .rss-post-title {
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      font-weight: 400;
+      letter-spacing: 0.03em;
+      line-height: 1.2;
+      font-style: italic;
+    }
+    .rss-post-date {
+      font-size: 0.7rem;
       letter-spacing: 0.1em;
       opacity: 0.4;
-      margin: 0;
-      text-transform: lowercase;
+      white-space: nowrap;
     }
-    .substack-subscribe a {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5em;
-      font-size: 0.78rem;
-      letter-spacing: 0.15em;
-      text-transform: lowercase;
-      color: var(--color-text, #e8e0d0);
-      opacity: 0.7;
+
+    .rss-post-body {
+      font-size: 0.92rem;
+      line-height: 1.8;
+      opacity: 0.82;
+      text-align: justify;
+    }
+    .rss-post-body p { margin-bottom: 1em; }
+    .rss-post-body img { max-width: 100%; height: auto; margin: 1rem 0; }
+    .rss-post-body h1,
+    .rss-post-body h2,
+    .rss-post-body h3 { font-weight: 400; font-style: italic; margin: 1.4em 0 0.6em; text-align: left; }
+
+    .rss-post-link {
+      display: inline-block;
+      margin-top: 1rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      opacity: 0.4;
       text-decoration: none;
-      border-bottom: 1px solid rgba(232, 224, 208, 0.3);
-      padding-bottom: 0.1em;
+      color: inherit;
       transition: opacity 0.2s;
     }
-    .substack-subscribe a:hover { opacity: 1; }
-    .substack-subscribe a::after { content: '↗'; font-size: 0.85em; }
+    .rss-post-link:hover { opacity: 1; }
   </style>
 </head>
 <body>
@@ -123,63 +108,54 @@
   <div class="noise"></div>
   <div id="cinema-veil"></div>
 
-  <div class="lang-switcher" id="langSwitcher">
-    <button class="lang-globe-btn" id="langGlobeBtn" aria-label="Selecionar idioma">
-      <img src="resources/img/globe.png" alt="idioma">
-    </button>
-    <div class="lang-dropdown" id="langDropdown">
-      <a href="index.html">Português</a>
-      <a href="index-en.html">English</a>
+  <div class="lang-switcher" id="langSwitcher"></div>
+
+  <main class="substack-page container">
+
+    <a href="index.html" class="back-link">← back</a>
+
+    <div class="substack-header">
+      <h2>writings on sound</h2>
     </div>
-  </div>
 
+    <div id="rss-feed">
+      <p style="opacity:0.4; font-size:0.8rem; letter-spacing:0.1em;">loading...</p>
+    </div>
 
+    <script>
+    fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent('https://writingsonsound1.substack.com/feed'))
+      .then(r => r.json())
+      .then(data => {
+        const feed = document.getElementById('rss-feed');
+        feed.innerHTML = '';
+        (data.items || []).forEach(item => {
+          const date    = new Date(item.pubDate);
+          const dateStr = date.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+          const article = document.createElement('article');
+          article.className = 'rss-post';
+          article.innerHTML = `
+            <div class="rss-post-header">
+              <h3 class="rss-post-title">${item.title}</h3>
+              <span class="rss-post-date">${dateStr}</span>
+            </div>
+            <div class="rss-post-body">${item.content || item.description}</div>
+            <a class="rss-post-link" href="${item.link}" target="_blank">read on substack ↗</a>
+          `;
+          feed.appendChild(article);
+        });
+      })
+      .catch(() => {
+        document.getElementById('rss-feed').innerHTML =
+          '<p style="opacity:0.4;font-size:0.8rem;">could not load posts.</p>';
+      });
+    </script>
 
-
-<div class="container">
-  + em breve
-</div>
-
+  </main>
 
   <span class="alhamdulillah">&#x0627;&#x0644;&#x062D;&#x0645;&#x062F;&#x0644;&#x0644;&#x0647;</span>
 
-  <div id="player-ui">
-    <div id="world-controls">
-      <button id="prev-world" aria-label="Mundo anterior">&#x2039;</button>
-      <span id="world-name"></span>
-      <button id="next-world" aria-label="Próximo mundo">&#x203a;</button>
-    </div>
-    <button id="play-btn" aria-label="Iniciar experiência sonora">
-      <span id="play-label">ecossistemas sonoros</span>
-      <span id="play-icon">&#x25B6;</span>
-    </button>
-  </div>
+  <div id="player-ui"></div>
 
- 
-<main class="container">
-  
-
-<div data-supascribe-embed-id="110777929890" data-supascribe-feed></div>
- 
-<script src="https://js.supascribe.com/v1/loader/example.js" async></script>
-
-</main>
-
-
-
-
-
-
-
-
-<!-- Feed embed code -->
-<div data-supascribe-embed-id="https://js.supascribe.com/v1/loader/Mm5vvuItdadCGf2Wl8iyghjVFA32.js" data-supascribe-feed></div>
-
-
-<!-- Supascribe Script -->
-<script src="https://js.supascribe.com/v1/loader/Mm5vvuItdadCGf2Wl8iyghjVFA32.js" async></script>
-
-
-
+  <script src="script.js"></script>
 </body>
 </html>
