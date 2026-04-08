@@ -38,6 +38,7 @@
         <button class="project-btn"
           data-type="multi-vimeo"
           data-title="Sofia Foi"
+          data-images='["resources/img/sf-poster.webp", "resources/img/sf-trailerimg.png"]'
           data-desc="Trilha sonora original. Dir. Pedro Geraldo, 2023. Premiado como melhor primeiro longa metragem no festival FIDMarseille."
           data-videos='[
             {"label":"excerpt I","url":"https://player.vimeo.com/video/1173101024?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"},
@@ -205,7 +206,7 @@
           singleWrap.classList.remove('is-soundcloud');
           embedFrame.src = btn.dataset.url;
 
-        } else if (type === 'multi-vimeo') {
+       } else if (type === 'multi-vimeo') {
           multiGrid.style.display = 'flex';
           const videos = JSON.parse(btn.dataset.videos);
           videos.forEach(v => {
@@ -226,6 +227,19 @@
             item.appendChild(wrap);
             multiGrid.appendChild(item);
           });
+          if (btn.dataset.images) {
+            const images = JSON.parse(btn.dataset.images);
+            images.forEach((src, i) => {
+              const imgWrap = document.createElement('div');
+              imgWrap.className = 'dialog-image-wrap';
+              const img = document.createElement('img');
+              img.src = src;
+              img.alt = btn.dataset.title || '';
+              img.className = 'dialog-poster' + (i === 1 ? ' dialog-poster--large' : '');
+              imgWrap.appendChild(img);
+              multiGrid.appendChild(imgWrap);
+            });
+          }
 
         } else if (type === 'spotify') {
           spotifyWrap.style.display = 'block';

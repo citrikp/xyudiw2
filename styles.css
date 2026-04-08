@@ -573,6 +573,19 @@ dialog:not([open]) {
   margin-bottom: 0.4rem;
 }
 
+.dialog-image-wrap {
+  width: 100%;
+  margin-top: 0.4rem;
+}
+
+.dialog-poster {
+  width: 100%;
+  max-width: 480px;
+  display: block;
+  margin: 0 auto;
+  border-radius: 4px;
+}
+
 /* Custom audio player */
 .audio-player {
   display: flex;

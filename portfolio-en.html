@@ -38,11 +38,12 @@
         <button class="project-btn"
           data-type="multi-vimeo"
           data-title="Sofia Foi"
+          data-images='["resources/img/sf-poster.webp", "resources/img/sf-trailerimg.png"]'
           data-desc="Original score. Dir. Pedro Geraldo, 2023. Winner of Best First Feature at FIDMarseille (FR) festival."
           data-videos='[
             {"label":"excerpt I","url":"https://player.vimeo.com/video/1173101024?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"},
             {"label":"excerpt II","url":"https://player.vimeo.com/video/1173100960?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"}
-            ]'>
+            ]'>       
           <span class="nav-slash">///</span>sofia foi [2023]
         </button>
       </li>
@@ -226,6 +227,19 @@
             item.appendChild(wrap);
             multiGrid.appendChild(item);
           });
+         if (btn.dataset.images) {
+            const images = JSON.parse(btn.dataset.images);
+            images.forEach((src, i) => {
+              const imgWrap = document.createElement('div');
+              imgWrap.className = 'dialog-image-wrap';
+              const img = document.createElement('img');
+              img.src = src;
+              img.alt = btn.dataset.title || '';
+              img.className = 'dialog-poster' + (i === 1 ? ' dialog-poster--large' : '');
+              imgWrap.appendChild(img);
+              multiGrid.appendChild(imgWrap);
+            });
+          }
 
         } else if (type === 'spotify') {
           spotifyWrap.style.display = 'block';
