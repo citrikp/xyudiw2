@@ -9,44 +9,57 @@
   <link rel="icon" href="resources/img/favicon1.ico" type="image/x-icon">
 
   <style>
-    html, body { overflow-y: auto !important; overflow-x: hidden; }
+    /* ── unlock scroll ── */
+    html, body             { overflow-y: auto !important; overflow-x: hidden; height: auto !important; }
+    html, body, .container { overflow-y: auto !important; }
 
-    #player-ui { display: none !important; }
-    .lang-switcher { display: none !important; }
-
-    .substack-page {
-      position: relative;
-      z-index: 10;
-      padding: 1.5rem 2rem 6rem 2rem;
-      max-width: 680px;
+    /* .container is position:fixed in styles.css — undo that here */
+    .substack-page.container {
+      position: relative !important;
+      height: auto !important;
+      min-height: 10vh;
+      overflow: visible !important;
+      max-width: 100vh;
+      padding: 1vh 8vw 10vh;
+      gap: 0;
     }
 
+    #player-ui        { display: none !important; }
+    .lang-switcher    { display: none !important; }
+
+    /* ── back link — matches portfolio style ── */
     .back-link {
       display: inline-block;
-      margin-bottom: 2rem;
-      font-size: 0.78rem;
+      margin-bottom: 2.5rem;
+      font-size: 0.75rem;
       letter-spacing: 0.12em;
       color: var(--ink);
-      opacity: 0.5;
+      opacity: 0.7;
       text-decoration: none;
       transition: opacity 0.2s;
+      font-family: var(--mono);
     }
     .back-link:hover { opacity: 1; }
 
+    /* ── page title — matches portfolio h1 scale ── */
     .substack-header {
-      margin-bottom: 2rem;
+      margin-bottom: 2.5rem;
       border-bottom: 1px solid rgba(15,15,14,0.15);
       padding-bottom: 1.2rem;
+      font-family: 'DM Serif Display', serif;
     }
     .substack-header h2 {
-      font-size: clamp(1.4rem, 4vw, 2rem);
+      font-size: clamp(2.2rem, 9vw, 3.5rem);
       font-weight: 400;
-      letter-spacing: 0.06em;
-      line-height: 1.1;
+      letter-spacing: 0.02em;
+      line-height: 1.05;
       margin: 0;
       text-transform: lowercase;
+      font-family: inherit;
+      font-family: 'DM Serif Display', serif;
     }
 
+    /* ── posts ── */
     .rss-post {
       margin-bottom: 3.5rem;
       padding-bottom: 3rem;
@@ -62,17 +75,19 @@
       flex-wrap: wrap;
     }
     .rss-post-title {
-      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
       font-weight: 400;
       letter-spacing: 0.03em;
       line-height: 1.2;
       font-style: italic;
+      font-family: 'DM Serif Display', serif;
     }
     .rss-post-date {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       letter-spacing: 0.1em;
       opacity: 0.4;
       white-space: nowrap;
+      font-family: var(--mono);
     }
 
     .rss-post-body {
@@ -87,15 +102,17 @@
     .rss-post-body h2,
     .rss-post-body h3 { font-weight: 400; font-style: italic; margin: 1.4em 0 0.6em; text-align: left; }
 
+    /* ── "read on substack" link — same family/size as portfolio nav ── */
     .rss-post-link {
       display: inline-block;
       margin-top: 1rem;
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       letter-spacing: 0.12em;
       opacity: 0.4;
       text-decoration: none;
       color: inherit;
       transition: opacity 0.2s;
+      font-family: var(--mono);
     }
     .rss-post-link:hover { opacity: 1; }
   </style>
@@ -151,8 +168,6 @@
     </script>
 
   </main>
-
-  <span class="alhamdulillah">&#x0627;&#x0644;&#x062D;&#x0645;&#x062F;&#x0644;&#x0644;&#x0647;</span>
 
   <div id="player-ui"></div>
 
