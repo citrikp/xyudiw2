@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mari Herzer</title>
-  <link rel="stylesheet" href="styles.css?v=202603191944">
+  <link rel="stylesheet" href="styles.css?v=202604211305">
   <link rel="icon" href="resources/img/favicon1.ico" type="image/x-icon">
 </head>
 
@@ -50,7 +50,7 @@
             <span class="nav-slash">///</span>portfolio
           </a>
 
-          <button class="btnColaborar nav-item" id="colaborarBtn">
+          <button class="btnColaborar nav-item" id="colaborarBtn" type="button">
             <span class="nav-slash">///</span>collaborate
           </button>
 
@@ -114,85 +114,171 @@
     }, { passive: true });
   })();
   </script>
-  <!-- COLLABORATE CARD OVERLAY -->
-  <div id="colaborar-overlay" aria-hidden="true">
-    <div id="colaborar-card" role="dialog" aria-modal="true" aria-label="Collaborate with Mari Herzer">
-      <button id="colaborar-close" class="colaborar-close-btn" aria-label="Close">&#x2715;</button>
-      <div class="cp-header">
-        <p class="cp-name">Mari Herzer</p>
-        <p class="cp-tagline">Music producer, film score composer and sound designer — drawing from unconventional readings of anthropological texts and natural science data as compositional tools.</p>
-        <div class="cp-tags">
-          <span class="cp-tag">Film score</span>
-          <span class="cp-tag">Sound design</span>
-          <span class="cp-tag">Advertising</span>
-          <span class="cp-tag">Sound installations</span>
-          <span class="cp-tag">Live electronics</span>
-          <span class="cp-tag">Synthesis</span>
-        </div>
+  <section id="colaborar-page" class="onepager" aria-hidden="true">
+    <button id="colaborar-back" class="onepager-back" type="button">close</button>
+    <h2 class="onepager-sticky-title">Mari Herzer</h2>
+    <div class="onepager-inner">
+      <div class="onepager-block onepager-block--media onepager-vimeo-wrap">
+        <iframe
+          id="introVimeo"
+          class="onepager-vimeo-frame"
+          src="https://player.vimeo.com/video/1185245821?background=1&autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0"
+          allow="autoplay; fullscreen; picture-in-picture"
+          title="showreel full"></iframe>
+        <button id="vimeoAudioToggle" class="onepager-vimeo-audio" type="button">audio off</button>
       </div>
-      <div class="cp-section">
-        <p class="cp-label">What I offer</p>
-        <p class="cp-body">Fifteen years of experience in music production and sound design, with a formative presence in São Paulo's electronic music scene — including eight years as a live PA and DJ at Mamba Negra, one of the city's largest electronic music parties. That trajectory built an ear and a sonic vocabulary that moves naturally between funk, automotivo, aggressive contemporary electronics and the naturalistic emulation of complex sensory ecosystems — delivering, across any of these registers, elegant, challenging and contemporary sonorities.</p>
+      <div class="onepager-block onepager-block--text onepager-block--intro-text">
+        <p class="onepager-eyebrow">collaborate</p>
+        <p class="onepager-text">Music producer, film score composer and sound designer — drawing from unconventional readings of anthropological texts and natural science data as compositional tools.</p>
       </div>
-      <div class="cp-section">
-        <p class="cp-label">Approach</p>
-        <p class="cp-body">One of the starting points of my work is an unconventional reading of anthropological texts and the use of natural science data as compositional material. This produces a sonic identity that resists obvious references — and becomes a precise differentiator for projects demanding something new, whether in building sonic worlds for cinema, creating electronic textures for contemporary advertising, or emulating organic natural environments.</p>
+      <figure class="onepager-block onepager-block--media onepager-block--left">
+        <img src="resources/img/studio/maristudio1.jpg" alt="Mari Herzer studio workspace">
+      </figure>
+      <div class="onepager-block onepager-block--text">
+        <p class="onepager-eyebrow">what i offer</p>
+        <p class="onepager-text">Fifteen years of experience in music production and sound design, with a formative presence in Sao Paulo's electronic music scene — including eight years as a live PA and DJ at Mamba Negra, one of the city's largest electronic music parties. That trajectory built an ear and a sonic vocabulary that moves naturally between funk, automotivo, aggressive contemporary electronics and the naturalistic emulation of complex sensory ecosystems — delivering, across any of these registers, elegant, challenging and contemporary sonorities.</p>
       </div>
-      <div class="cp-section">
-        <p class="cp-label">Where I make a difference</p>
-        <div class="cp-cols">
-          <div class="cp-block">
-            <p class="cp-block-title">Cinema &amp; series</p>
-            <p class="cp-block-body">Score and sound design for unconventional narratives. Flexibility across organic, electronic and hybrid textures.</p>
-          </div>
-          <div class="cp-block">
-            <p class="cp-block-title">Contemporary advertising</p>
-            <p class="cp-block-body">Brands with environmental, cultural or territorial identity. Current electronics — funk, aggressive beats, club sonorities.</p>
-          </div>
-          <div class="cp-block">
-            <p class="cp-block-title">Sonic identity</p>
-            <p class="cp-block-body">Projects needing a specific, hard-to-categorise sonic colour. Sustainability, culture, technology, diversity.</p>
-          </div>
-          <div class="cp-block">
-            <p class="cp-block-title">Installations &amp; new media</p>
-            <p class="cp-block-body">Immersive experiences, generative sound worlds, sensory environments built from natural data and phenomena.</p>
-          </div>
-        </div>
+      <figure class="onepager-block onepager-block--media onepager-block--right">
+        <img src="resources/img/studio/studio.jpg" alt="Production environment and studio tools">
+      </figure>
+      <div class="onepager-block onepager-block--text">
+        <p class="onepager-eyebrow">approach</p>
+        <p class="onepager-text">One of the starting points of my work is an unconventional reading of anthropological texts and the use of natural science data as compositional material. This produces a sonic identity that resists obvious references — and becomes a precise differentiator for projects demanding something new, whether in building sonic worlds for cinema, creating electronic textures for contemporary advertising, or emulating organic natural environments.</p>
       </div>
-      <div class="cp-footer">
-        <span class="cp-url">mariherzer.org</span>
-        <span class="cp-avail">Available for project-based work and ongoing partnerships</span>
+      <figure class="onepager-block onepager-block--media onepager-block--left">
+        <img src="resources/img/studio/mari_profile.jpg" alt="Portrait of Mari Herzer in the studio">
+      </figure>
+      <div class="onepager-block onepager-block--media onepager-block--video">
+        <video id="studioVideo" playsinline autoplay loop muted poster="resources/img/studio/maristudio1.jpg">
+          <source src="resources/img/studio/studio-reel3.mp4" type="video/mp4">
+        </video>
+        <p class="onepager-video-note">tap video to toggle audio</p>
       </div>
+      <div class="onepager-block onepager-block--text">
+        <p class="onepager-eyebrow">where i make a difference</p>
+        <p class="onepager-text"><strong>Cinema and series:</strong> score and sound design for unconventional narratives. Flexibility across organic, electronic and hybrid textures.</p>
+        <p class="onepager-text"><strong>Contemporary advertising:</strong> brands with environmental, cultural or territorial identity. Current electronics — funk, aggressive beats, club sonorities.</p>
+        <p class="onepager-text"><strong>Sonic identity:</strong> projects needing a specific, hard-to-categorise sonic colour. Sustainability, culture, technology, diversity.</p>
+        <p class="onepager-text"><strong>Installations and new media:</strong> immersive experiences, generative sound worlds, sensory environments built from natural data and phenomena.</p>
+      </div>
+      <figure class="onepager-block onepager-block--media onepager-block--left">
+        <img src="resources/img/studio/studio2.jpg" alt="Studio details and production desk">
+      </figure>
+      <figure class="onepager-block onepager-block--media onepager-block--right">
+        <img src="resources/img/studio/stats.jpg" alt="Studio equipment details">
+      </figure>
+      <figure class="onepager-block onepager-block--media onepager-block--left">
+        <img src="resources/img/studio/stats2.jpg" alt="Studio environment and tools">
+      </figure>
     </div>
-  </div>
+  </section>
+  <div id="onepager-transition" class="onepager-transition" aria-hidden="true"></div>
 
+  <script src="https://player.vimeo.com/api/player.js"></script>
   <script>
   (function() {
-    var overlay = document.getElementById('colaborar-overlay');
     var openBtn = document.getElementById('colaborarBtn');
-    var closeBtn = document.getElementById('colaborar-close');
-    function openCard() {
-      overlay.classList.add('is-visible');
-      overlay.setAttribute('aria-hidden', 'false');
-      document.body.style.overflow = 'hidden';
+    var closeBtn = document.getElementById('colaborar-back');
+    var page = document.getElementById('colaborar-page');
+    var video = document.getElementById('studioVideo');
+    var vimeoFrame = document.getElementById('introVimeo');
+    var vimeoAudioToggle = document.getElementById('vimeoAudioToggle');
+    var vimeoPlayer = (window.Vimeo && vimeoFrame) ? new window.Vimeo.Player(vimeoFrame) : null;
+    var transitionLayer = document.getElementById('onepager-transition');
+    var transitionMs = 360;
+    var revealItems = Array.prototype.slice.call(document.querySelectorAll('.onepager-block'));
+    var revealTextItems = revealItems.filter(function(item) {
+      return item.classList.contains('onepager-block--text');
+    });
+    var revealMediaItems = revealItems.filter(function(item) {
+      return !item.classList.contains('onepager-block--text');
+    });
+    if (!openBtn || !closeBtn || !page) return;
+
+    if (vimeoPlayer) {
+      vimeoPlayer.setMuted(true).catch(function() {});
+      if (vimeoAudioToggle) {
+        vimeoAudioToggle.addEventListener('click', function() {
+          var turnOn = !vimeoAudioToggle.classList.contains('is-on');
+          vimeoPlayer.setMuted(!turnOn).catch(function() {});
+          vimeoAudioToggle.classList.toggle('is-on', turnOn);
+          vimeoAudioToggle.textContent = turnOn ? 'audio on' : 'audio off';
+        });
+      }
     }
-    function closeCard() {
-      overlay.classList.add('is-closing');
-      overlay.addEventListener('animationend', function handler() {
-        overlay.classList.remove('is-visible', 'is-closing');
-        overlay.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = '';
-        overlay.removeEventListener('animationend', handler);
+
+    var mediaObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          mediaObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.34, rootMargin: '0px 0px -4% 0px' });
+
+    var textObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          textObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.52, rootMargin: '0px 0px -6% 0px' });
+
+    revealMediaItems.forEach(function(item) { mediaObserver.observe(item); });
+    revealTextItems.forEach(function(item) { textObserver.observe(item); });
+
+    function openOnepager() {
+      if (transitionLayer) transitionLayer.classList.add('is-active');
+      window.setTimeout(function() {
+        document.body.classList.add('onepager-active');
+        page.setAttribute('aria-hidden', 'false');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        revealItems.forEach(function(item) {
+          item.classList.remove('is-visible');
+        });
+        revealMediaItems.forEach(function(item) { mediaObserver.observe(item); });
+        revealTextItems.forEach(function(item) { textObserver.observe(item); });
+        if (video) {
+          video.muted = true;
+          video.play().catch(function() {});
+        }
+        if (vimeoPlayer) {
+          vimeoPlayer.setMuted(true).catch(function() {});
+          vimeoPlayer.play().catch(function() {});
+        }
+        if (transitionLayer) transitionLayer.classList.remove('is-active');
+      }, transitionMs);
+    }
+
+    function closeOnepager() {
+      if (video) {
+        video.muted = true;
+        video.pause();
+      }
+      if (vimeoPlayer) {
+        vimeoPlayer.setMuted(true).catch(function() {});
+        vimeoPlayer.pause().catch(function() {});
+      }
+      if (transitionLayer) transitionLayer.classList.add('is-active');
+      window.setTimeout(function() {
+        document.body.classList.remove('onepager-active');
+        page.setAttribute('aria-hidden', 'true');
+        if (transitionLayer) transitionLayer.classList.remove('is-active');
+      }, transitionMs);
+    }
+
+    openBtn.addEventListener('click', openOnepager);
+    closeBtn.addEventListener('click', closeOnepager);
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && document.body.classList.contains('onepager-active')) closeOnepager();
+    });
+
+    if (video) {
+      video.addEventListener('click', function() {
+        video.muted = !video.muted;
       });
     }
-    openBtn.addEventListener('click', openCard);
-    closeBtn.addEventListener('click', closeCard);
-    overlay.addEventListener('click', function(e) {
-      if (e.target === overlay) closeCard();
-    });
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && overlay.classList.contains('is-visible')) closeCard();
-    });
   })();
   </script>
 </body>
