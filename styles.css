@@ -1018,3 +1018,266 @@ body[data-world="2"] #world-name {
     height: 1.35rem;
   }
 }
+
+/* ─────────────────────────────────────────
+   COLABORAR CARD — ONE-PAGER OVERLAY
+───────────────────────────────────────── */
+
+#colaborar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(28, 28, 23, 0.82);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  align-items: center;
+  justify-content: center;
+}
+
+#colaborar-overlay.is-visible {
+  display: flex;
+  animation: overlay-in 0.4s ease forwards;
+}
+
+#colaborar-overlay.is-closing {
+  animation: overlay-out 0.35s ease forwards;
+}
+
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes overlay-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* O cartão em si — animação de "cartão entregue na mão" */
+#colaborar-card {
+  position: relative;
+  background: #1c1c17;
+  border: 1px solid rgba(184, 216, 50, 0.18);
+  border-radius: 6px;
+  width: min(580px, 92vw);
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 2.4rem 2rem 2rem;
+  color: #e8ece3;
+  animation: card-deal 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+#colaborar-overlay.is-closing #colaborar-card {
+  animation: card-take 0.32s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+/* Cartão saindo de baixo e girando levemente como se viesse da mão */
+@keyframes card-deal {
+  0%   { opacity: 0; transform: translateY(80px) rotate(4deg) scale(0.93); }
+  40%  { opacity: 1; transform: translateY(-8px) rotate(-1deg) scale(1.01); }
+  65%  { transform: translateY(4px) rotate(0.4deg) scale(0.998); }
+  100% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+}
+
+/* Ao fechar, o cartão é retirado */
+@keyframes card-take {
+  0%   { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+  100% { opacity: 0; transform: translateY(60px) rotate(-3deg) scale(0.94); }
+}
+
+.colaborar-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: #7a7e72;
+  padding: 0.25rem 0.4rem;
+  border-radius: 2px;
+  transition: color 0.2s, background 0.2s;
+  line-height: 1;
+  z-index: 10;
+}
+
+.colaborar-close-btn:hover {
+  color: #e8ece3;
+  background: rgba(255,255,255,0.07);
+}
+
+/* Header do card */
+.cp-header {
+  border-bottom: 1px solid rgba(184, 216, 50, 0.15);
+  padding-bottom: 1.4rem;
+  margin-bottom: 1.4rem;
+}
+
+.cp-name {
+  font-family: 'Legitima', serif;
+  font-style: italic;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #e8ece3;
+  margin: 0 0 0.5rem;
+  letter-spacing: 0.02em;
+}
+
+.cp-tagline {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  line-height: 1.7;
+  color: #9a9e92;
+  margin: 0 0 1rem;
+}
+
+.cp-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cp-tag {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 2px;
+  border: 1px solid rgba(184, 216, 50, 0.25);
+  color: #b8d832;
+  background: rgba(184, 216, 50, 0.05);
+}
+
+/* Seções */
+.cp-section {
+  margin-bottom: 1.4rem;
+}
+
+.cp-label {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #b8d832;
+  margin: 0 0 0.6rem;
+}
+
+.cp-body {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  line-height: 1.75;
+  color: #c8ccc3;
+  margin: 0;
+  text-align: justify;
+}
+
+/* Grid de blocos */
+.cp-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.cp-block {
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 4px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.03);
+}
+
+.cp-block-title {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: bold;
+  color: #e8ece3;
+  margin: 0 0 4px;
+  letter-spacing: 0.02em;
+}
+
+.cp-block-body {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  line-height: 1.65;
+  color: #7a7e72;
+  margin: 0;
+}
+
+/* Footer */
+.cp-footer {
+  border-top: 1px solid rgba(184, 216, 50, 0.12);
+  padding-top: 1rem;
+  margin-top: 1.4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cp-url {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: #7a7e72;
+  letter-spacing: 0.04em;
+}
+
+.cp-avail {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: 2px;
+  border: 1px solid rgba(107, 140, 62, 0.4);
+  color: #6b8c3e;
+  background: rgba(107, 140, 62, 0.07);
+}
+
+/* Mobile */
+@media (max-width: 520px) {
+  #colaborar-card {
+    padding: 2rem 1.2rem 1.5rem;
+    width: 96vw;
+    max-height: 94vh;
+  }
+  .cp-cols { grid-template-columns: 1fr; }
+  .cp-footer { flex-direction: column; align-items: flex-start; }
+}
+
+/* ─────────────────────────────────────────
+   BLOG FLOATING BUTTON (DVD bounce)
+───────────────────────────────────────── */
+
+#blog-float-btn {
+  position: fixed;
+  z-index: 50;
+  display: none;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: 'Arial Black', 'Franklin Gothic Heavy', 'Impact', sans-serif;
+  font-weight: 900;
+  font-size: 1.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ffffff;
+  -webkit-text-stroke: 3px #3ecfc4;
+  text-stroke: 3px #3ecfc4;
+  paint-order: stroke fill;
+  user-select: none;
+  pointer-events: auto;
+  will-change: transform;
+  line-height: 1;
+}
+
+#blog-float-btn:hover {
+  -webkit-text-stroke-color: #7be8e2;
+}
+
+/* Hide when worlds are active */
+body[data-world] #blog-float-btn {
+  display: none !important;
+}

@@ -36,10 +36,19 @@
 
       <li>
         <button class="project-btn"
+          data-type="fullscreen-video"
+          data-title="showreel"
+          data-url="https://player.vimeo.com/video/1184990232?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479">
+          <span class="nav-slash">///</span>showreel
+        </button>
+      </li>
+
+      <li>
+        <button class="project-btn"
           data-type="multi-vimeo"
           data-title="Sofia Foi"
           data-images='["resources/img/sf-poster.webp", "resources/img/sf-trailerimg.png"]'
-          data-desc="Trilha sonora original. Dir. Pedro Geraldo, 2023. Premiado como melhor primeiro longa metragem no festival FIDMarseille."
+          data-desc="Trilha sonora original para longa metragem. Dir. Pedro Geraldo, 2023. Premiado como melhor primeiro longa metragem no festival FIDMarseille."
           data-videos='[
             {"label":"excerpt I","url":"https://player.vimeo.com/video/1173101024?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"},
             {"label":"excerpt II","url":"https://player.vimeo.com/video/1173100960?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"}
@@ -50,9 +59,30 @@
 
       <li>
         <button class="project-btn"
+          data-type="bandcamp-multi"
+          data-title="singles autorais"
+          data-desc="Singles autorais lançados em selos independentes."
+          data-tracks='[
+            {"label":"Solta o Grave Alucinado / funk automotivo / Tratratrax (CO)","url":"https://bandcamp.com/EmbeddedPlayer/track=3903994201/size=small/bgcol=111111/linkcol=ffffff/transparent=true/"},
+            {"label":"Limbal Ring / techno + breakbeat / Osàre! Editions (UK)","url":"https://bandcamp.com/EmbeddedPlayer/track=3247475648/size=small/bgcol=111111/linkcol=ffffff/transparent=true/"},
+            {"label":"In Medias Res / experimental + ambient / Discos Flutuantes (BR)","url":"https://bandcamp.com/EmbeddedPlayer/track=114072863/size=small/bgcol=111111/linkcol=ffffff/transparent=true/"},
+            {"label":"Peace (Mari Herzer Remix) / techno +s breakbeat / MAMBArec (BR)","url":"https://bandcamp.com/EmbeddedPlayer/track=2265374817/size=small/bgcol=111111/linkcol=ffffff/transparent=true/"},
+            {"label":"Visionary Palace / breakbeat / dsrptv records (BR)","url":"https://bandcamp.com/EmbeddedPlayer/track=2491996696/size=small/bgcol=111111/linkcol=ffffff/transparent=true/"},
+            {"label":"● (Mari Herzer remix) / IDM + breakbeat / Insurgentes (CO)","url":"https://bandcamp.com/EmbeddedPlayer/track=163337576/size=small/bgcol=111111/linkcol=ffffff/transparent=true/"},
+            {"label":"Limbal Ring / techno + breakbeat / Osàre! Editions (UK)","url":"https://bandcamp.com/EmbeddedPlayer/track=3247475648/size=small/bgcol=111111/linkcol=ffffff/transparent=true/"},
+            {"label":"Narcosis part. Zopelar / techno + house / ITF006 (BR)","url":"https://bandcamp.com/EmbeddedPlayer/track=2245971546/size=small/bgcol=111111/linkcol=ffffff/transparent=true/"}
+          ]'>
+
+          
+          <span class="nav-slash">///</span>singles autorais [2017-2025]
+        </button>
+      </li>
+
+      <li>
+        <button class="project-btn"
           data-type="multi-vimeo"
           data-title="República dos Juízes"
-          data-desc="Trilha sonora original para documentário. Dir. Eugenio Puppo, 2022."
+          data-desc="Trilha sonora original para documentário longa metragem. Dir. Eugenio Puppo, 2022."
           data-videos='[
             {"label":"showreel","url":"https://player.vimeo.com/video/1178063597?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"},
             {"label":"excerto I","url":"https://player.vimeo.com/video/956227823?title=0&byline=0&portrait=0"},
@@ -70,7 +100,7 @@
           data-url="https://open.spotify.com/embed/album/5fPrhPhA0kpPpwfwsWKjpl?utm_source=generator&theme=0"
           data-title="Cheia"
           data-desc="Álbum de estreia lançado pelo selo MAMBArec, 2022.">
-          <span class="nav-slash">///</span>cheia [2022] album
+          <span class="nav-slash">///</span>cheia álbum [2022]
         </button>
       </li>
 
@@ -121,6 +151,14 @@
 
   </main>
 
+
+  <!-- FULLSCREEN VIDEO OVERLAY -->
+  <div id="fullscreen-overlay" style="display:none;position:fixed;inset:0;z-index:300;background:#000;">
+    <button id="fullscreen-close" style="position:absolute;top:1.2rem;right:1.5rem;background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;z-index:10;opacity:0.7;">&#x2715;</button>
+    <iframe id="fullscreen-frame" src="" frameborder="0" allowfullscreen
+      allow="autoplay; fullscreen; picture-in-picture"
+      style="width:100%;height:100%;display:block;"></iframe>
+  </div>
   <!-- Shared embed dialog -->
   <dialog id="embedDialog" class="embed-dialog">
     <button class="embed-close dialog-close">✕</button>
@@ -141,6 +179,11 @@
         frameBorder="0" allowfullscreen
         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
         loading="lazy"></iframe>
+    </div>
+    <!-- bandcamp -->
+    <div id="bandcampWrapper" style="display:none">
+      <iframe id="bandcampFrame" style="border:0;width:100%;height:120px;border-radius:6px;"
+        src="" seamless><a href="#">Carregando...</a></iframe>
     </div>
     <!-- custom audio player -->
     <div class="audio-player" id="audioPlayer" style="display:none"></div>
@@ -187,13 +230,17 @@
       spotifyFrm.src  = '';
       multiGrid.innerHTML    = '';
       audioPlayer.innerHTML  = '';
+      const bandcampWrap = document.getElementById('bandcampWrapper');
+      const bandcampFrm  = document.getElementById('bandcampFrame');
+      if (bandcampWrap) { bandcampWrap.style.display = 'none'; }
+      if (bandcampFrm)  { bandcampFrm.src = ''; }
       if (currentAudio) { currentAudio.pause(); currentAudio = null; }
     }
 
     // Start clean
     hideAll();
 
-    document.querySelectorAll('.project-btn').forEach(btn => {
+    document.querySelectorAll('.project-btn:not([data-type="fullscreen-video"]):not([data-type="bandcamp-multi"])').forEach(btn => {
       btn.addEventListener('click', () => {
         hideAll();
         titleEl.textContent = btn.dataset.title || '';
@@ -244,6 +291,12 @@
         } else if (type === 'spotify') {
           spotifyWrap.style.display = 'block';
           spotifyFrm.src = btn.dataset.url;
+
+        } else if (type === 'bandcamp') {
+          const bcWrap = document.getElementById('bandcampWrapper');
+          const bcFrm  = document.getElementById('bandcampFrame');
+          bcWrap.style.display = 'block';
+          bcFrm.src = btn.dataset.bandcampUrl || '';
 
         } else if (type === 'audio') {
           audioPlayer.style.display = 'flex';
@@ -336,21 +389,145 @@
     });
 
     // Close
+    function closeDialog() {
+      hideAll();
+      // Stop all bandcamp iframes
+      document.querySelectorAll('#bandcampWrapper iframe').forEach(function(fr) {
+        fr.src = fr.src; // reload = stop
+      });
+      dialog.close();
+    }
     closeBtn.addEventListener('click', e => {
       e.stopPropagation();
-      hideAll();
-      dialog.close();
+      closeDialog();
     });
     dialog.addEventListener('click', e => {
       const rect = dialog.getBoundingClientRect();
       if (e.clientX < rect.left || e.clientX > rect.right ||
           e.clientY < rect.top  || e.clientY > rect.bottom) {
-        hideAll();
-        dialog.close();
+        closeDialog();
       }
     });
   })();
   </script>
-</body>
+  <script>
+  (function() {
+    // ── FULLSCREEN VIDEO ──
+    var fsOverlay = document.getElementById('fullscreen-overlay');
+    var fsFrame   = document.getElementById('fullscreen-frame');
+    var fsClose   = document.getElementById('fullscreen-close');
 
+    document.querySelectorAll('.project-btn[data-type="fullscreen-video"]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        fsFrame.src = btn.dataset.url || '';
+        fsOverlay.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+      });
+    });
+
+    function closeFs() {
+      fsOverlay.style.display = 'none';
+      fsFrame.src = '';
+      document.body.style.overflow = '';
+    }
+    fsClose.addEventListener('click', closeFs);
+    // ESC fecha mesmo com iframe em foco (iframe rouba foco do document)
+    window.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && fsOverlay.style.display === 'block') closeFs();
+    });
+    // Quando iframe recebe foco, monitora via blur para recuperar ESC
+    fsFrame.addEventListener('load', function() {
+      try {
+        fsFrame.contentWindow.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape') closeFs();
+        });
+      } catch(err) {} // cross-origin: silently ignore
+    });
+
+    // ── BANDCAMP MULTI ──
+    var bcDialog  = document.getElementById('embedDialog');
+    var bcTitle   = bcDialog.querySelector('.embed-title');
+    var bcDesc    = bcDialog.querySelector('.embed-desc');
+    var bcWrapper = document.getElementById('bandcampWrapper');
+    var bcCloseBtn = bcDialog.querySelector('.embed-close');
+
+    // Stop all bandcamp iframes
+    function stopAllBc() {
+      bcWrapper.querySelectorAll('iframe').forEach(function(fr) {
+        var s = fr.src; fr.src = ''; fr.src = s;
+      });
+    }
+
+    document.querySelectorAll('.project-btn[data-type="bandcamp-multi"]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        // Hide all other wrappers in the shared dialog
+        ['singleWrapper','multiGrid','spotifyWrapper','audioPlayer'].forEach(function(id) {
+          document.getElementById(id).style.display = 'none';
+        });
+        var legacyBcFrame = document.getElementById('bandcampFrame');
+        if (legacyBcFrame) legacyBcFrame.src = '';
+
+        bcTitle.textContent = btn.dataset.title || '';
+        bcDesc.textContent  = btn.dataset.desc  || '';
+
+        // Always rebuild iframes fresh (stops previous playback cleanly)
+        bcWrapper.innerHTML = '';
+        bcWrapper.style.display = 'flex';
+        bcWrapper.style.flexDirection = 'column';
+        bcWrapper.style.gap = '8px';
+        bcWrapper.style.width = '100%';
+
+        var tracks = JSON.parse(btn.dataset.tracks);
+        tracks.forEach(function(t) {
+          var label = document.createElement('div');
+          label.textContent = t.label;
+          label.style.cssText = 'font-size:0.68rem;letter-spacing:0.1em;opacity:0.5;margin-bottom:2px;font-family:var(--mono)';
+
+          // Wrapper relativo para o overlay
+          var wrap = document.createElement('div');
+          wrap.style.cssText = 'position:relative;width:100%;height:42px;';
+
+          var fr = document.createElement('iframe');
+          fr.src = t.url;
+          fr.style.cssText = 'border:0;width:100%;height:42px;position:absolute;top:0;left:0;';
+          fr.setAttribute('seamless', '');
+
+          // Overlay transparente que intercepta o primeiro clique
+          var overlay = document.createElement('div');
+          overlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;cursor:pointer;';
+          overlay.title = t.label;
+
+          overlay.addEventListener('click', function() {
+            // Parar todos os outros iframes recarregando-os
+            bcWrapper.querySelectorAll('iframe').forEach(function(other) {
+              if (other !== fr) {
+                var s = other.src;
+                other.src = '';
+                setTimeout(function() { other.src = s; }, 50);
+              }
+            });
+            // Remover overlay para que o próximo clique chegue ao iframe
+            overlay.remove();
+          });
+
+          wrap.appendChild(fr);
+          wrap.appendChild(overlay);
+          bcWrapper.appendChild(label);
+          bcWrapper.appendChild(wrap);
+        });
+
+        bcDialog.showModal();
+      });
+    });
+
+    // Stop bandcamp on dialog close (both button and backdrop click)
+    bcCloseBtn.addEventListener('click', function() {
+      stopAllBc();
+    });
+    bcDialog.addEventListener('close', function() {
+      stopAllBc();
+    });
+  })();
+  </script>
+</body>
 </html>
