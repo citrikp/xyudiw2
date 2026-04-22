@@ -451,11 +451,12 @@
     var bcWrapper = document.getElementById('bandcampWrapper');
     var bcCloseBtn = bcDialog.querySelector('.embed-close');
 
-    // Stop all bandcamp iframes
+    // Stop all bandcamp iframes by clearing src then restoring
     function stopAllBc() {
       bcWrapper.querySelectorAll('iframe').forEach(function(fr) {
-        var s = fr.src; fr.src = ''; fr.src = s;
+        fr.src = '';
       });
+      bcWrapper.innerHTML = '';
     }
 
     document.querySelectorAll('.project-btn[data-type="bandcamp-multi"]').forEach(function(btn) {
@@ -470,57 +471,34 @@
         bcTitle.textContent = btn.dataset.title || '';
         bcDesc.textContent  = btn.dataset.desc  || '';
 
-        // Always rebuild iframes fresh (stops previous playback cleanly)
+        // Rebuild iframes fresh — no overlay, no interceptors, just clean iframes
         bcWrapper.innerHTML = '';
         bcWrapper.style.display = 'flex';
         bcWrapper.style.flexDirection = 'column';
-        bcWrapper.style.gap = '8px';
+        bcWrapper.style.gap = '10px';
         bcWrapper.style.width = '100%';
 
         var tracks = JSON.parse(btn.dataset.tracks);
         tracks.forEach(function(t) {
           var label = document.createElement('div');
           label.textContent = t.label;
-          label.style.cssText = 'font-size:0.68rem;letter-spacing:0.1em;opacity:0.5;margin-bottom:2px;font-family:var(--mono)';
-
-          // Wrapper relativo para o overlay
-          var wrap = document.createElement('div');
-          wrap.style.cssText = 'position:relative;width:100%;height:42px;';
+          label.style.cssText = 'font-size:0.68rem;letter-spacing:0.1em;opacity:0.5;margin-bottom:2px;font-family:var(--mono);padding:0 2px;';
 
           var fr = document.createElement('iframe');
           fr.src = t.url;
-          fr.style.cssText = 'border:0;width:100%;height:42px;position:absolute;top:0;left:0;';
+          fr.style.cssText = 'border:0;width:100%;height:42px;display:block;border-radius:3px;';
           fr.setAttribute('seamless', '');
+          fr.setAttribute('loading', 'lazy');
 
-          // Overlay transparente que intercepta o primeiro clique
-          var overlay = document.createElement('div');
-          overlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;cursor:pointer;';
-          overlay.title = t.label;
-
-          overlay.addEventListener('click', function() {
-            // Parar todos os outros iframes recarregando-os
-            bcWrapper.querySelectorAll('iframe').forEach(function(other) {
-              if (other !== fr) {
-                var s = other.src;
-                other.src = '';
-                setTimeout(function() { other.src = s; }, 50);
-              }
-            });
-            // Remover overlay para que o próximo clique chegue ao iframe
-            overlay.remove();
-          });
-
-          wrap.appendChild(fr);
-          wrap.appendChild(overlay);
           bcWrapper.appendChild(label);
-          bcWrapper.appendChild(wrap);
+          bcWrapper.appendChild(fr);
         });
 
         bcDialog.showModal();
       });
     });
 
-    // Stop bandcamp on dialog close (both button and backdrop click)
+    // Stop bandcamp on dialog close
     bcCloseBtn.addEventListener('click', function() {
       stopAllBc();
     });
