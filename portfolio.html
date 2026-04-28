@@ -1,13 +1,202 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mari Herzer — portfolio</title>
-  <link rel="stylesheet" href="styles.css?v=202603191944">
+  <link rel="stylesheet" href="styles.css?v=202604212142">
   <link rel="icon" href="resources/img/favicon1.ico" type="image/x-icon">
+  <style>
+    /* ── unlock scroll, canvas stays as bg ── */
+    html, body {
+      overflow-y: auto !important;
+      overflow-x: hidden;
+      height: auto !important;
+    }
+
+    /* ── override fixed .container ── */
+    .pf-page.container {
+      position: relative !important;
+      height: auto !important;
+      min-height: 100vh;
+      overflow: visible !important;
+      max-width: 100vw;
+      padding: 0 0 12vh;
+      gap: 0;
+      color: var(--ink);
+    }
+
+    /* ── force all content text to black ── */
+    .pf-page .onepager-eyebrow,
+    .pf-page .onepager-text,
+    .pf-page .pf-video-label,
+    .pf-page .pf-bc-label {
+      color: var(--ink) !important;
+    }
+
+    #player-ui { display: none !important; }
+
+    /* ── sticky title: full-width, outside inner wrapper ── */
+    .pf-sticky-title {
+      position: sticky;
+      top: 0;
+      z-index: 125;
+      width: 100%;
+      margin: 0;
+      padding: 1.1rem 5vw 0.8rem;
+      font-family: 'Legitima', 'Legitima Italic', serif;
+      font-style: italic;
+      font-weight: 700;
+      font-size: clamp(2.2rem, 8.2vw, 5rem);
+      line-height: 0.95;
+      letter-spacing: 0.03em;
+      -webkit-text-stroke: 1.4px currentColor;
+      mix-blend-mode: difference;
+      color: #fff;
+      pointer-events: none;
+    }
+    .pf-video-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 0.7rem;
+      opacity: 0.72;
+      font-family: 'Brut Grotesque', 'Inter', sans-serif;
+    }
+
+    /* ── video label (small eyebrow above video) ── */
+    .pf-vimeo-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #111;
+    }
+    .pf-vimeo-wrap iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+    .pf-play-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.35);
+      cursor: pointer;
+      transition: background 0.22s;
+      z-index: 5;
+    }
+    .pf-play-overlay:hover { background: rgba(0,0,0,0.15); }
+    .pf-play-overlay.is-gone { display: none; }
+    .pf-play-circle {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.7);
+      background: rgba(0,0,0,0.4);
+      color: #fff;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-left: 4px;
+      pointer-events: none;
+    }
+
+    /* ── bandcamp track rows ── */
+    .pf-bc-track { margin-bottom: 0.55rem; }
+    .pf-bc-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.55;
+      margin-bottom: 3px;
+      font-family: 'Brut Grotesque', 'Inter', sans-serif;
+    }
+    .pf-bc-track iframe {
+      border: 0;
+      width: 100%;
+      height: 42px;
+      display: block;
+      border-radius: 3px;
+    }
+
+    /* ── audio player — black bg, bigger controls ── */
+    .pf-audio-list {
+      background: #0f0f0e;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .pf-audio-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .pf-audio-row:last-child { border-bottom: none; }
+    .pf-audio-row:hover { background: rgba(255,255,255,0.05); }
+    .pf-play-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.4);
+      background: none;
+      color: #fff;
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-left: 3px;
+      flex-shrink: 0;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .pf-play-btn:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.8); }
+    .pf-play-btn.is-playing { background: #fff; color: #000; border-color: #fff; }
+    .pf-track-name {
+      flex: 1;
+      font-family: 'Brut Grotesque', 'Inter', sans-serif;
+      font-size: 0.88rem;
+      letter-spacing: 0.04em;
+      color: rgba(255,255,255,0.75);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .pf-prog-wrap {
+      width: 120px;
+      height: 4px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 2px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .pf-prog-bar {
+      height: 100%;
+      width: 0;
+      background: rgba(255,255,255,0.65);
+      border-radius: 2px;
+    }
+    .pf-dur {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.4);
+      width: 36px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* ── spotify ── */
+    .pf-spotify iframe { border-radius: 8px; display: block; }
+  </style>
 </head>
 
 <body>
@@ -15,7 +204,6 @@
   <canvas id="bg-canvas"></canvas>
   <div class="noise"></div>
 
-  <!-- Language switcher -->
   <div class="lang-switcher" id="langSwitcher">
     <button class="lang-globe-btn" id="langGlobeBtn" aria-label="Selecionar idioma">
       <img src="resources/img/globe.png" alt="idioma">
@@ -26,485 +214,282 @@
     </div>
   </div>
 
-  <main class="container">
+  <!-- exact same button as about page -->
+  <button id="pf-back" class="onepager-back" type="button">fechar</button>
 
-    <header class="portfolio-header">
-      <h1>portfolio</h1>
-    </header>
+  <main class="pf-page container">
 
-    <ul class="portfolio-list">
+    <h2 class="pf-sticky-title">portfolio</h2>
 
-      <li>
-        <button class="project-btn"
-          data-type="fullscreen-video"
-          data-title="showreel"
-          data-url="https://player.vimeo.com/video/1184990232?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479">
-          <span class="nav-slash">///</span>showreel
-        </button>
-      </li>
+    <div class="onepager-inner">
 
-      <li>
-        <button class="project-btn"
-          data-type="multi-vimeo"
-          data-title="Sofia Foi"
-          data-images='["resources/img/sf-poster.webp", "resources/img/sf-trailerimg.png"]'
-          data-desc="Trilha sonora original para longa metragem. Dir. Pedro Geraldo, 2023. Premiado como melhor primeiro longa metragem no festival FIDMarseille."
-          data-videos='[
-            {"label":"excerpt I","url":"https://player.vimeo.com/video/1173101024?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"},
-            {"label":"excerpt II","url":"https://player.vimeo.com/video/1173100960?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"}
-            ]'>
-          <span class="nav-slash">///</span>sofia foi [2023]
-        </button>
-      </li>
+      <!-- showreel -->
+      <div class="onepager-block onepager-block--media onepager-block--left">
+        <div class="pf-video-label">showreel</div>
+        <div class="pf-vimeo-wrap">
+          <iframe data-src="https://player.vimeo.com/video/1184990232?badge=0&autopause=0&player_id=0&app_id=58479" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
+          <div class="pf-play-overlay"><div class="pf-play-circle">&#x25B6;</div></div>
+        </div>
+      </div>
 
-      <li>
-        <button class="project-btn"
-          data-type="bandcamp-multi"
-          data-title="singles autorais"
-          data-desc="Singles autorais lançados em selos independentes."
-          data-tracks='[
-            {"label":"Solta o Grave Alucinado / funk automotivo / Tratratrax (CO)","url":"https://bandcamp.com/EmbeddedPlayer/track=3903994201/size=small/bgcol=111111/linkcol=ffffff/transparent=true/"},
-            {"label":"Limbal Ring / techno + breakbeat / Osàre! Editions (UK)","url":"https://bandcamp.com/EmbeddedPlayer/track=3247475648/size=small/bgcol=111111/linkcol=ffffff/transparent=true/"},
-            {"label":"In Medias Res / experimental + ambient / Discos Flutuantes (BR)","url":"https://bandcamp.com/EmbeddedPlayer/track=114072863/size=small/bgcol=111111/linkcol=ffffff/transparent=true/"},
-            {"label":"Peace (Mari Herzer Remix) / techno +s breakbeat / MAMBArec (BR)","url":"https://bandcamp.com/EmbeddedPlayer/track=2265374817/size=small/bgcol=111111/linkcol=ffffff/transparent=true/"},
-            {"label":"Visionary Palace / breakbeat / dsrptv records (BR)","url":"https://bandcamp.com/EmbeddedPlayer/track=2491996696/size=small/bgcol=111111/linkcol=ffffff/transparent=true/"},
-            {"label":"● (Mari Herzer remix) / IDM + breakbeat / Insurgentes (CO)","url":"https://bandcamp.com/EmbeddedPlayer/track=163337576/size=small/bgcol=111111/linkcol=ffffff/transparent=true/"},
-            {"label":"Limbal Ring / techno + breakbeat / Osàre! Editions (UK)","url":"https://bandcamp.com/EmbeddedPlayer/track=3247475648/size=small/bgcol=111111/linkcol=ffffff/transparent=true/"},
-            {"label":"Narcosis part. Zopelar / techno + house / ITF006 (BR)","url":"https://bandcamp.com/EmbeddedPlayer/track=2245971546/size=small/bgcol=111111/linkcol=ffffff/transparent=true/"}
-          ]'>
+      <!-- sofia foi -->
+      <div class="onepager-block onepager-block--text">
+        <p class="onepager-eyebrow">sofia foi [2023]</p>
+        <p class="onepager-text">Trilha sonora original para longa metragem. Dir. Pedro Geraldo, 2023. Premiado como melhor primeiro longa metragem no festival FIDMarseille.</p>
+      </div>
+      <div class="onepager-block onepager-block--media onepager-block--right">
+        <div class="pf-video-label">excerpt I</div>
+        <div class="pf-vimeo-wrap">
+          <iframe data-src="https://player.vimeo.com/video/1173101024?badge=0&autopause=0&player_id=0&app_id=58479" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
+          <div class="pf-play-overlay"><div class="pf-play-circle">&#x25B6;</div></div>
+        </div>
+      </div>
+      <div class="onepager-block onepager-block--media onepager-block--left">
+        <div class="pf-video-label">excerpt II</div>
+        <div class="pf-vimeo-wrap">
+          <iframe data-src="https://player.vimeo.com/video/1173100960?badge=0&autopause=0&player_id=0&app_id=58479" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
+          <div class="pf-play-overlay"><div class="pf-play-circle">&#x25B6;</div></div>
+        </div>
+      </div>
 
-          
-          <span class="nav-slash">///</span>singles autorais [2017-2025]
-        </button>
-      </li>
+      <!-- singles autorais -->
+      <div class="onepager-block onepager-block--text">
+        <p class="onepager-eyebrow">singles autorais [2017–2025]</p>
+        <p class="onepager-text">Singles autorais lançados em selos independentes.</p>
+      </div>
+      <div class="onepager-block onepager-block--media onepager-block--left">
+        <div class="pf-bc-track"><div class="pf-bc-label">Solta o Grave Alucinado / funk automotivo / Tratratrax (CO)</div><iframe src="https://bandcamp.com/EmbeddedPlayer/track=3903994201/size=small/bgcol=111111/linkcol=ffffff/transparent=true/" seamless loading="lazy"></iframe></div>
+        <div class="pf-bc-track"><div class="pf-bc-label">Limbal Ring / techno + breakbeat / Osàre! Editions (UK)</div><iframe src="https://bandcamp.com/EmbeddedPlayer/track=3247475648/size=small/bgcol=111111/linkcol=ffffff/transparent=true/" seamless loading="lazy"></iframe></div>
+        <div class="pf-bc-track"><div class="pf-bc-label">In Medias Res / experimental + ambient / Discos Flutuantes (BR)</div><iframe src="https://bandcamp.com/EmbeddedPlayer/track=114072863/size=small/bgcol=111111/linkcol=ffffff/transparent=true/" seamless loading="lazy"></iframe></div>
+        <div class="pf-bc-track"><div class="pf-bc-label">Peace (Mari Herzer Remix) / techno + breakbeat / MAMBArec (BR)</div><iframe src="https://bandcamp.com/EmbeddedPlayer/track=2265374817/size=small/bgcol=111111/linkcol=ffffff/transparent=true/" seamless loading="lazy"></iframe></div>
+        <div class="pf-bc-track"><div class="pf-bc-label">Visionary Palace / breakbeat / dsrptv records (BR)</div><iframe src="https://bandcamp.com/EmbeddedPlayer/track=2491996696/size=small/bgcol=111111/linkcol=ffffff/transparent=true/" seamless loading="lazy"></iframe></div>
+        <div class="pf-bc-track"><div class="pf-bc-label">● (Mari Herzer remix) / IDM + breakbeat / Insurgentes (CO)</div><iframe src="https://bandcamp.com/EmbeddedPlayer/track=163337576/size=small/bgcol=111111/linkcol=ffffff/transparent=true/" seamless loading="lazy"></iframe></div>
+        <div class="pf-bc-track"><div class="pf-bc-label">Narcosis part. Zopelar / techno + house / ITF006 (BR)</div><iframe src="https://bandcamp.com/EmbeddedPlayer/track=2245971546/size=small/bgcol=111111/linkcol=ffffff/transparent=true/" seamless loading="lazy"></iframe></div>
+      </div>
 
-      <li>
-        <button class="project-btn"
-          data-type="multi-vimeo"
-          data-title="República dos Juízes"
-          data-desc="Trilha sonora original para documentário longa metragem. Dir. Eugenio Puppo, 2022."
-          data-videos='[
-            {"label":"showreel","url":"https://player.vimeo.com/video/1178063597?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"},
-            {"label":"excerto I","url":"https://player.vimeo.com/video/956227823?title=0&byline=0&portrait=0"},
-            {"label":"excerto II","url":"https://player.vimeo.com/video/956227795?title=0&byline=0&portrait=0"},
-            {"label":"excerto III","url":"https://player.vimeo.com/video/956227294?title=0&byline=0&portrait=0"},
-            {"label":"excerto IV","url":"https://player.vimeo.com/video/956226051?title=0&byline=0&portrait=0"}
-          ]'>
-          <span class="nav-slash">///</span>república dos juízes [2022]
-        </button>
-      </li>
+      <!-- república dos juízes -->
+      <div class="onepager-block onepager-block--text">
+        <p class="onepager-eyebrow">república dos juízes [2022]</p>
+        <p class="onepager-text">Trilha sonora original para documentário longa metragem. Dir. Eugenio Puppo, 2022.</p>
+      </div>
+      <div class="onepager-block onepager-block--media onepager-block--right">
+        <div class="pf-video-label">showreel</div>
+        <div class="pf-vimeo-wrap">
+          <iframe data-src="https://player.vimeo.com/video/1178063597?badge=0&autopause=0&player_id=0&app_id=58479" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
+          <div class="pf-play-overlay"><div class="pf-play-circle">&#x25B6;</div></div>
+        </div>
+      </div>
+      <div class="onepager-block onepager-block--media onepager-block--left">
+        <div class="pf-video-label">excerto I</div>
+        <div class="pf-vimeo-wrap">
+          <iframe data-src="https://player.vimeo.com/video/956227823?title=0&byline=0&portrait=0" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
+          <div class="pf-play-overlay"><div class="pf-play-circle">&#x25B6;</div></div>
+        </div>
+      </div>
+      <div class="onepager-block onepager-block--media onepager-block--right">
+        <div class="pf-video-label">excerto II</div>
+        <div class="pf-vimeo-wrap">
+          <iframe data-src="https://player.vimeo.com/video/956227795?title=0&byline=0&portrait=0" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
+          <div class="pf-play-overlay"><div class="pf-play-circle">&#x25B6;</div></div>
+        </div>
+      </div>
+      <div class="onepager-block onepager-block--media onepager-block--left">
+        <div class="pf-video-label">excerto III</div>
+        <div class="pf-vimeo-wrap">
+          <iframe data-src="https://player.vimeo.com/video/956227294?title=0&byline=0&portrait=0" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
+          <div class="pf-play-overlay"><div class="pf-play-circle">&#x25B6;</div></div>
+        </div>
+      </div>
+      <div class="onepager-block onepager-block--media onepager-block--right">
+        <div class="pf-video-label">excerto IV</div>
+        <div class="pf-vimeo-wrap">
+          <iframe data-src="https://player.vimeo.com/video/956226051?title=0&byline=0&portrait=0" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
+          <div class="pf-play-overlay"><div class="pf-play-circle">&#x25B6;</div></div>
+        </div>
+      </div>
 
-      <li>
-        <button class="project-btn"
-          data-type="spotify"
-          data-url="https://open.spotify.com/embed/album/5fPrhPhA0kpPpwfwsWKjpl?utm_source=generator&theme=0"
-          data-title="Cheia"
-          data-desc="Álbum de estreia lançado pelo selo MAMBArec, 2022.">
-          <span class="nav-slash">///</span>cheia álbum [2022]
-        </button>
-      </li>
+      <!-- cheia álbum -->
+      <div class="onepager-block onepager-block--text">
+        <p class="onepager-eyebrow">cheia álbum [2022]</p>
+        <p class="onepager-text">Álbum de estreia lançado pelo selo MAMBArec, 2022.</p>
+      </div>
+      <div class="onepager-block onepager-block--media onepager-block--left pf-spotify">
+        <iframe style="border-radius:8px" src="https://open.spotify.com/embed/album/5fPrhPhA0kpPpwfwsWKjpl?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+      </div>
 
-      <li>
-        <button class="project-btn"
-          data-type="audio"
-          data-title="Faixas eletrônicas comissionadas [2021-2024]"
-          data-desc="Faixas eletrônicas comerciais encomendadas por DJs e empresas. Compostas, produzidas e mixadas por Mari Herzer. Todas as faixas contém trechos curtos com fades para proteção dos direitos autorais."
-          data-tracks='[
-            {"name":"track 1","src":"resources/audio/portfolio/-xyu551.mp3"},
-            {"name":"track 2","src":"resources/audio/portfolio/-xyu555.mp3"},
-            {"name":"track 3","src":"resources/audio/portfolio/-xyu552.mp3"},
-            {"name":"track 4","src":"resources/audio/portfolio/-xyu554.mp3"},
-            {"name":"track 5","src":"resources/audio/portfolio/-xyu553.mp3"},
-            {"name":"track 6","src":"resources/audio/portfolio/-xyu5510.mp3"},
-            {"name":"track 7","src":"resources/audio/portfolio/-xyu557.mp3"},
-            {"name":"track 8","src":"resources/audio/portfolio/-xyu558.mp3"},
-            {"name":"track 9","src":"resources/audio/portfolio/-xyu559.mp3"},
-            {"name":"track 10","src":"resources/audio/portfolio/-xyu556.mp3"}
-          ]'>
-          <span class="nav-slash">///</span>faixas comissionadas [2021-2024]
-        </button>
-      </li>
+      <!-- faixas comissionadas -->
+      <div class="onepager-block onepager-block--text">
+        <p class="onepager-eyebrow">faixas comissionadas [2021–2024]</p>
+        <p class="onepager-text">Faixas eletrônicas comerciais encomendadas por DJs e empresas. Compostas, produzidas e mixadas por Mari Herzer. Todas as faixas contém trechos curtos com fades para proteção dos direitos autorais.</p>
+      </div>
+      <div class="onepager-block onepager-block--media onepager-block--left pf-audio-list" id="audio-list"></div>
 
-      <li>
-        <button class="project-btn"
-          data-type="vimeo"
-          data-url="https://player.vimeo.com/video/591961465?title=0&byline=0&portrait=0"
-          data-title="Natura &amp; CO"
-          data-desc="Trilha sonora original para filme institucional da Natura &amp; CO, 2020.">
-          <span class="nav-slash">///</span>natura &amp; co [2020]
-        </button>
-      </li>
+      <!-- natura & co -->
+      <div class="onepager-block onepager-block--text">
+        <p class="onepager-eyebrow">natura &amp; co [2020]</p>
+        <p class="onepager-text">Trilha sonora original para filme institucional da Natura &amp; CO, 2020.</p>
+      </div>
+      <div class="onepager-block onepager-block--media onepager-block--right">
+        <div class="pf-vimeo-wrap">
+          <iframe data-src="https://player.vimeo.com/video/591961465?title=0&byline=0&portrait=0" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
+          <div class="pf-play-overlay"><div class="pf-play-circle">&#x25B6;</div></div>
+        </div>
+      </div>
 
-      <li>
-        <button class="project-btn"
-          data-type="vimeo"
-          data-url="https://player.vimeo.com/video/508575404?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"
-          data-title="Natura"
-          data-desc="Trilha sonora original para filme institucional da Natura, 2020.">
-          <span class="nav-slash">///</span>natura - centro de inovação [2020]
-        </button>
-      </li>
+      <!-- natura centro de inovação -->
+      <div class="onepager-block onepager-block--text">
+        <p class="onepager-eyebrow">natura — centro de inovação [2020]</p>
+        <p class="onepager-text">Trilha sonora original para filme institucional da Natura, 2020.</p>
+      </div>
+      <div class="onepager-block onepager-block--media onepager-block--left">
+        <div class="pf-vimeo-wrap">
+          <iframe data-src="https://player.vimeo.com/video/508575404?badge=0&autopause=0&player_id=0&app_id=58479" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
+          <div class="pf-play-overlay"><div class="pf-play-circle">&#x25B6;</div></div>
+        </div>
+      </div>
 
-    </ul>
-
-    <a href="index.html" class="back-link">← voltar</a>
-
+    </div><!-- /onepager-inner -->
   </main>
 
-
-  <!-- FULLSCREEN VIDEO OVERLAY -->
-  <div id="fullscreen-overlay" style="display:none;position:fixed;inset:0;z-index:300;background:#000;">
-    <button id="fullscreen-close" style="position:absolute;top:1.2rem;right:1.5rem;background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;z-index:10;opacity:0.7;">&#x2715;</button>
-    <iframe id="fullscreen-frame" src="" frameborder="0" allowfullscreen
-      allow="autoplay; fullscreen; picture-in-picture"
-      style="width:100%;height:100%;display:block;"></iframe>
-  </div>
-  <!-- Shared embed dialog -->
-  <dialog id="embedDialog" class="embed-dialog">
-    <button class="embed-close dialog-close">✕</button>
-    <div class="embed-meta">
-      <h2 class="embed-title"></h2>
-      <p class="embed-desc"></p>
-    </div>
-    <!-- single video -->
-    <div class="embed-wrapper" id="singleWrapper" style="display:none">
-      <iframe id="pf-embedFrame" src="" frameborder="0" allowfullscreen
-        allow="autoplay; fullscreen; picture-in-picture"></iframe>
-    </div>
-    <!-- multi-video grid -->
-    <div class="video-grid" id="multiGrid" style="display:none"></div>
-    <!-- spotify -->
-    <div id="spotifyWrapper" style="display:none">
-      <iframe id="spotifyFrame" style="border-radius:8px" src="" width="100%" height="352"
-        frameBorder="0" allowfullscreen
-        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-        loading="lazy"></iframe>
-    </div>
-    <!-- bandcamp -->
-    <div id="bandcampWrapper" style="display:none">
-      <iframe id="bandcampFrame" style="border:0;width:100%;height:120px;border-radius:6px;"
-        src="" seamless><a href="#">Carregando...</a></iframe>
-    </div>
-    <!-- custom audio player -->
-    <div class="audio-player" id="audioPlayer" style="display:none"></div>
-  </dialog>
+  <div id="pf-transition" class="onepager-transition" aria-hidden="true"></div>
 
   <script src="script.js"></script>
   <script>
   (function() {
-    const btn = document.getElementById('langGlobeBtn');
-    const dropdown = document.getElementById('langDropdown');
+
+    // ── lang switcher ──
+    var btn = document.getElementById('langGlobeBtn');
+    var dropdown = document.getElementById('langDropdown');
+    var switcher = document.getElementById('langSwitcher');
     btn.addEventListener('click', function(e) {
       e.stopPropagation();
       dropdown.classList.toggle('open');
     });
-    document.addEventListener('click', function() {
-      dropdown.classList.remove('open');
+    document.addEventListener('mousedown', function(e) {
+      if (!switcher.contains(e.target)) dropdown.classList.remove('open');
     });
-  })();
-  </script>
-  <script>
-  (function() {
-    const dialog      = document.getElementById('embedDialog');
-    const closeBtn    = document.querySelector('.embed-close');
-    const titleEl     = dialog.querySelector('.embed-title');
-    const descEl      = dialog.querySelector('.embed-desc');
-    const singleWrap  = document.getElementById('singleWrapper');
-    const embedFrame  = document.getElementById('pf-embedFrame');
-    const multiGrid   = document.getElementById('multiGrid');
-    const spotifyWrap = document.getElementById('spotifyWrapper');
-    const spotifyFrm  = document.getElementById('spotifyFrame');
-    const audioPlayer = document.getElementById('audioPlayer');
 
-    let currentAudio = null;
+    // ── fechar with fade transition ──
+    var backBtn = document.getElementById('pf-back');
+    var veil = document.getElementById('pf-transition');
+    backBtn.addEventListener('click', function() {
+      veil.style.opacity = '1';
+      veil.style.pointerEvents = 'auto';
+      setTimeout(function() { window.location.href = 'index.html'; }, 380);
+    });
 
-    function hideAll() {
-      // Clear meta so it never bleeds outside the dialog
-      titleEl.textContent = '';
-      descEl.textContent  = '';
-      singleWrap.style.display  = 'none';
-      multiGrid.style.display   = 'none';
-      spotifyWrap.style.display = 'none';
-      audioPlayer.style.display = 'none';
-      embedFrame.src  = '';
-      spotifyFrm.src  = '';
-      multiGrid.innerHTML    = '';
-      audioPlayer.innerHTML  = '';
-      const bandcampWrap = document.getElementById('bandcampWrapper');
-      const bandcampFrm  = document.getElementById('bandcampFrame');
-      if (bandcampWrap) { bandcampWrap.style.display = 'none'; }
-      if (bandcampFrm)  { bandcampFrm.src = ''; }
-      if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-    }
+    // ── click-to-play vimeo overlays ──
+    document.querySelectorAll('.pf-play-overlay').forEach(function(overlay) {
+      overlay.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var iframe = overlay.parentElement.querySelector('iframe');
+        var src = iframe.dataset.src || '';
+        iframe.src = src + (src.includes('?') ? '&' : '?') + 'autoplay=1';
+        overlay.classList.add('is-gone');
+      });
+    });
 
-    // Start clean
-    hideAll();
-
-    document.querySelectorAll('.project-btn:not([data-type="fullscreen-video"]):not([data-type="bandcamp-multi"])').forEach(btn => {
-      btn.addEventListener('click', () => {
-        hideAll();
-        titleEl.textContent = btn.dataset.title || '';
-        descEl.textContent  = btn.dataset.desc  || '';
-        const type = btn.dataset.type;
-
-        if (type === 'vimeo') {
-          singleWrap.style.display = 'block';
-          // remove is-soundcloud class
-          singleWrap.classList.remove('is-soundcloud');
-          embedFrame.src = btn.dataset.url;
-
-       } else if (type === 'multi-vimeo') {
-          multiGrid.style.display = 'flex';
-          const videos = JSON.parse(btn.dataset.videos);
-          videos.forEach(v => {
-            const item = document.createElement('div');
-            const label = document.createElement('div');
-            label.className = 'video-item-label';
-            label.textContent = v.label;
-            const wrap = document.createElement('div');
-            wrap.className = 'embed-wrapper';
-            const fr = document.createElement('iframe');
-            fr.src = v.url;
-            fr.frameBorder = '0';
-            fr.allowFullscreen = true;
-            fr.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture');
-            fr.loading = 'lazy';
-            wrap.appendChild(fr);
-            item.appendChild(label);
-            item.appendChild(wrap);
-            multiGrid.appendChild(item);
-          });
-          if (btn.dataset.images) {
-            const images = JSON.parse(btn.dataset.images);
-            images.forEach((src, i) => {
-              const imgWrap = document.createElement('div');
-              imgWrap.className = 'dialog-image-wrap';
-              const img = document.createElement('img');
-              img.src = src;
-              img.alt = btn.dataset.title || '';
-              img.className = 'dialog-poster' + (i === 1 ? ' dialog-poster--large' : '');
-              imgWrap.appendChild(img);
-              multiGrid.appendChild(imgWrap);
-            });
-          }
-
-        } else if (type === 'spotify') {
-          spotifyWrap.style.display = 'block';
-          spotifyFrm.src = btn.dataset.url;
-
-        } else if (type === 'bandcamp') {
-          const bcWrap = document.getElementById('bandcampWrapper');
-          const bcFrm  = document.getElementById('bandcampFrame');
-          bcWrap.style.display = 'block';
-          bcFrm.src = btn.dataset.bandcampUrl || '';
-
-        } else if (type === 'audio') {
-          audioPlayer.style.display = 'flex';
-          const tracks = JSON.parse(btn.dataset.tracks);
-          tracks.forEach((track, idx) => {
-            const row = document.createElement('div');
-            row.className = 'audio-track';
-
-            const playBtnEl = document.createElement('button');
-            playBtnEl.className = 'audio-play-btn';
-            playBtnEl.textContent = '▶';
-
-            const info = document.createElement('div');
-            info.className = 'audio-track-info';
-            const name = document.createElement('div');
-            name.className = 'audio-track-name';
-            name.textContent = track.name;
-            const dur = document.createElement('div');
-            dur.className = 'audio-track-duration';
-            dur.textContent = '--:--';
-            info.appendChild(name);
-            info.appendChild(dur);
-
-            const progWrap = document.createElement('div');
-            progWrap.className = 'audio-progress-wrap';
-            const progBar = document.createElement('div');
-            progBar.className = 'audio-progress-bar';
-            progWrap.appendChild(progBar);
-
-            const audio = new Audio(track.src);
-            audio.preload = 'metadata';
-
-            audio.addEventListener('loadedmetadata', () => {
-              const m = Math.floor(audio.duration / 60);
-              const s = Math.floor(audio.duration % 60).toString().padStart(2,'0');
-              dur.textContent = `${m}:${s}`;
-            });
-            audio.addEventListener('timeupdate', () => {
-              if (audio.duration) {
-                progBar.style.width = (audio.currentTime / audio.duration * 100) + '%';
-                const m = Math.floor(audio.currentTime / 60);
-                const s = Math.floor(audio.currentTime % 60).toString().padStart(2,'0');
-                dur.textContent = `${m}:${s}`;
-              }
-            });
-            audio.addEventListener('ended', () => {
-              playBtnEl.textContent = '▶';
-              playBtnEl.classList.remove('playing');
-              progBar.style.width = '0%';
-            });
-
-            playBtnEl.addEventListener('click', () => {
-              if (currentAudio && currentAudio !== audio) {
-                currentAudio.pause();
-                // reset other buttons
-                audioPlayer.querySelectorAll('.audio-play-btn').forEach(b => {
-                  b.textContent = '▶'; b.classList.remove('playing');
-                });
-                audioPlayer.querySelectorAll('.audio-progress-bar').forEach(b => {
-                  b.style.width = '0%';
-                });
-              }
-              if (audio.paused) {
-                audio.play();
-                playBtnEl.textContent = '■';
-                playBtnEl.classList.add('playing');
-                currentAudio = audio;
-              } else {
-                audio.pause();
-                playBtnEl.textContent = '▶';
-                playBtnEl.classList.remove('playing');
-              }
-            });
-
-            progWrap.addEventListener('click', e => {
-              const rect = progWrap.getBoundingClientRect();
-              const frac = (e.clientX - rect.left) / rect.width;
-              audio.currentTime = frac * audio.duration;
-            });
-
-            row.appendChild(playBtnEl);
-            row.appendChild(info);
-            row.appendChild(progWrap);
-            audioPlayer.appendChild(row);
-          });
+    // ── scroll reveal (same as onepager) ──
+    var revealItems = Array.prototype.slice.call(document.querySelectorAll('.onepager-block'));
+    var revealObs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          revealObs.unobserve(entry.target);
         }
-
-        dialog.showModal();
       });
-    });
+    }, { threshold: 0.12, rootMargin: '0px 0px -4% 0px' });
+    revealItems.forEach(function(item) { revealObs.observe(item); });
 
-    // Close
-    function closeDialog() {
-      hideAll();
-      // Stop all bandcamp iframes
-      document.querySelectorAll('#bandcampWrapper iframe').forEach(function(fr) {
-        fr.src = fr.src; // reload = stop
+    // ── audio player ──
+    var tracks = [
+      {name:'track 1', src:'resources/audio/portfolio/-xyu551.mp3'},
+      {name:'track 2', src:'resources/audio/portfolio/-xyu555.mp3'},
+      {name:'track 3', src:'resources/audio/portfolio/-xyu552.mp3'},
+      {name:'track 4', src:'resources/audio/portfolio/-xyu554.mp3'},
+      {name:'track 5', src:'resources/audio/portfolio/-xyu553.mp3'},
+      {name:'track 6', src:'resources/audio/portfolio/-xyu5510.mp3'},
+      {name:'track 7', src:'resources/audio/portfolio/-xyu557.mp3'},
+      {name:'track 8', src:'resources/audio/portfolio/-xyu558.mp3'},
+      {name:'track 9', src:'resources/audio/portfolio/-xyu559.mp3'},
+      {name:'track 10',src:'resources/audio/portfolio/-xyu556.mp3'}
+    ];
+    var list = document.getElementById('audio-list');
+    var currentAudio = null;
+
+    tracks.forEach(function(track) {
+      var row = document.createElement('div');
+      row.className = 'pf-audio-row';
+
+      var playBtn = document.createElement('button');
+      playBtn.className = 'pf-play-btn';
+      playBtn.innerHTML = '&#x25B6;';
+
+      var nameEl = document.createElement('div');
+      nameEl.className = 'pf-track-name';
+      nameEl.textContent = track.name;
+
+      var progWrap = document.createElement('div');
+      progWrap.className = 'pf-prog-wrap';
+      var progBar = document.createElement('div');
+      progBar.className = 'pf-prog-bar';
+      progWrap.appendChild(progBar);
+
+      var dur = document.createElement('div');
+      dur.className = 'pf-dur';
+      dur.textContent = '--:--';
+
+      var audio = new Audio(track.src);
+      audio.preload = 'metadata';
+      audio.addEventListener('loadedmetadata', function() {
+        var m = Math.floor(audio.duration / 60);
+        var s = Math.floor(audio.duration % 60).toString().padStart(2, '0');
+        dur.textContent = m + ':' + s;
       });
-      dialog.close();
-    }
-    closeBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      closeDialog();
-    });
-    dialog.addEventListener('click', e => {
-      const rect = dialog.getBoundingClientRect();
-      if (e.clientX < rect.left || e.clientX > rect.right ||
-          e.clientY < rect.top  || e.clientY > rect.bottom) {
-        closeDialog();
-      }
-    });
-  })();
-  </script>
-  <script>
-  (function() {
-    // ── FULLSCREEN VIDEO ──
-    var fsOverlay = document.getElementById('fullscreen-overlay');
-    var fsFrame   = document.getElementById('fullscreen-frame');
-    var fsClose   = document.getElementById('fullscreen-close');
-
-    document.querySelectorAll('.project-btn[data-type="fullscreen-video"]').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        fsFrame.src = btn.dataset.url || '';
-        fsOverlay.style.display = 'block';
-        document.body.style.overflow = 'hidden';
+      audio.addEventListener('timeupdate', function() {
+        if (audio.duration) {
+          progBar.style.width = (audio.currentTime / audio.duration * 100) + '%';
+          var m = Math.floor(audio.currentTime / 60);
+          var s = Math.floor(audio.currentTime % 60).toString().padStart(2, '0');
+          dur.textContent = m + ':' + s;
+        }
       });
-    });
-
-    function closeFs() {
-      fsOverlay.style.display = 'none';
-      fsFrame.src = '';
-      document.body.style.overflow = '';
-    }
-    fsClose.addEventListener('click', closeFs);
-    // ESC fecha mesmo com iframe em foco (iframe rouba foco do document)
-    window.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && fsOverlay.style.display === 'block') closeFs();
-    });
-    // Quando iframe recebe foco, monitora via blur para recuperar ESC
-    fsFrame.addEventListener('load', function() {
-      try {
-        fsFrame.contentWindow.addEventListener('keydown', function(e) {
-          if (e.key === 'Escape') closeFs();
-        });
-      } catch(err) {} // cross-origin: silently ignore
-    });
-
-    // ── BANDCAMP MULTI ──
-    var bcDialog  = document.getElementById('embedDialog');
-    var bcTitle   = bcDialog.querySelector('.embed-title');
-    var bcDesc    = bcDialog.querySelector('.embed-desc');
-    var bcWrapper = document.getElementById('bandcampWrapper');
-    var bcCloseBtn = bcDialog.querySelector('.embed-close');
-
-    // Stop all bandcamp iframes by clearing src then restoring
-    function stopAllBc() {
-      bcWrapper.querySelectorAll('iframe').forEach(function(fr) {
-        fr.src = '';
+      audio.addEventListener('ended', function() {
+        playBtn.innerHTML = '&#x25B6;';
+        playBtn.classList.remove('is-playing');
+        progBar.style.width = '0%';
       });
-      bcWrapper.innerHTML = '';
-    }
-
-    document.querySelectorAll('.project-btn[data-type="bandcamp-multi"]').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        // Hide all other wrappers in the shared dialog
-        ['singleWrapper','multiGrid','spotifyWrapper','audioPlayer'].forEach(function(id) {
-          document.getElementById(id).style.display = 'none';
-        });
-        var legacyBcFrame = document.getElementById('bandcampFrame');
-        if (legacyBcFrame) legacyBcFrame.src = '';
-
-        bcTitle.textContent = btn.dataset.title || '';
-        bcDesc.textContent  = btn.dataset.desc  || '';
-
-        // Rebuild iframes fresh — no overlay, no interceptors, just clean iframes
-        bcWrapper.innerHTML = '';
-        bcWrapper.style.display = 'flex';
-        bcWrapper.style.flexDirection = 'column';
-        bcWrapper.style.gap = '10px';
-        bcWrapper.style.width = '100%';
-
-        var tracks = JSON.parse(btn.dataset.tracks);
-        tracks.forEach(function(t) {
-          var label = document.createElement('div');
-          label.textContent = t.label;
-          label.style.cssText = 'font-size:0.68rem;letter-spacing:0.1em;opacity:0.5;margin-bottom:2px;font-family:var(--mono);padding:0 2px;';
-
-          var fr = document.createElement('iframe');
-          fr.src = t.url;
-          fr.style.cssText = 'border:0;width:100%;height:42px;display:block;border-radius:3px;';
-          fr.setAttribute('seamless', '');
-          fr.setAttribute('loading', 'lazy');
-
-          bcWrapper.appendChild(label);
-          bcWrapper.appendChild(fr);
-        });
-
-        bcDialog.showModal();
+      playBtn.addEventListener('click', function() {
+        if (currentAudio && currentAudio !== audio) {
+          currentAudio.pause();
+          list.querySelectorAll('.pf-play-btn').forEach(function(b) {
+            b.innerHTML = '&#x25B6;'; b.classList.remove('is-playing');
+          });
+          list.querySelectorAll('.pf-prog-bar').forEach(function(b) { b.style.width = '0%'; });
+        }
+        if (audio.paused) {
+          audio.play();
+          playBtn.innerHTML = '&#x25FC;';
+          playBtn.classList.add('is-playing');
+          currentAudio = audio;
+        } else {
+          audio.pause();
+          playBtn.innerHTML = '&#x25B6;';
+          playBtn.classList.remove('is-playing');
+        }
       });
+      progWrap.addEventListener('click', function(e) {
+        var rect = progWrap.getBoundingClientRect();
+        audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+      });
+
+      row.appendChild(playBtn);
+      row.appendChild(nameEl);
+      row.appendChild(progWrap);
+      row.appendChild(dur);
+      list.appendChild(row);
     });
 
-    // Stop bandcamp on dialog close
-    bcCloseBtn.addEventListener('click', function() {
-      stopAllBc();
-    });
-    bcDialog.addEventListener('close', function() {
-      stopAllBc();
-    });
   })();
   </script>
 </body>
