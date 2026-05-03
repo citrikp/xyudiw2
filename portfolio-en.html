@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap">
-  <link rel="stylesheet" href="styles.css?v=202605032500">
+  <link rel="stylesheet" href="styles.css?v=202605032800">
   <link rel="icon" href="resources/img/favicon1.ico" type="image/x-icon">
   <style>
     /* solid #000 page background — styles.css hides #bg-canvas shader on portfolio */
@@ -49,19 +49,36 @@
       overflow: hidden;
       cursor: pointer;
       border-radius: 12px;
+      outline: none;
+      box-shadow: none;
+      transform: translateZ(0);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
     }
     .pf-vimeo-wrap iframe {
       position: absolute;
-      top: -10%; left: -10%;
-      width: 120%;
-      height: 120%;
+      inset: 0;
+      width: 100%;
+      height: 100%;
       border: 0;
       display: block;
       pointer-events: none;
+      outline: none;
+      background: #000;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      clip-path: inset(0 round 12px);
+    }
+    .pf-vimeo-wrap.pf-vimeo-iframe-armed iframe {
+      opacity: 1;
+      transition: none;
     }
     .pf-play-overlay {
       position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
       background: rgba(0,0,0,0.1); cursor: pointer; transition: background 0.22s; z-index: 5;
+    }
+    .pf-vimeo-wrap.is-previewing .pf-play-overlay {
+      background: rgba(0,0,0,0.02);
     }
     .pf-play-overlay:hover { background: rgba(0,0,0,0.03); }
     .pf-play-overlay.is-gone { display: none; }
@@ -71,7 +88,7 @@
       z-index: 4;
       overflow: hidden;
       border-radius: inherit;
-      transition: opacity 0.24s ease;
+      transition: opacity 0.4s ease;
       pointer-events: none;
     }
     .pf-video-thumb img {
@@ -80,10 +97,11 @@
       object-fit: cover;
       object-position: center center;
       display: block;
-      transform: scale(1.18);
-      transform-origin: center center;
     }
-    .pf-vimeo-wrap.is-previewing .pf-video-thumb { opacity: 0; }
+    .pf-vimeo-wrap.is-previewing .pf-video-thumb {
+      opacity: 0;
+      transition: opacity 0.55s ease 0.12s;
+    }
 
     /* shared modal player (fullscreen embed) */
     .pf-modal {
@@ -539,11 +557,15 @@
     modalSound.addEventListener('click', function() {
       if (!modalPlayer) return;
       modalPlayer.getMuted().then(function(m) {
-        return modalPlayer.setMuted(!m);
-      }).then(function() {
-        return modalPlayer.setVolume(1);
-      }).then(function() {
-        return modalPlayer.play();
+        var wantMuted = !m;
+        if (wantMuted) {
+          return modalPlayer.setMuted(true);
+        }
+        return modalPlayer.setVolume(1).then(function() {
+          return modalPlayer.setMuted(false);
+        }).then(function() {
+          return modalPlayer.play();
+        });
       }).then(function() {
         return modalPlayer.getMuted();
       }).then(function(m) {
@@ -578,8 +600,20 @@
         (vimeoId ? ('https://vumbnail.com/' + vimeoId + '.jpg') : '') + '">';
       wrap.appendChild(thumb);
 
+      function armIframeThenRevealPoster() {
+        if (!wrap.matches(':hover')) return;
+        wrap.classList.add('pf-vimeo-iframe-armed');
+        window.requestAnimationFrame(function() {
+          window.requestAnimationFrame(function() {
+            window.setTimeout(function() {
+              if (wrap.matches(':hover')) wrap.classList.add('is-previewing');
+            }, 260);
+          });
+        });
+      }
+
       function finalizePreviewReveal() {
-        if (wrap.matches(':hover')) wrap.classList.add('is-previewing');
+        armIframeThenRevealPoster();
       }
 
       function ensurePreview() {
@@ -589,9 +623,9 @@
             if (finalized) return;
             finalized = true;
             window.clearTimeout(fallbackTimer);
-            finalizePreviewReveal();
+            window.setTimeout(armIframeThenRevealPoster, 1120);
           }
-          var fallbackTimer = window.setTimeout(finalize, 900);
+          var fallbackTimer = window.setTimeout(finalize, 2600);
           iframe.addEventListener('load', finalize, { once: true });
           iframe.src = previewSrc;
           loaded = true;
@@ -604,6 +638,7 @@
         wrap.addEventListener('mouseenter', ensurePreview);
         wrap.addEventListener('mouseleave', function() {
           wrap.classList.remove('is-previewing');
+          wrap.classList.remove('pf-vimeo-iframe-armed');
         });
       }
 
@@ -612,6 +647,7 @@
         e.stopPropagation();
         openModal(rawSrc, iframe);
         wrap.classList.remove('is-previewing');
+        wrap.classList.remove('pf-vimeo-iframe-armed');
         loaded = false;
       });
     });
