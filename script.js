@@ -2910,7 +2910,7 @@ const LUT = new Uint8Array(MAX_ITER * 3);
       siteSubtitle.style.transition = 'opacity 0.45s ease, visibility 0.45s ease';
     }
 
-    /* Default = CSS (#fff); cinematic = muted green-grey; inline overrides Antfood exclusion on desktop */
+    /* Default = CSS (#fff); cinematic = muted green-grey; inline overrides prior exclusion on desktop */
     navItems.forEach(el => {
       el.style.transition = 'color 3s ease';
       if (navCol) {

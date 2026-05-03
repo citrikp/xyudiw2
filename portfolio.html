@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap">
-  <link rel="stylesheet" href="styles.css?v=202605032200">
+  <link rel="stylesheet" href="styles.css?v=202605032500">
   <link rel="icon" href="resources/img/favicon1.ico" type="image/x-icon">
   <style>
     /* ── unlock scroll; solid #000 page background (styles.css — no shader canvas on portfolio) ── */
@@ -101,7 +101,7 @@
     }
     .pf-vimeo-wrap.is-previewing .pf-video-thumb { opacity: 0; }
 
-    /* ── shared antfood-style modal player ── */
+    /* ── shared modal player (fullscreen embed) ── */
     .pf-modal {
       position: fixed;
       inset: 0;
@@ -591,7 +591,7 @@
   <script>
   (function() {
 
-    // ── shared modal player (antfood-style) ──
+    // ── shared modal player (fullscreen embed) ──
     var modal = document.createElement('div');
     modal.className = 'pf-modal';
     modal.setAttribute('aria-hidden', 'true');
