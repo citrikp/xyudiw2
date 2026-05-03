@@ -105,13 +105,44 @@
 
     /* shared modal player (fullscreen embed) */
     .pf-modal {
-      position: fixed; inset: 0; z-index: 9999;
-      display: none; flex-direction: column; align-items: center; justify-content: center;
-      background: rgba(0, 0, 0, 0.95);
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      pointer-events: none;
       animation: pf-modal-fade 0.26s ease;
     }
-    .pf-modal.is-open { display: flex; }
-    @keyframes pf-modal-fade { from { opacity: 0; } to { opacity: 1; } }
+    .pf-modal.is-open { display: flex; pointer-events: none; }
+    .pf-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background: rgba(0, 0, 0, 0.95);
+      pointer-events: auto;
+      cursor: pointer;
+    }
+    .pf-modal-shell {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      pointer-events: none;
+      max-height: 100%;
+      padding-bottom: max(0.35rem, env(safe-area-inset-bottom, 0px));
+      box-sizing: border-box;
+    }
+    .pf-modal-shell > * {
+      pointer-events: auto;
+    }
+    @keyframes pf-modal-fade {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
     .pf-modal-stage {
       position: relative;
       width: min(88vw, 1400px);
@@ -119,21 +150,36 @@
       background: #000;
     }
     .pf-modal-iframe {
-      position: absolute; inset: 0; width: 100%; height: 100%;
-      border: 0; display: block;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
     }
     .pf-modal-close {
-      position: fixed; top: 1.3rem; right: 1.4rem; z-index: 10001;
-      background: #fff; color: #111; border: 0; border-radius: 999px;
+      position: fixed;
+      top: max(1.3rem, env(safe-area-inset-top, 0px));
+      right: max(1.4rem, env(safe-area-inset-right, 0px));
+      z-index: 10001;
+      pointer-events: auto;
+      background: #fff;
+      color: #111;
+      border: 0;
+      border-radius: 999px;
       font-family: 'Brut Grotesque', 'Inter', sans-serif;
-      font-weight: 500; font-size: 0.82rem; letter-spacing: 0.02em;
-      padding: 0.5rem 1.1rem; cursor: pointer;
+      font-weight: 500;
+      font-size: 0.82rem;
+      letter-spacing: 0.02em;
+      padding: 0.5rem 1.1rem;
+      cursor: pointer;
       transition: background 0.18s ease;
     }
     .pf-modal-close:hover { background: #ddd; }
     .pf-modal-controls {
       width: min(88vw, 1400px);
       margin-top: 0.7rem;
+      padding: 0.35rem 0 max(1rem, calc(env(safe-area-inset-bottom, 0px) + 0.35rem));
       display: flex;
       align-items: center;
       gap: 1rem;
@@ -142,27 +188,97 @@
       letter-spacing: 0.04em;
       text-transform: uppercase;
       user-select: none;
+      box-sizing: border-box;
     }
     .pf-modal-play {
-      background: none; border: 0;
+      background: none;
+      border: 0;
       color: rgba(255,255,255,0.85);
-      font-family: inherit; font-size: inherit;
-      letter-spacing: inherit; text-transform: inherit;
-      cursor: pointer; padding: 0;
-      white-space: nowrap; flex-shrink: 0;
+      font-family: inherit;
+      font-size: inherit;
+      letter-spacing: inherit;
+      text-transform: inherit;
+      cursor: pointer;
+      padding: 0;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     .pf-modal-progress {
-      position: relative; flex: 1;
-      height: 2px; background: rgba(255,255,255,0.2);
+      position: relative;
+      flex: 1;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.2);
       cursor: pointer;
     }
-    .pf-modal-progress::after { content: ''; position: absolute; inset: -6px 0; }
-    .pf-modal-progress-bar {
-      position: absolute; top: 0; bottom: 0; left: 0;
-      width: 0%; background: rgba(255,255,255,0.9);
+    .pf-modal-progress::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: -14px;
+      bottom: -14px;
     }
-    .pf-modal-time { color: rgba(255,255,255,0.6); white-space: nowrap; flex-shrink: 0; min-width: 2.4rem; text-align: center; }
-    .pf-modal-sound { color: rgba(255,255,255,0.85); cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+    .pf-modal-progress-bar {
+      position: absolute;
+      top: 0; bottom: 0; left: 0;
+      width: 0%;
+      background: rgba(255,255,255,0.9);
+    }
+    .pf-modal-time {
+      color: rgba(255,255,255,0.6);
+      white-space: nowrap;
+      flex-shrink: 0;
+      min-width: 2.4rem;
+      text-align: center;
+    }
+    .pf-modal-sound {
+      color: rgba(255,255,255,0.85);
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      padding: 0.35rem 0.15rem;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+    }
+    @media (max-width: 1023px) {
+      .pf-modal-controls {
+        font-size: 0.78rem;
+        gap: 1.15rem;
+        margin-top: 0.85rem;
+        padding-bottom: max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 0.85rem));
+      }
+      .pf-modal-progress {
+        height: 7px;
+      }
+      .pf-modal-play {
+        padding: 0.45rem 0.2rem;
+        min-height: 44px;
+        align-items: center;
+        display: inline-flex;
+      }
+    }
+    @media (orientation: landscape) and (max-height: 480px) {
+      .pf-modal-controls {
+        font-size: 0.82rem;
+        gap: 1.25rem;
+        padding-bottom: max(1.6rem, calc(env(safe-area-inset-bottom, 0px) + 1.1rem));
+        margin-top: 0.55rem;
+      }
+      .pf-modal-progress {
+        height: 8px;
+      }
+      .pf-modal-play {
+        padding: 0.45rem 0.2rem;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+      }
+      .pf-modal-shell {
+        padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+      }
+    }
 
     .pf-play-circle { display: none; }
     .pf-bc-track { margin-bottom: 0.55rem; }
@@ -432,7 +548,9 @@
     modal.className = 'pf-modal';
     modal.setAttribute('aria-hidden', 'true');
     modal.innerHTML =
+      '<div class="pf-modal-backdrop" aria-hidden="true"></div>' +
       '<button class="pf-modal-close" type="button" aria-label="Close video">Close</button>' +
+      '<div class="pf-modal-shell">' +
       '<div class="pf-modal-stage">' +
         '<iframe class="pf-modal-iframe" src="" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>' +
       '</div>' +
@@ -440,10 +558,12 @@
         '<button class="pf-modal-play" type="button">Pause video</button>' +
         '<div class="pf-modal-progress"><div class="pf-modal-progress-bar"></div></div>' +
         '<div class="pf-modal-time">0:00</div>' +
-        '<div class="pf-modal-sound" role="button" tabindex="0">Sound off</div>' +
+        '<div class="pf-modal-sound" role="button" tabindex="0">Sound on</div>' +
+      '</div>' +
       '</div>';
     document.body.appendChild(modal);
 
+    var modalBackdrop = modal.querySelector('.pf-modal-backdrop');
     var modalStage = modal.querySelector('.pf-modal-stage');
     var modalIframe = modal.querySelector('.pf-modal-iframe');
     var modalCloseBtn = modal.querySelector('.pf-modal-close');
@@ -469,6 +589,17 @@
       return m + ':' + r;
     }
 
+    function syncModalSoundFromPlayer() {
+      if (!modalPlayer || !modalSound) return;
+      modalPlayer.getMuted().then(function(m) {
+        // #region agent log
+        fetch('http://127.0.0.1:7722/ingest/87e146c9-842a-4600-92ce-058bc194aafd',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'748776'},body:JSON.stringify({sessionId:'748776',location:'portfolio-en.html:syncModalSoundFromPlayer',message:'sync mute from player',data:{muted:!!m,labelBefore:modalSound.textContent,modalMutedBefore:modalMuted},timestamp:Date.now(),hypothesisId:'H1'})}).catch(function(){});
+        // #endregion
+        modalMuted = !!m;
+        modalSound.textContent = modalMuted ? 'Sound off' : 'Sound on';
+      }).catch(function() {});
+    }
+
     function openModal(rawSrc, previewIframe) {
       // no autoplay in URL — trigger via API so browser allows unmuted sound
       var fullSrc = rawSrc + (rawSrc.includes('?') ? '&' : '?') +
@@ -478,14 +609,14 @@
       modal.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
       if (previewIframe) previewIframe.src = '';
-      modalMuted = true;
+      modalMuted = false;
       modalDuration = 0;
       modalProgressBar.style.width = '0%';
       modalTime.textContent = '0:00';
+      modalSound.textContent = 'Sound on';
       if (window.Vimeo && window.Vimeo.Player) {
         modalPlayer = new window.Vimeo.Player(modalIframe);
         modalPlayBtn.textContent = 'Pause video';
-        modalSound.textContent = 'Sound off';
         modalPlayer.ready().then(function() {
           return modalPlayer.setVolume(1);
         }).then(function() {
@@ -495,16 +626,13 @@
         }).then(function() {
           return modalPlayer.getDuration().then(function(d) { modalDuration = d || 0; });
         }).then(function() {
-          return modalPlayer.getMuted();
-        }).then(function(m) {
-          modalMuted = !!m;
-          modalSound.textContent = modalMuted ? 'Sound off' : 'Sound on';
+          modalMuted = false;
+          modalSound.textContent = 'Sound on';
+          syncModalSoundFromPlayer();
         }).catch(function() {
-          modalPlayer.getMuted().then(function(m) {
-            modalMuted = !!m;
-            modalSound.textContent = modalMuted ? 'Sound off' : 'Sound on';
-          }).catch(function() {});
+          syncModalSoundFromPlayer();
         });
+        modalPlayer.on('volumechange', syncModalSoundFromPlayer);
         modalPlayer.on('timeupdate', function(data) {
           if (data && data.duration) modalDuration = data.duration;
           var ratio = (data && data.duration) ? (data.seconds / data.duration) : 0;
@@ -531,12 +659,21 @@
       modalTime.textContent = '0:00';
     }
 
-    modalCloseBtn.addEventListener('click', closeModal);
-    modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
+    modalCloseBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      closeModal();
+    });
+    modalBackdrop.addEventListener('click', function() {
+      // #region agent log
+      fetch('http://127.0.0.1:7722/ingest/87e146c9-842a-4600-92ce-058bc194aafd',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'748776'},body:JSON.stringify({sessionId:'748776',location:'portfolio-en.html:backdrop',message:'backdrop dismiss',data:{},timestamp:Date.now(),hypothesisId:'H2'})}).catch(function(){});
+      // #endregion
+      closeModal();
+    });
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
     });
-    modalPlayBtn.addEventListener('click', function() {
+    modalPlayBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
       if (!modalPlayer) return;
       modalPlayer.getPaused().then(function(paused) {
         if (paused) {
@@ -549,34 +686,38 @@
       }).catch(function() {});
     });
     modalProgress.addEventListener('click', function(e) {
+      e.stopPropagation();
       if (!modalPlayer || !modalDuration) return;
       var rect = modalProgress.getBoundingClientRect();
       var ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
       modalPlayer.setCurrentTime(modalDuration * ratio).catch(function() {});
     });
-    modalSound.addEventListener('click', function() {
+    modalSound.addEventListener('click', function(e) {
+      e.stopPropagation();
       if (!modalPlayer) return;
-      modalPlayer.getMuted().then(function(m) {
-        var wantMuted = !m;
-        if (wantMuted) {
-          return modalPlayer.setMuted(true);
-        }
-        return modalPlayer.setVolume(1).then(function() {
+      // #region agent log
+      fetch('http://127.0.0.1:7722/ingest/87e146c9-842a-4600-92ce-058bc194aafd',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'748776'},body:JSON.stringify({sessionId:'748776',location:'portfolio-en.html:modalSound',message:'sound toggle click',data:{modalMutedUI:modalMuted,label:modalSound.textContent},timestamp:Date.now(),hypothesisId:'H1'})}).catch(function(){});
+      // #endregion
+      var goMuted = !modalMuted;
+      if (goMuted) {
+        modalPlayer.setMuted(true).then(function() {
+          modalMuted = true;
+          modalSound.textContent = 'Sound off';
+        }).catch(function() {
+          syncModalSoundFromPlayer();
+        });
+      } else {
+        modalPlayer.setVolume(1).then(function() {
           return modalPlayer.setMuted(false);
         }).then(function() {
           return modalPlayer.play();
+        }).then(function() {
+          modalMuted = false;
+          modalSound.textContent = 'Sound on';
+        }).catch(function() {
+          syncModalSoundFromPlayer();
         });
-      }).then(function() {
-        return modalPlayer.getMuted();
-      }).then(function(m) {
-        modalMuted = !!m;
-        modalSound.textContent = modalMuted ? 'Sound off' : 'Sound on';
-      }).catch(function() {
-        modalPlayer.getMuted().then(function(m) {
-          modalMuted = !!m;
-          modalSound.textContent = modalMuted ? 'Sound off' : 'Sound on';
-        }).catch(function() {});
-      });
+      }
     });
 
     // thumb + hover preview — hide poster after iframe paints (avoid white flash)
