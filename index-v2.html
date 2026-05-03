@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="lang-detect.js?v=202604295073"></script>
+  <title>Mari Herzer (v2)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap">
+  <link rel="stylesheet" href="styles.css?v=202605032200">
+  <link rel="icon" href="resources/img/favicon1.ico" type="image/x-icon">
+  <style>
+    /* Vimeo full-viewport background (no chrome: background=1 on embed URL) */
+    .home-video-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+      background: #000;
+    }
+    .home-video-backdrop__frame {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 177.78vh;
+      min-width: 100%;
+      height: 56.25vw;
+      min-height: 100%;
+      border: 0;
+      transform: translate(-50%, -50%);
+    }
+    /* Desktop / large screens: true cover for 16×9 — fill entire viewport on any aspect */
+    @media (min-width: 1024px) {
+      .home-video-backdrop__frame {
+        width: max(100vw, calc(100vh * 16 / 9));
+        height: max(100vh, calc(100vw * 9 / 16));
+        min-width: 100%;
+        min-height: 100%;
+      }
+    }
+    /* Homepage UI: difference against moving video (this file only) */
+    body.site-home-video-bg .site-title {
+      mix-blend-mode: difference;
+      color: #fff;
+    }
+    body.site-home-video-bg .site-title .mh-letter {
+      mix-blend-mode: normal;
+    }
+    body.site-home-video-bg .home-corner-cluster {
+      mix-blend-mode: difference;
+    }
+    body.site-home-video-bg .site-subtitles-antfood,
+    body.site-home-video-bg .site-subtitles-antfood li {
+      color: #fff;
+      border-bottom-color: rgba(255, 255, 255, 0.35);
+    }
+    body.site-home-video-bg #langSwitcher {
+      mix-blend-mode: difference;
+    }
+    body.site-home-video-bg #player-ui {
+      mix-blend-mode: difference;
+    }
+    body.site-home-video-bg .panel-trigger {
+      mix-blend-mode: difference;
+    }
+    body.site-home-video-bg .home-nav-desktop-inner {
+      mix-blend-mode: difference;
+    }
+    @media (min-width: 1024px) {
+      body.site-home-video-bg .home-nav-desktop-inner .nav-links {
+        mix-blend-mode: difference !important;
+      }
+    }
+    @media (max-width: 1023px) {
+      body.site-home-video-bg.home-menu-open:not([data-world]) .home-nav-desktop-inner,
+      body.site-home-video-bg.home-menu-open:not([data-world]) .home-nav-desktop-inner .nav-links,
+      body.site-home-video-bg.home-menu-open:not([data-world]) .home-nav-desktop-inner .nav-item,
+      body.site-home-video-bg.home-menu-open:not([data-world]) .home-nav-desktop-inner .nav-links a,
+      body.site-home-video-bg.home-menu-open:not([data-world]) .nav-links-social a {
+        mix-blend-mode: difference !important;
+      }
+    }
+  </style>
+  <style id="home-video-blend">
+    /*
+     * mix-blend-mode: difference against a cross-origin <iframe> is blocked by the browser
+     * compositor (security sandbox — iframes are opaque to the host page blend pipeline).
+     * These blends composite against #bg-canvas + the #000 video backdrop container,
+     * producing white text that inverts to black over any lit canvas region.
+     *
+     * Key fix: styles.css sets `mix-blend-mode: normal` on body.site-home .site-title and
+     * `isolation: isolate` on the mobile panel-trigger — both must be overridden here.
+     */
+
+    /* ── Desktop: true cover — fills viewport on any aspect ratio, never letterboxes ── */
+    @media (min-width: 1024px) {
+      .home-video-backdrop__frame {
+        width: max(100vw, calc(100vh * (16 / 9)));
+        height: max(100vh, calc(100vw * (9 / 16)));
+        min-width: unset;
+        min-height: unset;
+      }
+    }
+
+    /* Title — override mix-blend-mode: normal from styles.css (higher specificity + !important) */
+    body.site-home-video-bg .home-marquee-anchor .site-title {
+      mix-blend-mode: difference !important;
+      color: #fff !important;
+    }
+    body.site-home-video-bg .site-title .mh-letter {
+      mix-blend-mode: difference;
+    }
+
+    /* Corner cluster */
+    body.site-home-video-bg .home-corner-cluster {
+      mix-blend-mode: difference;
+    }
+
+    /* Subtitles: background-clip:text is incompatible with mix-blend-mode — drop gradient, use flat #fff */
+    body.site-home-video-bg .site-subtitles-antfood li {
+      color: #fff !important;
+      background: none !important;
+      -webkit-background-clip: unset !important;
+      background-clip: unset !important;
+      animation: none !important;
+      mix-blend-mode: difference;
+      border-bottom-color: rgba(255, 255, 255, 0.32) !important;
+    }
+    body.site-home-video-bg .site-subtitles-antfood li:last-child {
+      border-bottom: none !important;
+    }
+
+    /* Lang switcher */
+    body.site-home-video-bg #langSwitcher {
+      mix-blend-mode: difference;
+    }
+
+    /* Bottom player UI */
+    body.site-home-video-bg #player-ui {
+      mix-blend-mode: difference;
+    }
+
+    /* Mobile menu pill: isolation: isolate (styles.css) traps the blend — remove it */
+    body.site-home-video-bg .panel-trigger {
+      mix-blend-mode: difference !important;
+      isolation: auto !important;
+    }
+
+    /* Desktop nav pill */
+    body.site-home-video-bg .home-nav-desktop-inner {
+      mix-blend-mode: difference;
+    }
+    @media (min-width: 1024px) {
+      body.site-home-video-bg .home-nav-desktop-inner .nav-links {
+        mix-blend-mode: difference !important;
+      }
+    }
+  </style>
+</head>
+<body class="site-home site-home-video-bg">
+
+  <div class="home-video-backdrop" aria-hidden="true">
+    <iframe
+      class="home-video-backdrop__frame"
+      src="https://player.vimeo.com/video/1187549143?background=1&amp;autoplay=1&amp;loop=1&amp;muted=1&amp;controls=0&amp;title=0&amp;byline=0&amp;portrait=0&amp;playsinline=1&amp;dnt=1"
+      allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+      referrerpolicy="strict-origin-when-cross-origin"
+      title=""
+    ></iframe>
+  </div>
+
+  <canvas id="world-canvas"></canvas>
+  <div id="cinema-veil"></div>
+
+  <header class="home-marquee-anchor">
+    <h1 class="site-title" id="homeSiteTitle" aria-label="Mari Herzer"><span class="site-title-chunk site-title-chunk--long" aria-hidden="true">Mari Herzer</span><span class="site-title-chunk site-title-chunk--short" aria-hidden="true"><span class="mh-letter">M</span><span class="mh-letter">H</span></span></h1>
+  </header>
+
+  <nav class="sliding-panel home-main-nav" aria-label="Primário">
+      <button type="button" class="panel-trigger" aria-expanded="false" aria-controls="homeNavPanelContent" id="homeNavTrigger">
+        <span class="trigger-label">Menu</span>
+      </button>
+      <div class="panel-content" id="homeNavPanelContent">
+        <button type="button" class="home-menu-close-mobile" id="homeMenuCloseMobile" aria-label="Fechar menu">Fechar</button>
+        <div class="home-nav-desktop-inner">
+        <div class="nav-links nav-links--home-desktop">
+
+          <button class="btnColaborar nav-item" id="colaborarBtn" type="button">
+            Sobre
+          </button>
+
+          <a href="portfolio.html" class="nav-item" id="navPortfolioLink">
+            Portfolio
+          </a>
+
+          <button class="btnC nav-item" type="button">
+            Contato
+          </button>
+
+          <dialog id="contatoDialog">
+            <button class="btnClose2 dialog-close">&#x2715;</button>
+            <div class="dialog-body dialog-body--contato">
+              <p><span class="contact-label">instagram</span><br>
+                <a href="https://instagram.com/mariherzer" target="_blank">@mariherzer</a></p>
+              <p><span class="contact-label">email</span><br>
+                <a href="/cdn-cgi/l/email-protection#deb3bfacb7b6bbaca4bbac9eb9b3bfb7b2f0bdb1b3"><span class="__cf_email__" data-cfemail="fc919d8e9594998e86998ebc9b919d9590d29f9391">[email&#160;protected]</span></a></p>
+            </div>
+          </dialog>
+
+          <a href="substack.html" class="nav-item">
+            Blog
+          </a>
+
+          <button type="button" class="nav-item nav-item--home-onepager" id="homeFromOnepagerBtn">
+            Home
+          </button>
+
+          <div class="nav-links-social">
+            <a href="https://www.instagram.com/mariherzer/" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a href="https://mariherzer.bandcamp.com/" target="_blank" rel="noopener noreferrer">Bandcamp</a>
+          </div>
+
+        </div>
+        </div>
+      </div>
+    </nav>
+
+  <div id="home-corner-cluster" class="home-corner-cluster">
+    <ul id="homeCornerSubtitles" class="site-subtitles-antfood" aria-hidden="true">
+      <li>produção musical</li>
+      <li>trilha sonora</li>
+      <li>sound design</li>
+    </ul>
+  </div>
+  <div class="lang-switcher site-home-lang-switcher" id="langSwitcher">
+    <button type="button" class="lang-globe-btn" id="langGlobeBtn" aria-label="Selecionar idioma">
+      <img src="resources/img/globe.png" alt="">
+    </button>
+    <div class="lang-dropdown" id="langDropdown">
+      <a href="index-v2.html" data-lang-switch class="active">Português</a>
+      <a href="index-en.html" data-lang-switch>English</a>
+    </div>
+  </div>
+
+  <div id="player-ui">
+    <div id="world-controls">
+      <button id="prev-world" aria-label="Mundo anterior">&#x2039;</button>
+      <span id="world-name"></span>
+      <button id="next-world" aria-label="Próximo mundo">&#x203a;</button>
+    </div>
+    <button id="play-btn" aria-label="Iniciar experiência sonora">
+      <span id="play-label">ecossistemas sonoros</span>
+      <span id="play-icon">&#x25B6;</span>
+    </button>
+  </div>
+
+  <section id="colaborar-page" class="onepager" aria-hidden="true">
+    <h2 class="onepager-sticky-title">Mari Herzer</h2>
+    <div class="onepager-inner">
+      <div class="onepager-block onepager-block--media onepager-block--video">
+        <video id="studioVideo" playsinline autoplay loop muted poster="resources/img/studio/maristudio1.jpg">
+          <source src="resources/img/studio/studio-reel3.mp4" type="video/mp4">
+        </video>
+        <p class="onepager-video-note">toque no video para ativar/desativar som</p>
+      </div>
+      <div class="onepager-block onepager-block--text onepager-block--intro-text">
+        <p class="onepager-eyebrow">colaborar</p>
+        <p class="onepager-text">Produtora musical, compositora de trilha sonora, mixadora e sound designer com quinze anos de experiência e uma abordagem construída sobre dois eixos complementares:</p>
+      </div>
+      <figure class="onepager-block onepager-block--media onepager-block--left">
+        <img src="resources/img/studio/maristudio1.jpg" alt="Estúdio de Mari Herzer">
+      </figure>
+      <div class="onepager-block onepager-block--text">
+        <p class="onepager-eyebrow">eixo um</p>
+        <p class="onepager-text">como DJ e produtora com longa experiência no circuito underground de música eletrônica brasileiro e internacional, além de 8 anos sendo artista-residente da festa e produtora do selo Mamba Negra, mantenho ouvidos atentos no que há de mais novo no universo da música eletrônica — do baile funk, dubstep ao techno. Acompanho o que se renova constantemente por meio da internet mais profunda; os timbres em constante mutação da música eletrônica, remexidos pela lógica memética pós-2010 em plena aceleração.</p>
+      </div>
+      <figure class="onepager-block onepager-block--media onepager-block--right">
+        <img src="resources/img/studio/studio.jpg" alt="Espaço de trabalho de produção musical">
+      </figure>
+      <div class="onepager-block onepager-block--text">
+        <p class="onepager-eyebrow">eixo dois</p>
+        <p class="onepager-text">De um lugar mais introspectivo, utilizo dados de ciências naturais e humanas como ferramentas de composição, construo paisagens e ecossistemas sonoros complexos para narrativas enraizadas no mito, na elipse e na especificidade cultural. A seção de ecossistemas sonoros na página inicial deste site mostra onde isso leva.</p>
+      </div>
+      <figure class="onepager-block onepager-block--media onepager-block--left">
+        <img src="resources/img/studio/mari_profile.jpg" alt="Retrato de Mari Herzer no estúdio">
+      </figure>
+      <div class="onepager-block onepager-block--media onepager-vimeo-wrap">
+        <iframe
+          id="introVimeo"
+          class="onepager-vimeo-frame"
+          src="https://player.vimeo.com/video/1185245821?background=1&autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0"
+          allow="autoplay; fullscreen; picture-in-picture"
+          title="showreel full"></iframe>
+        <button id="vimeoAudioToggle" class="onepager-vimeo-audio" type="button">som off</button>
+      </div>
+      <div class="onepager-block onepager-block--text">
+        <p class="onepager-eyebrow">o que ofereço</p>
+        <p class="onepager-text">Quinze anos de experiência em produção musical e sound design com raízes na música eletrônica underground de São Paulo e afora — incluindo oito anos como artista-residente na Mamba Negra. Essa trajetória me conferiu um vocabulário sonoro que abrange funk mandelão, automotivo, eletrônica contemporânea de sonoridade mais agressiva à emulação de ecossistemas sonoros complexos por meio de um sound design zeloso e elegante, sempre alinhados com o que há de mais novo.</p>
+      </div>
+      <figure class="onepager-block onepager-block--media onepager-block--left">
+        <img src="resources/img/studio/studio2.jpg" alt="Detalhes do estúdio de trabalho">
+      </figure>
+      <div class="onepager-block onepager-block--text">
+        <p class="onepager-eyebrow">abordagem</p>
+        <p class="onepager-text">Componho com sintetizadores analógicos e digitais e manipulo samples por meio de técnicas destrutivas, tendo cuidado com cada milissegundo de um som específico além de alta habilidade com colagens sonoras. Em um projeto recente de 2025, gravei e compilei uma biblioteca de sons amazônicos de aves, sons minerais, corpos aquáticos, pegadas e insetos. A ideia é produzir sons que ainda não existem com as ferramentas citadas aqui.</p>
+      </div>
+      <figure class="onepager-block onepager-block--media onepager-block--right">
+        <img src="resources/img/studio/stats.jpg" alt="Detalhes do setup e instrumentos">
+      </figure>
+      <div class="onepager-block onepager-block--text">
+        <p class="onepager-eyebrow">onde faço diferença</p>
+        <p class="onepager-text"><strong>Cinema e séries:</strong> trilha e sound design para narrativas em elipse, que remetem às diversas realidades brasileiras. Maleabilidade em texturas sonoras, sejam orgânicas ou agressivas.</p>
+        <p class="onepager-text"><strong>Publicidade:</strong> marcas com identidade ambiental e cultural. Eletrônica atual — funk, batidas agressivas, sonoridades de pista.</p>
+        <p class="onepager-text"><strong>Identidade sonora:</strong> projetos que precisam de uma cor sonora específica e difícil de categorizar. Sustentabilidade, cultura, tecnologia, diversidade.</p>
+        <p class="onepager-text"><strong>Instalações e novas mídias:</strong> experiências imersivas, mundos sonoros gerativos, ambientes sensoriais construídos a partir de dados e fenômenos naturais.</p>
+      </div>
+      <figure class="onepager-block onepager-block--media onepager-block--left">
+        <img src="resources/img/studio/stats2.jpg" alt="Ambiente do estúdio e equipamentos">
+      </figure>
+    </div>
+  </section>
+  <div id="onepager-transition" class="onepager-transition" aria-hidden="true"></div>
+
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="script.js?v=202604295077"></script>
+  <script src="https://player.vimeo.com/api/player.js"></script>
+  <script>
+  (function() {
+    var btn = document.getElementById('langGlobeBtn');
+    var dropdown = document.getElementById('langDropdown');
+    var switcher = document.getElementById('langSwitcher');
+    if (!btn || !dropdown || !switcher) return;
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      dropdown.classList.toggle('open');
+    });
+    document.addEventListener('mousedown', function(e) {
+      if (!switcher.contains(e.target)) dropdown.classList.remove('open');
+    });
+    document.addEventListener('touchstart', function(e) {
+      if (!switcher.contains(e.target)) dropdown.classList.remove('open');
+    }, { passive: true });
+  })();
+  </script>
+  <script>
+  (function() {
+    var openBtn = document.getElementById('colaborarBtn');
+    var page = document.getElementById('colaborar-page');
+    var video = document.getElementById('studioVideo');
+    var vimeoFrame = document.getElementById('introVimeo');
+    var vimeoAudioToggle = document.getElementById('vimeoAudioToggle');
+    var vimeoPlayer = (window.Vimeo && vimeoFrame) ? new window.Vimeo.Player(vimeoFrame) : null;
+    var transitionLayer = document.getElementById('onepager-transition');
+    var transitionMs = 360;
+    var revealItems = Array.prototype.slice.call(document.querySelectorAll('.onepager-block'));
+    var revealTextItems = revealItems.filter(function(item) {
+      return item.classList.contains('onepager-block--text');
+    });
+    var revealMediaItems = revealItems.filter(function(item) {
+      return !item.classList.contains('onepager-block--text');
+    });
+    if (!openBtn || !page) return;
+
+    var vimeoAmbientSrc = 'https://player.vimeo.com/video/1185245821?background=1&autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0';
+    var vimeoAudioSrc = 'https://player.vimeo.com/video/1185245821?autoplay=1&loop=1&muted=0&title=0&byline=0&portrait=0';
+
+    function syncVimeoToggleUi(muted) {
+      if (!vimeoAudioToggle) return;
+      vimeoAudioToggle.classList.toggle('is-on', !muted);
+      vimeoAudioToggle.textContent = muted ? 'som off' : 'som on';
+    }
+
+    if (vimeoPlayer) {
+      vimeoPlayer.setMuted(true).catch(function() {});
+      if (vimeoAudioToggle) {
+        vimeoAudioToggle.addEventListener('click', function() {
+          var wantOn = !vimeoAudioToggle.classList.contains('is-on');
+          if (!wantOn) {
+            vimeoPlayer.setMuted(true).then(function() { syncVimeoToggleUi(true); }).catch(function() { syncVimeoToggleUi(true); });
+            return;
+          }
+          function tryUnmute() {
+            return vimeoPlayer.setMuted(false)
+              .then(function() { return vimeoPlayer.setVolume(1); })
+              .then(function() { return vimeoPlayer.play(); })
+              .then(function() { return vimeoPlayer.getMuted(); });
+          }
+          tryUnmute().then(function(m) {
+            if (!m) {
+              syncVimeoToggleUi(false);
+              return;
+            }
+            if (vimeoFrame && vimeoFrame.src.indexOf('background=1') !== -1) {
+              vimeoFrame.src = vimeoAudioSrc;
+              vimeoPlayer = new window.Vimeo.Player(vimeoFrame);
+              return vimeoPlayer.ready().then(function() {
+                return vimeoPlayer.setVolume(1);
+              }).then(function() {
+                return vimeoPlayer.play();
+              }).then(function() {
+                return vimeoPlayer.getMuted();
+              }).then(function(m2) {
+                syncVimeoToggleUi(!!m2);
+              });
+            }
+            syncVimeoToggleUi(!!m);
+          }).catch(function() {
+            vimeoPlayer.getMuted().then(function(m) { syncVimeoToggleUi(!!m); }).catch(function() {});
+          });
+        });
+      }
+    }
+
+    var mediaObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          mediaObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.34, rootMargin: '0px 0px -4% 0px' });
+
+    var textObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          textObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.52, rootMargin: '0px 0px -6% 0px' });
+
+    revealMediaItems.forEach(function(item) { mediaObserver.observe(item); });
+    revealTextItems.forEach(function(item) { textObserver.observe(item); });
+
+    function openOnepager() {
+      if (typeof window._closeHomeMobileMenu === 'function') window._closeHomeMobileMenu();
+      if (typeof window._stopEcossistemas === 'function') {
+        window._stopEcossistemas();
+      }
+      if (transitionLayer) transitionLayer.classList.add('is-active');
+      window.setTimeout(function() {
+        document.body.classList.add('onepager-active');
+        page.setAttribute('aria-hidden', 'false');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        revealItems.forEach(function(item) {
+          item.classList.remove('is-visible');
+        });
+        revealMediaItems.forEach(function(item) { mediaObserver.observe(item); });
+        revealTextItems.forEach(function(item) { textObserver.observe(item); });
+        if (video) {
+          video.muted = true;
+          video.play().catch(function() {});
+        }
+        if (vimeoFrame && vimeoFrame.src.indexOf('background=1') === -1) {
+          vimeoFrame.src = vimeoAmbientSrc;
+          vimeoPlayer = (window.Vimeo && vimeoFrame) ? new window.Vimeo.Player(vimeoFrame) : null;
+        }
+        if (vimeoPlayer) {
+          vimeoPlayer.setMuted(true).catch(function() {});
+          vimeoPlayer.play().catch(function() {});
+        }
+        if (vimeoAudioToggle) {
+          vimeoAudioToggle.classList.remove('is-on');
+          vimeoAudioToggle.textContent = 'som off';
+        }
+        if (transitionLayer) transitionLayer.classList.remove('is-active');
+      }, transitionMs);
+    }
+
+    function closeOnepager() {
+      if (video) {
+        video.muted = true;
+        video.pause();
+      }
+      if (vimeoFrame && vimeoFrame.src.indexOf('background=1') === -1) {
+        vimeoFrame.src = vimeoAmbientSrc;
+        vimeoPlayer = (window.Vimeo && vimeoFrame) ? new window.Vimeo.Player(vimeoFrame) : null;
+      }
+      if (vimeoPlayer) {
+        vimeoPlayer.setMuted(true).catch(function() {});
+        vimeoPlayer.pause().catch(function() {});
+      }
+      if (vimeoAudioToggle) {
+        vimeoAudioToggle.classList.remove('is-on');
+        vimeoAudioToggle.textContent = 'som off';
+      }
+      if (transitionLayer) transitionLayer.classList.add('is-active');
+      window.setTimeout(function() {
+        document.body.classList.remove('onepager-active');
+        page.setAttribute('aria-hidden', 'true');
+        if (transitionLayer) transitionLayer.classList.remove('is-active');
+        if (/^#(colab|sobre|about)$/i.test(window.location.hash || '') && typeof history.replaceState === 'function') {
+          history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+      }, transitionMs);
+    }
+
+    var langLinks = document.querySelectorAll('#langSwitcher a[data-lang-switch]');
+    Array.prototype.forEach.call(langLinks, function(link) {
+      link.addEventListener('click', function(e) {
+        if (!document.body.classList.contains('onepager-active')) return;
+        var raw = link.getAttribute('href') || '';
+        if (raw.indexOf('#') !== -1) return;
+        e.preventDefault();
+        window.location.href = raw + '#colab';
+      });
+    });
+
+    var hash = (window.location.hash || '').slice(1).toLowerCase();
+    if (hash === 'colab' || hash === 'sobre' || hash === 'about') {
+      window.setTimeout(function() { openOnepager(); }, 0);
+    }
+
+    openBtn.addEventListener('click', openOnepager);
+
+    var homeFromOnepager = document.getElementById('homeFromOnepagerBtn');
+    if (homeFromOnepager) {
+      homeFromOnepager.addEventListener('click', function() {
+        if (typeof window._closeHomeMobileMenu === 'function') window._closeHomeMobileMenu();
+        closeOnepager();
+      });
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && document.body.classList.contains('onepager-active')) closeOnepager();
+    });
+
+    var portfolioLink = document.getElementById('navPortfolioLink');
+    if (portfolioLink) {
+      portfolioLink.addEventListener('click', function(e) {
+        if (typeof window._stopEcossistemas === 'function') {
+          window._stopEcossistemas();
+        }
+      });
+    }
+
+    if (video) {
+      video.addEventListener('click', function() {
+        video.muted = !video.muted;
+      });
+    }
+  })();
+  </script>
+</body>
+</html>
