@@ -152,6 +152,37 @@
       }
     }
   </style>
+  <style id="home-header-geometry">
+    /*
+     * Nav pill placement — mirrors styles.css :root (index parity).
+     * Desktop: pill vertical center = title line vertical center.
+     * Mobile: same midline formula + small --mobile-menu-pill-drop (not baseline-locked).
+     */
+    @media (min-width: 1024px) {
+      body.site-home-video-bg {
+        --desktop-title-cap-height: calc(var(--home-title-line-clamp) * 0.95);
+        --desktop-nav-pill-outer-h: calc(0.76rem + clamp(0.86rem, 1.02vw, 1.02rem) * 1.22);
+        --desktop-menu-pill-top: calc(
+          max(var(--page-edge), env(safe-area-inset-top, 0px)) +
+          var(--desktop-title-cap-height) * 0.5 -
+          var(--desktop-nav-pill-outer-h) * 0.5
+        );
+      }
+    }
+    @media (max-width: 1023px) {
+      body.site-home-video-bg {
+        --mobile-title-cap-height: calc(var(--brand-title-size-mobile) * 0.95);
+        --mobile-menu-pill-outer-h: calc(1rem + 0.82rem);
+        --mobile-menu-pill-drop: clamp(3px, 0.28rem, 6px);
+        --mobile-menu-pill-top: calc(
+          var(--title-top-inset) +
+          var(--mobile-title-cap-height) * 0.5 -
+          var(--mobile-menu-pill-outer-h) * 0.5 +
+          var(--mobile-menu-pill-drop)
+        );
+      }
+    }
+  </style>
 </head>
 <body class="site-home site-home-video-bg">
 
@@ -294,7 +325,7 @@
       </div>
       <div class="onepager-block onepager-block--text">
         <p class="onepager-eyebrow">o que ofereço</p>
-        <p class="onepager-text">Quinze anos de experiência em produção musical e sound design com raízes na música eletrônica underground de São Paulo e afora — incluindo oito anos como artista-residente na Mamba Negra. Essa trajetória me conferiu um vocabulário sonoro que abrange funk mandelão, automotivo, eletrônica contemporânea de sonoridade mais agressiva à emulação de ecossistemas sonoros complexos por meio de um sound design zeloso e elegante, sempre alinhados com o que há de mais novo.</p>
+        <p class="onepager-text">Quinze anos de experiência em produção musical e sound design com raízes na música eletrônica underground de São Paulo e afora, além de tocar como sintesista nos festivais Draaimolen (NL), Nuits Sonores (FR), Roskilde (DK), Primavera Sound (ES) com a banda Teto Preto. Essa trajetória me conferiu um vocabulário sonoro que abrange funk mandelão, automotivo, eletrônica contemporânea de sonoridade mais agressiva à emulação de ecossistemas sonoros complexos por meio de um sound design zeloso e elegante, sempre alinhados com o que há de mais novo.</p>
       </div>
       <figure class="onepager-block onepager-block--media onepager-block--left">
         <img src="resources/img/studio/studio2.jpg" alt="Detalhes do estúdio de trabalho">
