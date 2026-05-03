@@ -4,52 +4,34 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="lang-detect.js?v=202604295073"></script>
   <title>Mari Herzer — portfolio</title>
-  <link rel="stylesheet" href="styles.css?v=202604212142">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap">
+  <link rel="stylesheet" href="styles.css?v=202605032200">
   <link rel="icon" href="resources/img/favicon1.ico" type="image/x-icon">
   <style>
+    /* solid #000 page background — styles.css hides #bg-canvas shader on portfolio */
     html, body {
       overflow-y: auto !important;
       overflow-x: hidden;
       height: auto !important;
     }
-    .pf-page.container {
-      position: relative !important;
-      height: auto !important;
-      min-height: 100vh;
-      overflow: visible !important;
-      max-width: 100vw;
-      padding: 0 0 12vh;
-      gap: 0;
-      color: var(--ink);
-    }
+    /* layout is main.pf-page in styles.css; title fixed in styles.css for portfolio */
     #player-ui { display: none !important; }
 
-    /* force all content text to black */
     .pf-page .onepager-eyebrow,
     .pf-page .onepager-text,
     .pf-page .pf-video-label,
-    .pf-page .pf-bc-label { color: var(--ink) !important; }
-
-    /* sticky title — full width, difference blend */
-    .pf-sticky-title {
-      position: sticky;
-      top: 0;
-      z-index: 125;
-      width: 100%;
-      margin: 0;
-      padding: 1.1rem 5vw 0.8rem;
-      font-family: 'Legitima', 'Legitima Italic', serif;
-      font-style: italic;
+    .pf-page .pf-bc-label { color: #fff !important; }
+    .pf-page .onepager-text {
+      font-family: 'Brut Grotesque', 'Inter', sans-serif;
       font-weight: 700;
-      font-size: clamp(2.2rem, 8.2vw, 5rem);
-      line-height: 0.95;
-      letter-spacing: 0.03em;
-      -webkit-text-stroke: 1.4px currentColor;
-      mix-blend-mode: difference;
-      color: #fff;
-      pointer-events: none;
     }
+
+
+
     .pf-video-label {
       font-size: 0.68rem;
       font-weight: 700;
@@ -63,21 +45,108 @@
       position: relative;
       width: 100%;
       aspect-ratio: 16 / 9;
-      background: #111;
+      background: #000;
+      overflow: hidden;
+      cursor: pointer;
+      border-radius: 12px;
     }
-    .pf-vimeo-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
+    .pf-vimeo-wrap iframe {
+      position: absolute;
+      top: -10%; left: -10%;
+      width: 120%;
+      height: 120%;
+      border: 0;
+      display: block;
+      pointer-events: none;
+    }
     .pf-play-overlay {
       position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-      background: rgba(0,0,0,0.35); cursor: pointer; transition: background 0.22s; z-index: 5;
+      background: rgba(0,0,0,0.1); cursor: pointer; transition: background 0.22s; z-index: 5;
     }
-    .pf-play-overlay:hover { background: rgba(0,0,0,0.15); }
+    .pf-play-overlay:hover { background: rgba(0,0,0,0.03); }
     .pf-play-overlay.is-gone { display: none; }
-    .pf-play-circle {
-      width: 54px; height: 54px; border-radius: 50%;
-      border: 1.5px solid rgba(255,255,255,0.7); background: rgba(0,0,0,0.4); color: #fff;
-      font-size: 1rem; display: flex; align-items: center; justify-content: center;
-      padding-left: 4px; pointer-events: none;
+    .pf-video-thumb {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      overflow: hidden;
+      border-radius: inherit;
+      transition: opacity 0.24s ease;
+      pointer-events: none;
     }
+    .pf-video-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      display: block;
+      transform: scale(1.18);
+      transform-origin: center center;
+    }
+    .pf-vimeo-wrap.is-previewing .pf-video-thumb { opacity: 0; }
+
+    /* shared antfood-style modal player */
+    .pf-modal {
+      position: fixed; inset: 0; z-index: 9999;
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      background: rgba(0, 0, 0, 0.95);
+      animation: pf-modal-fade 0.26s ease;
+    }
+    .pf-modal.is-open { display: flex; }
+    @keyframes pf-modal-fade { from { opacity: 0; } to { opacity: 1; } }
+    .pf-modal-stage {
+      position: relative;
+      width: min(88vw, 1400px);
+      aspect-ratio: 16 / 9;
+      background: #000;
+    }
+    .pf-modal-iframe {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      border: 0; display: block;
+    }
+    .pf-modal-close {
+      position: fixed; top: 1.3rem; right: 1.4rem; z-index: 10001;
+      background: #fff; color: #111; border: 0; border-radius: 999px;
+      font-family: 'Brut Grotesque', 'Inter', sans-serif;
+      font-weight: 500; font-size: 0.82rem; letter-spacing: 0.02em;
+      padding: 0.5rem 1.1rem; cursor: pointer;
+      transition: background 0.18s ease;
+    }
+    .pf-modal-close:hover { background: #ddd; }
+    .pf-modal-controls {
+      width: min(88vw, 1400px);
+      margin-top: 0.7rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-family: 'Brut Grotesque', 'Inter', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      user-select: none;
+    }
+    .pf-modal-play {
+      background: none; border: 0;
+      color: rgba(255,255,255,0.85);
+      font-family: inherit; font-size: inherit;
+      letter-spacing: inherit; text-transform: inherit;
+      cursor: pointer; padding: 0;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .pf-modal-progress {
+      position: relative; flex: 1;
+      height: 2px; background: rgba(255,255,255,0.2);
+      cursor: pointer;
+    }
+    .pf-modal-progress::after { content: ''; position: absolute; inset: -6px 0; }
+    .pf-modal-progress-bar {
+      position: absolute; top: 0; bottom: 0; left: 0;
+      width: 0%; background: rgba(255,255,255,0.9);
+    }
+    .pf-modal-time { color: rgba(255,255,255,0.6); white-space: nowrap; flex-shrink: 0; min-width: 2.4rem; text-align: center; }
+    .pf-modal-sound { color: rgba(255,255,255,0.85); cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+
+    .pf-play-circle { display: none; }
     .pf-bc-track { margin-bottom: 0.55rem; }
     .pf-bc-label {
       font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
@@ -85,63 +154,130 @@
     }
     .pf-bc-track iframe { border: 0; width: 100%; height: 42px; display: block; border-radius: 3px; }
 
-    /* audio player — black bg, bigger controls */
-    .pf-audio-list { background: #0f0f0e; border-radius: 6px; overflow: hidden; }
-    .pf-audio-row {
-      display: flex; align-items: center; gap: 1rem;
-      padding: 0.85rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.07);
+    /* commissioned MP3 list — glass pills, blur over canvas (#audio-list) */
+    body.portfolio-page .pf-page .pf-audio-list {
+      background: transparent; border-radius: 0; overflow: visible;
+      display: flex; flex-direction: column; gap: 0.52rem;
     }
-    .pf-audio-row:last-child { border-bottom: none; }
-    .pf-audio-row:hover { background: rgba(255,255,255,0.05); }
-    .pf-play-btn {
-      width: 40px; height: 40px; border-radius: 50%;
-      border: 1.5px solid rgba(255,255,255,0.4); background: none; color: #fff;
-      font-size: 0.82rem; cursor: pointer; display: flex; align-items: center;
-      justify-content: center; padding-left: 3px; flex-shrink: 0;
-      transition: background 0.15s, border-color 0.15s;
+    body.portfolio-page .pf-page .pf-audio-list .pf-audio-row {
+      display: flex; align-items: center; border: none; border-radius: 999px;
+      -webkit-backdrop-filter: blur(24px) saturate(120%); backdrop-filter: blur(24px) saturate(120%);
+      box-shadow: 0 2px 22px rgba(0,0,0,0.1);
+      transition: padding 0.42s cubic-bezier(0.22,1,0.36,1), gap 0.42s cubic-bezier(0.22,1,0.36,1), background 0.2s ease, box-shadow 0.25s ease;
     }
-    .pf-play-btn:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.8); }
-    .pf-play-btn.is-playing { background: #fff; color: #000; border-color: #fff; }
-    .pf-track-name {
-      flex: 1; font-family: 'Brut Grotesque', 'Inter', sans-serif; font-size: 0.88rem;
-      letter-spacing: 0.04em; color: rgba(255,255,255,0.75);
+    body.portfolio-page .pf-page .pf-audio-list .pf-audio-row:not(.pf-audio-row--open) {
+      gap: 0.48rem; padding: 0.24rem 0.76rem; background: rgba(18,20,26,0.16);
+    }
+    body.portfolio-page .pf-page .pf-audio-list .pf-audio-row:not(.pf-audio-row--open):hover {
+      background: rgba(22,24,30,0.26); box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    }
+    body.portfolio-page .pf-page .pf-audio-list .pf-audio-row.pf-audio-row--open {
+      gap: 0.82rem; padding: 0.54rem 0.92rem; background: rgba(18,20,26,0.24);
+    }
+    body.portfolio-page .pf-page .pf-audio-list .pf-audio-row.pf-audio-row--open:hover {
+      background: rgba(24,26,32,0.34); box-shadow: 0 6px 32px rgba(0,0,0,0.16);
+    }
+    @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+      body.portfolio-page .pf-page .pf-audio-list .pf-audio-row:not(.pf-audio-row--open) { background: rgba(18,20,26,0.55); }
+      body.portfolio-page .pf-page .pf-audio-list .pf-audio-row.pf-audio-row--open { background: rgba(18,20,26,0.72); }
+    }
+    body.portfolio-page .pf-page .pf-audio-list .pf-play-btn {
+      flex-shrink: 0; border-radius: 50%; border: none; background: transparent; box-shadow: none;
+      color: rgba(255,255,255,0.92); cursor: pointer; display: flex; align-items: center; justify-content: center; padding-left: 3px;
+      transition: background 0.15s ease, color 0.15s ease, width 0.42s cubic-bezier(0.22,1,0.36,1), height 0.42s cubic-bezier(0.22,1,0.36,1), font-size 0.42s cubic-bezier(0.22,1,0.36,1);
+    }
+    body.portfolio-page .pf-page .pf-audio-list .pf-audio-row:not(.pf-audio-row--open) .pf-play-btn { width: 28px; height: 28px; font-size: 0.62rem; }
+    body.portfolio-page .pf-page .pf-audio-list .pf-audio-row.pf-audio-row--open .pf-play-btn { width: 36px; height: 36px; font-size: 0.78rem; }
+    body.portfolio-page .pf-page .pf-audio-list .pf-play-btn:hover:not(.is-playing) { background: rgba(255,255,255,0.06); color: rgba(255,255,255,1); }
+    body.portfolio-page .pf-page .pf-audio-list .pf-play-btn.is-playing { background: transparent; color: rgba(255,255,255,0.94); }
+    body.portfolio-page .pf-page .pf-audio-list .pf-play-btn.is-playing:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,1); }
+    body.portfolio-page .pf-page .pf-audio-list .pf-track-name {
+      flex: 1; font-family: 'Brut Grotesque', 'Inter', sans-serif; letter-spacing: 0.04em; color: rgba(255,255,255,0.82);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      transition: font-size 0.42s cubic-bezier(0.22,1,0.36,1);
     }
-    .pf-prog-wrap { width: 120px; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; cursor: pointer; flex-shrink: 0; }
-    .pf-prog-bar { height: 100%; width: 0; background: rgba(255,255,255,0.65); border-radius: 2px; }
-    .pf-dur { font-family: var(--mono); font-size: 0.72rem; color: rgba(255,255,255,0.4); width: 36px; text-align: right; flex-shrink: 0; }
+    body.portfolio-page .pf-page .pf-audio-list .pf-audio-row:not(.pf-audio-row--open) .pf-track-name { font-size: 0.72rem; opacity: 0.92; }
+    body.portfolio-page .pf-page .pf-audio-list .pf-audio-row.pf-audio-row--open .pf-track-name { font-size: 0.84rem; opacity: 1; }
+    body.portfolio-page .pf-page .pf-audio-list .pf-prog-wrap { position: relative; flex-shrink: 0; border-radius: 3px; cursor: pointer;
+      transition: width 0.42s cubic-bezier(0.22,1,0.36,1), height 0.42s cubic-bezier(0.22,1,0.36,1);
+    }
+    body.portfolio-page .pf-page .pf-audio-list .pf-prog-wrap::before {
+      content: ''; position: absolute; left: -4px; right: -4px; top: -8px; bottom: -8px;
+    }
+    body.portfolio-page .pf-page .pf-audio-list .pf-audio-row:not(.pf-audio-row--open) .pf-prog-wrap { width: min(152px,40vw); height: 5px; background: rgba(255,255,255,0.16); }
+    body.portfolio-page .pf-page .pf-audio-list .pf-audio-row.pf-audio-row--open .pf-prog-wrap { width: min(256px,62vw); height: 8px; background: rgba(255,255,255,0.2); }
+    body.portfolio-page .pf-page .pf-audio-list .pf-prog-bar { height: 100%; width: 0; background: rgba(255,255,255,0.72); border-radius: inherit; pointer-events: none; }
+    body.portfolio-page .pf-page .pf-audio-list .pf-dur { font-family: var(--mono); letter-spacing: 0.03em; color: rgba(255,255,255,0.44); width: 38px; text-align: right; flex-shrink: 0;
+      transition: font-size 0.42s cubic-bezier(0.22,1,0.36,1);
+    }
+    body.portfolio-page .pf-page .pf-audio-list .pf-audio-row:not(.pf-audio-row--open) .pf-dur { font-size: 0.64rem; }
+    body.portfolio-page .pf-page .pf-audio-list .pf-audio-row.pf-audio-row--open .pf-dur { font-size: 0.7rem; }
     .pf-spotify iframe { border-radius: 8px; display: block; }
   </style>
 </head>
 
-<body>
+<body class="portfolio-page nav-unified">
 
   <canvas id="bg-canvas"></canvas>
   <div class="noise"></div>
-
-  <div class="lang-switcher" id="langSwitcher">
-    <button class="lang-globe-btn" id="langGlobeBtn" aria-label="Select language">
-      <img src="resources/img/globe.png" alt="language">
+  <nav class="sliding-panel home-main-nav" aria-label="Primary">
+    <button type="button" class="panel-trigger" aria-expanded="false" aria-controls="homeNavPanelContent" id="homeNavTrigger">
+      <span class="trigger-label">Menu</span>
     </button>
-    <div class="lang-dropdown" id="langDropdown">
-      <a href="portfolio.html">Português</a>
-      <a href="portfolio-en.html" class="active">English</a>
+    <div class="panel-content" id="homeNavPanelContent">
+      <button type="button" class="home-menu-close-mobile" id="homeMenuCloseMobile" aria-label="Close menu">Close</button>
+      <div class="home-nav-desktop-inner">
+        <div class="nav-links nav-links--home-desktop">
+
+          <a href="index-en.html#about" class="nav-item">
+            About
+          </a>
+
+          <a href="portfolio-en.html" class="nav-item" id="navPortfolioLink">
+            Portfolio
+          </a>
+
+          <button class="btnC nav-item" type="button">
+            Contact
+          </button>
+
+          <dialog id="contatoDialog">
+            <button class="btnClose2 dialog-close">&#x2715;</button>
+            <div class="dialog-body dialog-body--contato">
+              <p><span class="contact-label">instagram</span><br>
+                <a href="https://instagram.com/mariherzer" target="_blank">@mariherzer</a></p>
+              <p><span class="contact-label">email</span><br>
+                <a href="mailto:mariherzer@gmail.com">mariherzer@gmail.com</a></p>
+            </div>
+          </dialog>
+
+          <a href="substack.html" class="nav-item">
+            Blog
+          </a>
+
+          <a href="index-en.html" class="nav-item nav-item--home-foot">Home</a>
+
+          <div class="nav-links-social">
+            <a href="https://www.instagram.com/mariherzer/" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a href="https://mariherzer.bandcamp.com/" target="_blank" rel="noopener noreferrer">Bandcamp</a>
+          </div>
+
+        </div>
+      </div>
     </div>
-  </div>
+  </nav>
 
-  <button id="pf-back" class="onepager-back" type="button">close</button>
+  <section class="pf-onepager-shell" aria-label="Portfolio">
 
-  <main class="pf-page container">
+  <h2 class="onepager-sticky-title">Mari Herzer</h2>
 
-    <h2 class="pf-sticky-title">portfolio</h2>
-
+  <main class="pf-page">
     <div class="onepager-inner">
 
-      <!-- showreel -->
-      <div class="onepager-block onepager-block--media onepager-block--left">
+      <div class="onepager-block onepager-block--media onepager-vimeo-wrap">
         <div class="pf-video-label">showreel</div>
         <div class="pf-vimeo-wrap">
-          <iframe data-src="https://player.vimeo.com/video/1184990232?badge=0&autopause=0&player_id=0&app_id=58479" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
+          <iframe data-src="https://player.vimeo.com/video/1185245821?badge=0&autopause=0&player_id=0&app_id=58479" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
           <div class="pf-play-overlay"><div class="pf-play-circle">&#x25B6;</div></div>
         </div>
       </div>
@@ -187,7 +323,7 @@
         <p class="onepager-text">Original score for documentary. Dir. Eugenio Puppo, 2022.</p>
       </div>
       <div class="onepager-block onepager-block--media onepager-block--right">
-        <div class="pf-video-label">showreel</div>
+        <div class="pf-video-label">trailer</div>
         <div class="pf-vimeo-wrap">
           <iframe data-src="https://player.vimeo.com/video/1178063597?badge=0&autopause=0&player_id=0&app_id=58479" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
           <div class="pf-play-overlay"><div class="pf-play-circle">&#x25B6;</div></div>
@@ -264,51 +400,254 @@
 
     </div><!-- /onepager-inner -->
   </main>
+  </section>
 
   <div id="pf-transition" class="onepager-transition" aria-hidden="true"></div>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=202604295076"></script>
+  <script src="https://player.vimeo.com/api/player.js"></script>
   <script>
   (function() {
-    var btn = document.getElementById('langGlobeBtn');
-    var dropdown = document.getElementById('langDropdown');
-    var switcher = document.getElementById('langSwitcher');
-    btn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      dropdown.classList.toggle('open');
+
+    // shared modal player (antfood-style)
+    var modal = document.createElement('div');
+    modal.className = 'pf-modal';
+    modal.setAttribute('aria-hidden', 'true');
+    modal.innerHTML =
+      '<button class="pf-modal-close" type="button" aria-label="Close video">Close</button>' +
+      '<div class="pf-modal-stage">' +
+        '<iframe class="pf-modal-iframe" src="" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>' +
+      '</div>' +
+      '<div class="pf-modal-controls">' +
+        '<button class="pf-modal-play" type="button">Pause video</button>' +
+        '<div class="pf-modal-progress"><div class="pf-modal-progress-bar"></div></div>' +
+        '<div class="pf-modal-time">0:00</div>' +
+        '<div class="pf-modal-sound" role="button" tabindex="0">Sound off</div>' +
+      '</div>';
+    document.body.appendChild(modal);
+
+    var modalStage = modal.querySelector('.pf-modal-stage');
+    var modalIframe = modal.querySelector('.pf-modal-iframe');
+    var modalCloseBtn = modal.querySelector('.pf-modal-close');
+    var modalPlayBtn = modal.querySelector('.pf-modal-play');
+    var modalProgress = modal.querySelector('.pf-modal-progress');
+    var modalProgressBar = modal.querySelector('.pf-modal-progress-bar');
+    var modalTime = modal.querySelector('.pf-modal-time');
+    var modalSound = modal.querySelector('.pf-modal-sound');
+    var modalPlayer = null;
+    var modalMuted = false;
+    var modalDuration = 0;
+
+    function resetModalIframe() {
+      modalStage.innerHTML =
+        '<iframe class="pf-modal-iframe" src="" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>';
+      modalIframe = modalStage.querySelector('.pf-modal-iframe');
+    }
+
+    function fmtTime(sec) {
+      var s = Math.max(0, Math.floor(sec || 0));
+      var m = Math.floor(s / 60);
+      var r = (s % 60).toString().padStart(2, '0');
+      return m + ':' + r;
+    }
+
+    function openModal(rawSrc, previewIframe) {
+      // no autoplay in URL — trigger via API so browser allows unmuted sound
+      var fullSrc = rawSrc + (rawSrc.includes('?') ? '&' : '?') +
+        'controls=0&dnt=1&title=0&byline=0&portrait=0&autopause=0';
+      modalIframe.src = fullSrc;
+      modal.classList.add('is-open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      if (previewIframe) previewIframe.src = '';
+      modalMuted = true;
+      modalDuration = 0;
+      modalProgressBar.style.width = '0%';
+      modalTime.textContent = '0:00';
+      if (window.Vimeo && window.Vimeo.Player) {
+        modalPlayer = new window.Vimeo.Player(modalIframe);
+        modalPlayBtn.textContent = 'Pause video';
+        modalSound.textContent = 'Sound off';
+        modalPlayer.ready().then(function() {
+          return modalPlayer.setVolume(1);
+        }).then(function() {
+          return modalPlayer.setMuted(false);
+        }).then(function() {
+          return modalPlayer.play();
+        }).then(function() {
+          return modalPlayer.getDuration().then(function(d) { modalDuration = d || 0; });
+        }).then(function() {
+          return modalPlayer.getMuted();
+        }).then(function(m) {
+          modalMuted = !!m;
+          modalSound.textContent = modalMuted ? 'Sound off' : 'Sound on';
+        }).catch(function() {
+          modalPlayer.getMuted().then(function(m) {
+            modalMuted = !!m;
+            modalSound.textContent = modalMuted ? 'Sound off' : 'Sound on';
+          }).catch(function() {});
+        });
+        modalPlayer.on('timeupdate', function(data) {
+          if (data && data.duration) modalDuration = data.duration;
+          var ratio = (data && data.duration) ? (data.seconds / data.duration) : 0;
+          modalProgressBar.style.width = (ratio * 100) + '%';
+          modalTime.textContent = fmtTime(data ? data.seconds : 0);
+        });
+        modalPlayer.on('ended', function() {
+          modalPlayBtn.textContent = 'Play video';
+        });
+      }
+    }
+
+    function closeModal() {
+      modal.classList.remove('is-open');
+      modal.setAttribute('aria-hidden', 'true');
+      if (modalPlayer) {
+        modalPlayer.pause().catch(function() {});
+        modalPlayer.destroy().catch(function() {});
+        modalPlayer = null;
+      }
+      resetModalIframe();
+      document.body.style.overflow = '';
+      modalProgressBar.style.width = '0%';
+      modalTime.textContent = '0:00';
+    }
+
+    modalCloseBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
     });
-    document.addEventListener('mousedown', function(e) {
-      if (!switcher.contains(e.target)) dropdown.classList.remove('open');
+    modalPlayBtn.addEventListener('click', function() {
+      if (!modalPlayer) return;
+      modalPlayer.getPaused().then(function(paused) {
+        if (paused) {
+          modalPlayer.play().catch(function() {});
+          modalPlayBtn.textContent = 'Pause video';
+        } else {
+          modalPlayer.pause().catch(function() {});
+          modalPlayBtn.textContent = 'Play video';
+        }
+      }).catch(function() {});
+    });
+    modalProgress.addEventListener('click', function(e) {
+      if (!modalPlayer || !modalDuration) return;
+      var rect = modalProgress.getBoundingClientRect();
+      var ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      modalPlayer.setCurrentTime(modalDuration * ratio).catch(function() {});
+    });
+    modalSound.addEventListener('click', function() {
+      if (!modalPlayer) return;
+      modalPlayer.getMuted().then(function(m) {
+        return modalPlayer.setMuted(!m);
+      }).then(function() {
+        return modalPlayer.setVolume(1);
+      }).then(function() {
+        return modalPlayer.play();
+      }).then(function() {
+        return modalPlayer.getMuted();
+      }).then(function(m) {
+        modalMuted = !!m;
+        modalSound.textContent = modalMuted ? 'Sound off' : 'Sound on';
+      }).catch(function() {
+        modalPlayer.getMuted().then(function(m) {
+          modalMuted = !!m;
+          modalSound.textContent = modalMuted ? 'Sound off' : 'Sound on';
+        }).catch(function() {});
+      });
     });
 
-    var backBtn = document.getElementById('pf-back');
-    var veil = document.getElementById('pf-transition');
-    backBtn.addEventListener('click', function() {
-      veil.style.opacity = '1';
-      veil.style.pointerEvents = 'auto';
-      setTimeout(function() { window.location.href = 'index-en.html'; }, 380);
-    });
+    // thumb + hover preview — hide poster after iframe paints (avoid white flash)
+    var canHover = window.matchMedia && window.matchMedia('(hover: hover)').matches;
+    var wraps = Array.prototype.slice.call(document.querySelectorAll('.pf-vimeo-wrap'));
+    wraps.forEach(function(wrap) {
+      var iframe = wrap.querySelector('iframe');
+      var overlay = wrap.querySelector('.pf-play-overlay');
+      if (!iframe || !overlay) return;
 
-    document.querySelectorAll('.pf-play-overlay').forEach(function(overlay) {
+      var rawSrc = iframe.dataset.src || '';
+      var previewSrc = rawSrc + (rawSrc.includes('?') ? '&' : '?') +
+        'background=1&autoplay=1&loop=1&muted=1&dnt=1';
+      var idMatch = rawSrc.match(/video\/(\d+)/);
+      var vimeoId = idMatch ? idMatch[1] : '';
+      var loaded = false;
+
+      var thumb = document.createElement('div');
+      thumb.className = 'pf-video-thumb';
+      thumb.innerHTML = '<img alt="" loading="lazy" src="' +
+        (vimeoId ? ('https://vumbnail.com/' + vimeoId + '.jpg') : '') + '">';
+      wrap.appendChild(thumb);
+
+      function finalizePreviewReveal() {
+        if (wrap.matches(':hover')) wrap.classList.add('is-previewing');
+      }
+
+      function ensurePreview() {
+        if (!loaded) {
+          var finalized = false;
+          function finalize() {
+            if (finalized) return;
+            finalized = true;
+            window.clearTimeout(fallbackTimer);
+            finalizePreviewReveal();
+          }
+          var fallbackTimer = window.setTimeout(finalize, 900);
+          iframe.addEventListener('load', finalize, { once: true });
+          iframe.src = previewSrc;
+          loaded = true;
+        } else {
+          finalizePreviewReveal();
+        }
+      }
+
+      if (canHover) {
+        wrap.addEventListener('mouseenter', ensurePreview);
+        wrap.addEventListener('mouseleave', function() {
+          wrap.classList.remove('is-previewing');
+        });
+      }
+
       overlay.addEventListener('click', function(e) {
+        e.preventDefault();
         e.stopPropagation();
-        var iframe = overlay.parentElement.querySelector('iframe');
-        var src = iframe.dataset.src || '';
-        iframe.src = src + (src.includes('?') ? '&' : '?') + 'autoplay=1';
-        overlay.classList.add('is-gone');
+        openModal(rawSrc, iframe);
+        wrap.classList.remove('is-previewing');
+        loaded = false;
       });
     });
 
     var revealItems = Array.prototype.slice.call(document.querySelectorAll('.onepager-block'));
-    var revealObs = new IntersectionObserver(function(entries) {
+    var innerRail = document.querySelector('main.pf-page .onepager-inner');
+    var priorityBlocks = innerRail ? Array.prototype.slice.call(innerRail.querySelectorAll(':scope > .onepager-block')).slice(0, 3) : [];
+    priorityBlocks.forEach(function(el) {
+      el.classList.add('is-visible');
+    });
+    var revealTextItems = revealItems.filter(function(item) {
+      if (priorityBlocks.indexOf(item) !== -1) return false;
+      return item.classList.contains('onepager-block--text');
+    });
+    var revealMediaItems = revealItems.filter(function(item) {
+      if (priorityBlocks.indexOf(item) !== -1) return false;
+      return !item.classList.contains('onepager-block--text');
+    });
+    var mediaObserver = new IntersectionObserver(function(entries) {
       entries.forEach(function(entry) {
         if (entry.isIntersecting) {
           entry.target.classList.add('is-visible');
-          revealObs.unobserve(entry.target);
+          mediaObserver.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.12, rootMargin: '0px 0px -4% 0px' });
-    revealItems.forEach(function(item) { revealObs.observe(item); });
+    }, { threshold: 0.34, rootMargin: '0px 0px -4% 0px' });
+    var textObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          textObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.52, rootMargin: '0px 0px -6% 0px' });
+    revealMediaItems.forEach(function(item) { mediaObserver.observe(item); });
+    revealTextItems.forEach(function(item) { textObserver.observe(item); });
 
     var tracks = [
       {name:'track 1', src:'resources/audio/portfolio/-xyu551.mp3'},
@@ -324,6 +663,7 @@
     ];
     var list = document.getElementById('audio-list');
     var currentAudio = null;
+
     tracks.forEach(function(track) {
       var row = document.createElement('div');
       row.className = 'pf-audio-row';
@@ -360,6 +700,8 @@
         playBtn.innerHTML = '&#x25B6;';
         playBtn.classList.remove('is-playing');
         progBar.style.width = '0%';
+        row.classList.remove('pf-audio-row--open');
+        currentAudio = null;
       });
       playBtn.addEventListener('click', function() {
         if (currentAudio && currentAudio !== audio) {
@@ -368,15 +710,39 @@
             b.innerHTML = '&#x25B6;'; b.classList.remove('is-playing');
           });
           list.querySelectorAll('.pf-prog-bar').forEach(function(b) { b.style.width = '0%'; });
+          list.querySelectorAll('.pf-audio-row').forEach(function(r) {
+            r.classList.remove('pf-audio-row--open');
+          });
         }
         if (audio.paused) {
-          audio.play(); playBtn.innerHTML = '&#x25FC;'; playBtn.classList.add('is-playing'); currentAudio = audio;
+          audio.play();
+          playBtn.innerHTML = '&#x25FC;';
+          playBtn.classList.add('is-playing');
+          row.classList.add('pf-audio-row--open');
+          currentAudio = audio;
         } else {
-          audio.pause(); playBtn.innerHTML = '&#x25B6;'; playBtn.classList.remove('is-playing');
+          audio.pause();
+          playBtn.innerHTML = '&#x25B6;';
+          playBtn.classList.remove('is-playing');
+          row.classList.remove('pf-audio-row--open');
+          currentAudio = null;
         }
       });
       progWrap.addEventListener('click', function(e) {
+        if (currentAudio && currentAudio !== audio) {
+          currentAudio.pause();
+          list.querySelectorAll('.pf-play-btn').forEach(function(b) {
+            b.innerHTML = '&#x25B6;'; b.classList.remove('is-playing');
+          });
+          list.querySelectorAll('.pf-prog-bar').forEach(function(b) { b.style.width = '0%'; });
+          list.querySelectorAll('.pf-audio-row').forEach(function(r) {
+            r.classList.remove('pf-audio-row--open');
+          });
+          currentAudio = null;
+        }
+        row.classList.add('pf-audio-row--open');
         var rect = progWrap.getBoundingClientRect();
+        if (!audio.duration || !(rect.width > 0)) return;
         audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
       });
       row.appendChild(playBtn); row.appendChild(nameEl); row.appendChild(progWrap); row.appendChild(dur);
