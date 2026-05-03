@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap">
-  <link rel="stylesheet" href="styles.css?v=202605032800">
+  <link rel="stylesheet" href="styles.css?v=202605032930">
   <link rel="icon" href="resources/img/favicon1.ico" type="image/x-icon">
   <style>
     /* solid #000 page background — styles.css hides #bg-canvas shader on portfolio */
@@ -116,9 +116,18 @@
       pointer-events: none;
       animation: pf-modal-fade 0.26s ease;
     }
-    .pf-modal.is-open { display: flex; pointer-events: none; }
+    .pf-modal.is-open {
+      display: flex;
+      pointer-events: none;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: max(0.75rem, env(safe-area-inset-top, 0px)) 0 max(0.75rem, env(safe-area-inset-bottom, 0px));
+      box-sizing: border-box;
+    }
     .pf-modal-backdrop {
-      position: absolute;
+      position: fixed;
       inset: 0;
       z-index: 0;
       background: rgba(0, 0, 0, 0.95);
@@ -131,10 +140,12 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      align-self: center;
+      margin: auto;
       pointer-events: none;
-      max-height: 100%;
-      padding-bottom: max(0.35rem, env(safe-area-inset-bottom, 0px));
       box-sizing: border-box;
+      max-height: none;
+      padding-bottom: max(0.35rem, env(safe-area-inset-bottom, 0px));
     }
     .pf-modal-shell > * {
       pointer-events: auto;
@@ -146,6 +157,7 @@
     .pf-modal-stage {
       position: relative;
       width: min(88vw, 1400px);
+      flex-shrink: 0;
       aspect-ratio: 16 / 9;
       background: #000;
     }
@@ -178,6 +190,7 @@
     .pf-modal-close:hover { background: #ddd; }
     .pf-modal-controls {
       width: min(88vw, 1400px);
+      flex-shrink: 0;
       margin-top: 0.7rem;
       padding: 0.35rem 0 max(1rem, calc(env(safe-area-inset-bottom, 0px) + 0.35rem));
       display: flex;
@@ -643,6 +656,20 @@
           modalPlayBtn.textContent = 'Play video';
         });
       }
+      window.requestAnimationFrame(function() {
+        window.requestAnimationFrame(function() {
+          var shell = modal.querySelector('.pf-modal-shell');
+          var stage = modal.querySelector('.pf-modal-stage');
+          var ctrl = modal.querySelector('.pf-modal-controls');
+          if (!shell || !stage || !ctrl) return;
+          var st = stage.getBoundingClientRect();
+          var ct = ctrl.getBoundingClientRect();
+          var vh = window.innerHeight;
+          // #region agent log
+          fetch('http://127.0.0.1:7722/ingest/87e146c9-842a-4600-92ce-058bc194aafd',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'748776'},body:JSON.stringify({sessionId:'748776',location:'portfolio-en.html:openModal',message:'modal layout after open',data:{innerW:window.innerWidth,innerH:vh,stageW:st.width,shellW:shell.getBoundingClientRect().width,stageH:st.height,stageBottom:st.bottom,ctrlTop:ct.top,ctrlBottom:ct.bottom,controlsFit:ct.bottom<=vh+2,modalScrollH:modal.scrollHeight,modalClientH:modal.clientHeight},timestamp:Date.now(),hypothesisId:'H1'})}).catch(function(){});
+          // #endregion
+        });
+      });
     }
 
     function closeModal() {
