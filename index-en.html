@@ -5,57 +5,45 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="lang-detect.js?v=202604295073"></script>
   <title>Mari Herzer</title>
-  <link rel="stylesheet" href="styles.css?v=202604212142">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap">
+  <link rel="stylesheet" href="styles.css?v=202605032400">
   <link rel="icon" href="resources/img/favicon1.ico" type="image/x-icon">
 </head>
 
-<body>
+<body class="site-home">
 
   <canvas id="bg-canvas"></canvas>
-  <canvas id="creature-canvas"></canvas>
   <canvas id="world-canvas"></canvas>
   <div class="noise"></div>
   <div id="cinema-veil"></div>
 
-  <div class="lang-switcher" id="langSwitcher">
-    <button class="lang-globe-btn" id="langGlobeBtn" aria-label="Select language">
-      <img src="resources/img/globe.png" alt="language">
-    </button>
-    <div class="lang-dropdown" id="langDropdown">
-      <a href="index.html">Português</a>
-      <a href="index-en.html" class="active">English</a>
-    </div>
-  </div>
+  <header class="home-marquee-anchor">
+    <h1 class="site-title" id="homeSiteTitle" aria-label="Mari Herzer"><span class="site-title-chunk site-title-chunk--long" aria-hidden="true">Mari Herzer</span><span class="site-title-chunk site-title-chunk--short" aria-hidden="true"><span class="mh-letter">M</span><span class="mh-letter">H</span></span></h1>
+  </header>
 
-  <main class="container">
-
-    <header class="header">
-      <h1 class="site-title">Mari<br>Herzer</h1>
-      <p class="site-subtitle">
-        <span class="subtitle-line">music production · film score</span>
-        <span class="subtitle-line">sound design</span>
-      </p>
-    </header>
-
-    <nav class="sliding-panel">
-      <div class="panel-trigger">
-        <span class="trigger-label">menu</span>
-        <span class="trigger-arrow">↓</span>
-      </div>
-      <div class="panel-content">
-        <div class="nav-links">
+  <nav class="sliding-panel home-main-nav" aria-label="Primary">
+      <button type="button" class="panel-trigger" aria-expanded="false" aria-controls="homeNavPanelContent" id="homeNavTrigger">
+        <span class="trigger-label">Menu</span>
+      </button>
+      <div class="panel-content" id="homeNavPanelContent">
+        <button type="button" class="home-menu-close-mobile" id="homeMenuCloseMobile" aria-label="Close menu">Close</button>
+        <div class="home-nav-desktop-inner">
+        <div class="nav-links nav-links--home-desktop">
 
           <button class="btnColaborar nav-item" id="colaborarBtn" type="button">
-            <span class="nav-slash">///</span>about
+            About
           </button>
 
           <a href="portfolio-en.html" class="nav-item" id="navPortfolioLink">
-            <span class="nav-slash">///</span>portfolio
+            Portfolio
           </a>
 
-          <button class="btnC nav-item">
-            <span class="nav-slash">///</span>contact
+          <button class="btnC nav-item" type="button">
+            Contact
           </button>
 
           <dialog id="contatoDialog">
@@ -69,17 +57,39 @@
           </dialog>
 
           <a href="substack.html" class="nav-item">
-            <span class="nav-slash">///</span>blog
+            Blog
           </a>
 
+          <button type="button" class="nav-item nav-item--home-onepager" id="homeFromOnepagerBtn">
+            Home
+          </button>
+
+          <div class="nav-links-social">
+            <a href="https://www.instagram.com/mariherzer/" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a href="https://mariherzer.bandcamp.com/" target="_blank" rel="noopener noreferrer">Bandcamp</a>
+          </div>
+
+        </div>
         </div>
       </div>
     </nav>
 
-  </main>
-
-  <span class="alhamdulillah">&#x0627;&#x0644;&#x062D;&#x0645;&#x062F;&#x0644;&#x0644;&#x0647;</span>
-
+  <div id="home-corner-cluster" class="home-corner-cluster">
+    <ul id="homeCornerSubtitles" class="site-subtitles-antfood" aria-hidden="true">
+      <li>music production</li>
+      <li>film score</li>
+      <li>sound design</li>
+    </ul>
+  </div>
+  <div class="lang-switcher site-home-lang-switcher" id="langSwitcher">
+    <button type="button" class="lang-globe-btn" id="langGlobeBtn" aria-label="Select language">
+      <img src="resources/img/globe.png" alt="">
+    </button>
+    <div class="lang-dropdown" id="langDropdown">
+      <a href="index.html" data-lang-switch>Português</a>
+      <a href="index-en.html" data-lang-switch class="active">English</a>
+    </div>
+  </div>
   <div id="player-ui">
     <div id="world-controls">
       <button id="prev-world" aria-label="Previous world">&#x2039;</button>
@@ -92,32 +102,36 @@
     </button>
   </div>
 
-  <script src="script.js"></script>
-  <script>
-  (function() {
-    var btn = document.getElementById('langGlobeBtn');
-    var dropdown = document.getElementById('langDropdown');
-    var switcher = document.getElementById('langSwitcher');
-    btn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      dropdown.classList.toggle('open');
-    });
-    document.addEventListener('mousedown', function(e) {
-      if (!switcher.contains(e.target)) {
-        dropdown.classList.remove('open');
-      }
-    });
-    document.addEventListener('touchstart', function(e) {
-      if (!switcher.contains(e.target)) {
-        dropdown.classList.remove('open');
-      }
-    }, { passive: true });
-  })();
-  </script>
   <section id="colaborar-page" class="onepager" aria-hidden="true">
-    <button id="colaborar-back" class="onepager-back" type="button">close</button>
     <h2 class="onepager-sticky-title">Mari Herzer</h2>
     <div class="onepager-inner">
+      <div class="onepager-block onepager-block--media onepager-block--video">
+        <video id="studioVideo" playsinline autoplay loop muted poster="resources/img/studio/maristudio1.jpg">
+          <source src="resources/img/studio/studio-reel3.mp4" type="video/mp4">
+        </video>
+        <p class="onepager-video-note">tap video to toggle audio</p>
+      </div>
+      <div class="onepager-block onepager-block--text onepager-block--intro-text">
+        <p class="onepager-eyebrow">collaborate</p>
+        <p class="onepager-text">Music producer, film score composer, mixer and sound designer with fifteen years of experience and an approach built on two complementary axes:</p>
+      </div>
+      <figure class="onepager-block onepager-block--media onepager-block--left">
+        <img src="resources/img/studio/maristudio1.jpg" alt="Mari Herzer studio workspace">
+      </figure>
+      <div class="onepager-block onepager-block--text">
+        <p class="onepager-eyebrow">axis one</p>
+        <p class="onepager-text">as a DJ and producer with long experience in the Brazilian and international electronic music underground circuit, including 8 years as artist-in-residence at party and label Mamba Negra, I keep close watch on what is most alive in the universe of electronic music — from baile funk and dubstep to techno. I track what renews itself constantly through the deeper internet; the ever-shifting timbres of electronic music, driven by the memetic logic of post-2010 culture in full acceleration.</p>
+      </div>
+      <figure class="onepager-block onepager-block--media onepager-block--right">
+        <img src="resources/img/studio/studio.jpg" alt="Production environment and studio tools">
+      </figure>
+      <div class="onepager-block onepager-block--text">
+        <p class="onepager-eyebrow">axis two</p>
+        <p class="onepager-text">From a more introspective place, I use natural and human science data as compositional tools, building complex sonic landscapes and ecosystems for narratives rooted in myth, ellipsis, and cultural specificity. The sonic ecosystems section of this site's homepage shows where this leads.</p>
+      </div>
+      <figure class="onepager-block onepager-block--media onepager-block--left">
+        <img src="resources/img/studio/mari_profile.jpg" alt="Portrait of Mari Herzer in the studio">
+      </figure>
       <div class="onepager-block onepager-block--media onepager-vimeo-wrap">
         <iframe
           id="introVimeo"
@@ -127,51 +141,24 @@
           title="showreel full"></iframe>
         <button id="vimeoAudioToggle" class="onepager-vimeo-audio" type="button">audio off</button>
       </div>
-      <div class="onepager-block onepager-block--text onepager-block--intro-text">
-        <p class="onepager-eyebrow">Who I am</p>
-        <p class="onepager-text">Music producer, film score composer, mixer and sound designer with fifteen years of experience and an approach built on two complementary axes.</p>
-      </div>
-      <figure class="onepager-block onepager-block--media onepager-block--left">
-        <img src="resources/img/studio/maristudio1.jpg" alt="Mari Herzer studio workspace">
-      </figure>
       <div class="onepager-block onepager-block--text">
-        <p class="onepager-eyebrow">Face one</p>
-        <p class="onepager-text">As a DJ and electronic music producer, I keep close watch on what is most alive in electronic sound — from baile funk and dubstep to experimental music. I track what renews itself constantly outside traditional channels, through the deeper internet: electronic music's ever-shifting timbres, driven by the memetic logic of post-2010 culture.</p>
-      </div>
-      <figure class="onepager-block onepager-block--media onepager-block--right">
-        <img src="resources/img/studio/studio.jpg" alt="Production environment and studio tools">
-      </figure>
-      <div class="onepager-block onepager-block--text">
-        <p class="onepager-eyebrow">Face two</p>
-        <p class="onepager-text">From a more introspective place, I read anthropological texts and natural science data as compositional tools — building complex sonic landscapes and ecosystems for narratives rooted in myth, ellipsis, and cultural specificity. The sonic ecosystems section of this site's homepage shows where this leads.</p>
-      </div>
-      <figure class="onepager-block onepager-block--media onepager-block--left">
-        <img src="resources/img/studio/mari_profile.jpg" alt="Portrait of Mari Herzer in the studio">
-      </figure>
-      <div class="onepager-block onepager-block--media onepager-block--video">
-        <video id="studioVideo" playsinline autoplay loop muted poster="resources/img/studio/maristudio1.jpg">
-          <source src="resources/img/studio/studio-reel3.mp4" type="video/mp4">
-        </video>
-        <p class="onepager-video-note">tap video to toggle audio</p>
-      </div>
-      <div class="onepager-block onepager-block--text">
-        <p class="onepager-eyebrow">What I offer</p>
-        <p class="onepager-text">Fifteen years in music production and sound design, with deep roots in São Paulo's electronic music underground — including eight years as artist-in-residence at party and label Mamba Negra. This gave me a sonic vocabulary spanning funk mandelão, automotivo, harder-edged contemporary electronics, and the emulation of complex sonic ecosystems: elegant, challenging sounds aligned with what is most vital in the field.</p>
+        <p class="onepager-eyebrow">what I offer</p>
+        <p class="onepager-text">Fifteen years of experience in music production and sound design with roots in São Paulo's electronic music underground and beyond — including eight years as artist-in-residence at Mamba Negra. This trajectory gave me a sonic vocabulary spanning funk mandelão, automotivo, harder-edged contemporary electronics, to the emulation of complex sonic ecosystems through careful and elegant sound design, always aligned with what is most alive in the field.</p>
       </div>
       <figure class="onepager-block onepager-block--media onepager-block--left">
         <img src="resources/img/studio/studio2.jpg" alt="Studio details and production desk">
       </figure>
       <div class="onepager-block onepager-block--text">
-        <p class="onepager-eyebrow">Approach</p>
-        <p class="onepager-text">I compose with analog and digital synthesizers alongside extreme-to-delicate sample manipulation — including, in a recent 2025 project, an extensive Amazonian sound library of birds, mineral sounds, bodies of water, footsteps and insects — producing sounds that don't yet exist.</p>
+        <p class="onepager-eyebrow">approach</p>
+        <p class="onepager-text">I compose with analog and digital synthesizers and manipulate samples through destructive techniques, paying attention to each millisecond of a specific sound as well as having high skill with sonic collage. In a recent 2025 project, I recorded and compiled an Amazonian sound library of birds, mineral sounds, bodies of water, footsteps and insects. The idea is to produce sounds that don't yet exist with the tools described here.</p>
       </div>
       <figure class="onepager-block onepager-block--media onepager-block--right">
         <img src="resources/img/studio/stats.jpg" alt="Studio equipment details">
       </figure>
       <div class="onepager-block onepager-block--text">
         <p class="onepager-eyebrow">where I make a difference</p>
-        <p class="onepager-text"><strong>Cinema and series:</strong> score and sound design for unconventional narratives. Flexibility across organic, electronic and hybrid textures.</p>
-        <p class="onepager-text"><strong>Contemporary advertising:</strong> brands with environmental, cultural or territorial identity. Current electronics — funk, aggressive beats, club sonorities.</p>
+        <p class="onepager-text"><strong>Cinema and series:</strong> score and sound design for narratives in ellipsis, evoking the diverse realities of Brazil. Flexibility across organic or aggressive sonic textures.</p>
+        <p class="onepager-text"><strong>Advertising:</strong> brands with environmental and cultural identity. Current electronics — funk, aggressive beats, club sonorities.</p>
         <p class="onepager-text"><strong>Sonic identity:</strong> projects needing a specific, hard-to-categorise sonic colour. Sustainability, culture, technology, diversity.</p>
         <p class="onepager-text"><strong>Installations and new media:</strong> immersive experiences, generative sound worlds, sensory environments built from natural data and phenomena.</p>
       </div>
@@ -182,11 +169,29 @@
   </section>
   <div id="onepager-transition" class="onepager-transition" aria-hidden="true"></div>
 
+  <script src="script.js?v=202604295077"></script>
   <script src="https://player.vimeo.com/api/player.js"></script>
   <script>
   (function() {
+    var btn = document.getElementById('langGlobeBtn');
+    var dropdown = document.getElementById('langDropdown');
+    var switcher = document.getElementById('langSwitcher');
+    if (!btn || !dropdown || !switcher) return;
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      dropdown.classList.toggle('open');
+    });
+    document.addEventListener('mousedown', function(e) {
+      if (!switcher.contains(e.target)) dropdown.classList.remove('open');
+    });
+    document.addEventListener('touchstart', function(e) {
+      if (!switcher.contains(e.target)) dropdown.classList.remove('open');
+    }, { passive: true });
+  })();
+  </script>
+  <script>
+  (function() {
     var openBtn = document.getElementById('colaborarBtn');
-    var closeBtn = document.getElementById('colaborar-back');
     var page = document.getElementById('colaborar-page');
     var video = document.getElementById('studioVideo');
     var vimeoFrame = document.getElementById('introVimeo');
@@ -201,16 +206,54 @@
     var revealMediaItems = revealItems.filter(function(item) {
       return !item.classList.contains('onepager-block--text');
     });
-    if (!openBtn || !closeBtn || !page) return;
+    if (!openBtn || !page) return;
+
+    var vimeoAmbientSrc = 'https://player.vimeo.com/video/1185245821?background=1&autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0';
+    var vimeoAudioSrc = 'https://player.vimeo.com/video/1185245821?autoplay=1&loop=1&muted=0&title=0&byline=0&portrait=0';
+
+    function syncVimeoToggleUi(muted) {
+      if (!vimeoAudioToggle) return;
+      vimeoAudioToggle.classList.toggle('is-on', !muted);
+      vimeoAudioToggle.textContent = muted ? 'audio off' : 'audio on';
+    }
 
     if (vimeoPlayer) {
       vimeoPlayer.setMuted(true).catch(function() {});
       if (vimeoAudioToggle) {
         vimeoAudioToggle.addEventListener('click', function() {
-          var turnOn = !vimeoAudioToggle.classList.contains('is-on');
-          vimeoPlayer.setMuted(!turnOn).catch(function() {});
-          vimeoAudioToggle.classList.toggle('is-on', turnOn);
-          vimeoAudioToggle.textContent = turnOn ? 'audio on' : 'audio off';
+          var wantOn = !vimeoAudioToggle.classList.contains('is-on');
+          if (!wantOn) {
+            vimeoPlayer.setMuted(true).then(function() { syncVimeoToggleUi(true); }).catch(function() { syncVimeoToggleUi(true); });
+            return;
+          }
+          function tryUnmute() {
+            return vimeoPlayer.setMuted(false)
+              .then(function() { return vimeoPlayer.setVolume(1); })
+              .then(function() { return vimeoPlayer.play(); })
+              .then(function() { return vimeoPlayer.getMuted(); });
+          }
+          tryUnmute().then(function(m) {
+            if (!m) {
+              syncVimeoToggleUi(false);
+              return;
+            }
+            if (vimeoFrame && vimeoFrame.src.indexOf('background=1') !== -1) {
+              vimeoFrame.src = vimeoAudioSrc;
+              vimeoPlayer = new window.Vimeo.Player(vimeoFrame);
+              return vimeoPlayer.ready().then(function() {
+                return vimeoPlayer.setVolume(1);
+              }).then(function() {
+                return vimeoPlayer.play();
+              }).then(function() {
+                return vimeoPlayer.getMuted();
+              }).then(function(m2) {
+                syncVimeoToggleUi(!!m2);
+              });
+            }
+            syncVimeoToggleUi(!!m);
+          }).catch(function() {
+            vimeoPlayer.getMuted().then(function(m) { syncVimeoToggleUi(!!m); }).catch(function() {});
+          });
         });
       }
     }
@@ -237,6 +280,7 @@
     revealTextItems.forEach(function(item) { textObserver.observe(item); });
 
     function openOnepager() {
+      if (typeof window._closeHomeMobileMenu === 'function') window._closeHomeMobileMenu();
       // Stop sonic ecosystems audio if playing
       if (typeof window._stopEcossistemas === 'function') {
         window._stopEcossistemas();
@@ -255,9 +299,17 @@
           video.muted = true;
           video.play().catch(function() {});
         }
+        if (vimeoFrame && vimeoFrame.src.indexOf('background=1') === -1) {
+          vimeoFrame.src = vimeoAmbientSrc;
+          vimeoPlayer = (window.Vimeo && vimeoFrame) ? new window.Vimeo.Player(vimeoFrame) : null;
+        }
         if (vimeoPlayer) {
           vimeoPlayer.setMuted(true).catch(function() {});
           vimeoPlayer.play().catch(function() {});
+        }
+        if (vimeoAudioToggle) {
+          vimeoAudioToggle.classList.remove('is-on');
+          vimeoAudioToggle.textContent = 'audio off';
         }
         if (transitionLayer) transitionLayer.classList.remove('is-active');
       }, transitionMs);
@@ -268,20 +320,56 @@
         video.muted = true;
         video.pause();
       }
+      if (vimeoFrame && vimeoFrame.src.indexOf('background=1') === -1) {
+        vimeoFrame.src = vimeoAmbientSrc;
+        vimeoPlayer = (window.Vimeo && vimeoFrame) ? new window.Vimeo.Player(vimeoFrame) : null;
+      }
       if (vimeoPlayer) {
         vimeoPlayer.setMuted(true).catch(function() {});
         vimeoPlayer.pause().catch(function() {});
+      }
+      if (vimeoAudioToggle) {
+        vimeoAudioToggle.classList.remove('is-on');
+        vimeoAudioToggle.textContent = 'audio off';
       }
       if (transitionLayer) transitionLayer.classList.add('is-active');
       window.setTimeout(function() {
         document.body.classList.remove('onepager-active');
         page.setAttribute('aria-hidden', 'true');
         if (transitionLayer) transitionLayer.classList.remove('is-active');
+        if (/^#(colab|sobre|about)$/i.test(window.location.hash || '') && typeof history.replaceState === 'function') {
+          history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
       }, transitionMs);
     }
 
+    /** About/onepager: language switch keeps overlay after reload (#colab) */
+    var langLinks = document.querySelectorAll('#langSwitcher a[data-lang-switch]');
+    Array.prototype.forEach.call(langLinks, function(link) {
+      link.addEventListener('click', function(e) {
+        if (!document.body.classList.contains('onepager-active')) return;
+        var raw = link.getAttribute('href') || '';
+        if (raw.indexOf('#') !== -1) return;
+        e.preventDefault();
+        window.location.href = raw + '#colab';
+      });
+    });
+
+    var hash = (window.location.hash || '').slice(1).toLowerCase();
+    if (hash === 'colab' || hash === 'sobre' || hash === 'about') {
+      window.setTimeout(function() { openOnepager(); }, 0);
+    }
+
     openBtn.addEventListener('click', openOnepager);
-    closeBtn.addEventListener('click', closeOnepager);
+
+    var homeFromOnepager = document.getElementById('homeFromOnepagerBtn');
+    if (homeFromOnepager) {
+      homeFromOnepager.addEventListener('click', function() {
+        if (typeof window._closeHomeMobileMenu === 'function') window._closeHomeMobileMenu();
+        closeOnepager();
+      });
+    }
+
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && document.body.classList.contains('onepager-active')) closeOnepager();
     });
