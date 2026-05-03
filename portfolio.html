@@ -135,11 +135,10 @@
     .pf-modal.is-open {
       display: flex;
       pointer-events: none;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      align-items: flex-start;
-      justify-content: flex-start;
-      padding: max(0.75rem, env(safe-area-inset-top, 0px)) 0 max(0.75rem, env(safe-area-inset-bottom, 0px));
+      overflow: hidden;
+      align-items: center;
+      justify-content: center;
+      padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
       box-sizing: border-box;
     }
     .pf-modal-backdrop {
@@ -156,12 +155,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      align-self: center;
-      margin: auto;
+      flex: 0 0 auto;
+      margin: 0;
+      max-width: 100%;
       pointer-events: none;
       box-sizing: border-box;
-      max-height: none;
-      padding-bottom: max(0.35rem, env(safe-area-inset-bottom, 0px));
     }
     .pf-modal-shell > * {
       pointer-events: auto;
@@ -172,7 +170,9 @@
     }
     .pf-modal-stage {
       position: relative;
-      width: min(88vw, 1400px);
+      width: min(88vw, 1400px, calc(100dvh * 16 / 9));
+      max-width: 100%;
+      max-height: min(100dvh, 100vh);
       flex-shrink: 0;
       aspect-ratio: 16 / 9;
       background: #000;
@@ -201,23 +201,54 @@
       letter-spacing: 0.02em;
       padding: 0.5rem 1.1rem;
       cursor: pointer;
-      transition: background 0.18s ease;
+      transition: background 0.18s ease, opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      transform: translateY(0);
     }
     .pf-modal-close:hover { background: #ddd; }
     .pf-modal-controls {
-      width: min(88vw, 1400px);
-      flex-shrink: 0;
-      margin-top: 0.7rem;
-      padding: 0.35rem 0 max(1rem, calc(env(safe-area-inset-bottom, 0px) + 0.35rem));
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 3;
+      width: 100%;
+      margin-top: 0;
+      padding: 0.45rem 0.75rem;
+      padding-bottom: max(0.45rem, env(safe-area-inset-bottom, 0px));
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.75rem;
       font-family: 'Brut Grotesque', 'Inter', sans-serif;
       font-size: 0.7rem;
       letter-spacing: 0.04em;
       text-transform: uppercase;
       user-select: none;
       box-sizing: border-box;
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      transform: translateY(0);
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0,0,0,0.5) 45%, transparent 100%);
+      pointer-events: auto;
+    }
+    .pf-modal.is-chrome-hidden .pf-modal-close {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-0.75rem);
+    }
+    .pf-modal.is-chrome-hidden .pf-modal-controls {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(1.1rem);
+    }
+    .pf-modal-hit {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      background: transparent;
+      pointer-events: none;
+      touch-action: manipulation;
+    }
+    .pf-modal.is-chrome-hidden.is-open .pf-modal-hit {
+      pointer-events: auto;
     }
     .pf-modal-play {
       background: none;
@@ -274,9 +305,10 @@
     @media (max-width: 1023px) {
       .pf-modal-controls {
         font-size: 0.78rem;
-        gap: 1.15rem;
-        margin-top: 0.85rem;
-        padding-bottom: max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 0.85rem));
+        gap: 1rem;
+        padding-left: 0.85rem;
+        padding-right: 0.85rem;
+        padding-top: 0.55rem;
       }
       .pf-modal-progress {
         height: 7px;
@@ -290,10 +322,10 @@
     }
     @media (orientation: landscape) and (max-height: 480px) {
       .pf-modal-controls {
-        font-size: 0.82rem;
-        gap: 1.25rem;
-        padding-bottom: max(1.6rem, calc(env(safe-area-inset-bottom, 0px) + 1.1rem));
-        margin-top: 0.55rem;
+        font-size: 0.8rem;
+        gap: 1.1rem;
+        padding: 0.38rem 0.65rem;
+        padding-bottom: max(0.35rem, env(safe-area-inset-bottom, 0px));
       }
       .pf-modal-progress {
         height: 8px;
@@ -303,9 +335,6 @@
         min-height: 44px;
         display: inline-flex;
         align-items: center;
-      }
-      .pf-modal-shell {
-        padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
       }
     }
 
@@ -703,12 +732,13 @@
       '<div class="pf-modal-shell">' +
       '<div class="pf-modal-stage">' +
         '<iframe class="pf-modal-iframe" src="" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>' +
-      '</div>' +
-      '<div class="pf-modal-controls">' +
+        '<div class="pf-modal-controls">' +
         '<button class="pf-modal-play" type="button">Pausar v\u00eddeo</button>' +
         '<div class="pf-modal-progress"><div class="pf-modal-progress-bar"></div></div>' +
         '<div class="pf-modal-time">0:00</div>' +
         '<div class="pf-modal-sound" role="button" tabindex="0">Som on</div>' +
+        '</div>' +
+        '<div class="pf-modal-hit" aria-hidden="true"></div>' +
       '</div>' +
       '</div>';
     document.body.appendChild(modal);
@@ -726,10 +756,66 @@
     var modalMuted = false;
     var modalDuration = 0;
 
+    var modalChromeHideTimer = null;
+    var CHROME_HIDE_MS = 5000;
+
+    function clearModalChromeTimer() {
+      if (modalChromeHideTimer) {
+        clearTimeout(modalChromeHideTimer);
+        modalChromeHideTimer = null;
+      }
+    }
+
+    function scheduleModalChromeHide() {
+      clearModalChromeTimer();
+      modalChromeHideTimer = setTimeout(function() {
+        modalChromeHideTimer = null;
+        if (!modal.classList.contains('is-open')) return;
+        modal.classList.add('is-chrome-hidden');
+      }, CHROME_HIDE_MS);
+    }
+
+    function syncModalChromeTimerWithPlayback() {
+      clearModalChromeTimer();
+      if (!modalPlayer) return;
+      modalPlayer.getPaused().then(function(paused) {
+        if (!paused) scheduleModalChromeHide();
+      }).catch(function() {});
+    }
+
+    function showModalChromeFromUser() {
+      modal.classList.remove('is-chrome-hidden');
+      syncModalChromeTimerWithPlayback();
+    }
+
+    function onModalChromeControlUsed() {
+      modal.classList.remove('is-chrome-hidden');
+      syncModalChromeTimerWithPlayback();
+    }
+
     function resetModalIframe() {
-      modalStage.innerHTML =
-        '<iframe class="pf-modal-iframe" src="" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>';
-      modalIframe = modalStage.querySelector('.pf-modal-iframe');
+      var controls = modalStage.querySelector('.pf-modal-controls');
+      var hit = modalStage.querySelector('.pf-modal-hit');
+      var oldIframe = modalStage.querySelector('.pf-modal-iframe');
+      if (oldIframe) oldIframe.remove();
+      var newIframe = document.createElement('iframe');
+      newIframe.className = 'pf-modal-iframe';
+      newIframe.setAttribute('frameborder', '0');
+      newIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture');
+      newIframe.setAttribute('allowfullscreen', '');
+      newIframe.src = '';
+      if (controls) {
+        modalStage.insertBefore(newIframe, controls);
+      } else {
+        modalStage.insertBefore(newIframe, modalStage.firstChild);
+      }
+      if (!hit) {
+        hit = document.createElement('div');
+        hit.className = 'pf-modal-hit';
+        hit.setAttribute('aria-hidden', 'true');
+        modalStage.appendChild(hit);
+      }
+      modalIframe = newIframe;
     }
 
     function fmtTime(sec) {
@@ -742,9 +828,6 @@
     function syncModalSoundFromPlayer() {
       if (!modalPlayer || !modalSound) return;
       modalPlayer.getMuted().then(function(m) {
-        // #region agent log
-        fetch('http://127.0.0.1:7722/ingest/87e146c9-842a-4600-92ce-058bc194aafd',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'748776'},body:JSON.stringify({sessionId:'748776',location:'portfolio.html:syncModalSoundFromPlayer',message:'sync mute from player',data:{muted:!!m,labelBefore:modalSound.textContent,modalMutedBefore:modalMuted},timestamp:Date.now(),hypothesisId:'H1'})}).catch(function(){});
-        // #endregion
         modalMuted = !!m;
         modalSound.textContent = modalMuted ? 'Som off' : 'Som on';
       }).catch(function() {});
@@ -755,6 +838,8 @@
         'controls=0&dnt=1&title=0&byline=0&portrait=0&autopause=0';
       modalIframe.src = fullSrc;
       modal.classList.add('is-open');
+      modal.classList.remove('is-chrome-hidden');
+      clearModalChromeTimer();
       modal.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
       if (previewIframe) previewIframe.src = '';
@@ -782,6 +867,14 @@
           syncModalSoundFromPlayer();
         });
         modalPlayer.on('volumechange', syncModalSoundFromPlayer);
+        modalPlayer.on('play', function() {
+          modal.classList.remove('is-chrome-hidden');
+          syncModalChromeTimerWithPlayback();
+        });
+        modalPlayer.on('pause', function() {
+          clearModalChromeTimer();
+          modal.classList.remove('is-chrome-hidden');
+        });
         modalPlayer.on('timeupdate', function(data) {
           if (data && data.duration) modalDuration = data.duration;
           var ratio = (data && data.duration) ? (data.seconds / data.duration) : 0;
@@ -792,24 +885,12 @@
           modalPlayBtn.textContent = 'Tocar v\u00eddeo';
         });
       }
-      window.requestAnimationFrame(function() {
-        window.requestAnimationFrame(function() {
-          var shell = modal.querySelector('.pf-modal-shell');
-          var stage = modal.querySelector('.pf-modal-stage');
-          var ctrl = modal.querySelector('.pf-modal-controls');
-          if (!shell || !stage || !ctrl) return;
-          var st = stage.getBoundingClientRect();
-          var ct = ctrl.getBoundingClientRect();
-          var vh = window.innerHeight;
-          // #region agent log
-          fetch('http://127.0.0.1:7722/ingest/87e146c9-842a-4600-92ce-058bc194aafd',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'748776'},body:JSON.stringify({sessionId:'748776',location:'portfolio.html:openModal',message:'modal layout after open',data:{innerW:window.innerWidth,innerH:vh,stageW:st.width,shellW:shell.getBoundingClientRect().width,stageH:st.height,stageBottom:st.bottom,ctrlTop:ct.top,ctrlBottom:ct.bottom,controlsFit:ct.bottom<=vh+2,modalScrollH:modal.scrollHeight,modalClientH:modal.clientHeight},timestamp:Date.now(),hypothesisId:'H1'})}).catch(function(){});
-          // #endregion
-        });
-      });
     }
 
     function closeModal() {
       modal.classList.remove('is-open');
+      modal.classList.remove('is-chrome-hidden');
+      clearModalChromeTimer();
       modal.setAttribute('aria-hidden', 'true');
       if (modalPlayer) {
         modalPlayer.pause().catch(function() {});
@@ -827,16 +908,21 @@
       closeModal();
     });
     modalBackdrop.addEventListener('click', function() {
-      // #region agent log
-      fetch('http://127.0.0.1:7722/ingest/87e146c9-842a-4600-92ce-058bc194aafd',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'748776'},body:JSON.stringify({sessionId:'748776',location:'portfolio.html:backdrop',message:'backdrop dismiss',data:{},timestamp:Date.now(),hypothesisId:'H2'})}).catch(function(){});
-      // #endregion
       closeModal();
     });
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
     });
+    modalStage.addEventListener('click', function(e) {
+      if (!modal.classList.contains('is-open') || !modal.classList.contains('is-chrome-hidden')) return;
+      var t = e.target;
+      if (!t || !t.closest || !t.closest('.pf-modal-hit')) return;
+      e.stopPropagation();
+      showModalChromeFromUser();
+    });
     modalPlayBtn.addEventListener('click', function(e) {
       e.stopPropagation();
+      onModalChromeControlUsed();
       if (!modalPlayer) return;
       modalPlayer.getPaused().then(function(paused) {
         if (paused) {
@@ -850,6 +936,7 @@
     });
     modalProgress.addEventListener('click', function(e) {
       e.stopPropagation();
+      onModalChromeControlUsed();
       if (!modalPlayer || !modalDuration) return;
       var rect = modalProgress.getBoundingClientRect();
       var ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
@@ -857,10 +944,8 @@
     });
     modalSound.addEventListener('click', function(e) {
       e.stopPropagation();
+      onModalChromeControlUsed();
       if (!modalPlayer) return;
-      // #region agent log
-      fetch('http://127.0.0.1:7722/ingest/87e146c9-842a-4600-92ce-058bc194aafd',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'748776'},body:JSON.stringify({sessionId:'748776',location:'portfolio.html:modalSound',message:'sound toggle click',data:{modalMutedUI:modalMuted,label:modalSound.textContent},timestamp:Date.now(),hypothesisId:'H1'})}).catch(function(){});
-      // #endregion
       var goMuted = !modalMuted;
       if (goMuted) {
         modalPlayer.setMuted(true).then(function() {
