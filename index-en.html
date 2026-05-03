@@ -10,8 +10,64 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap">
-  <link rel="stylesheet" href="styles.css?v=202605032400">
+  <link rel="stylesheet" href="styles.css?v=202605032500">
   <link rel="icon" href="resources/img/favicon1.ico" type="image/x-icon">
+  <style id="home-blend">
+    /* Title: blend on the anchor (fixed compositing element), not the title itself */
+    body.site-home .home-marquee-anchor {
+      mix-blend-mode: difference;
+    }
+    body.site-home .home-marquee-anchor .site-title {
+      mix-blend-mode: normal !important;
+      color: #fff !important;
+    }
+    body.site-home .site-title .mh-letter {
+      mix-blend-mode: difference;
+    }
+    /* Nav: blend on the nav element, reset on inner to avoid double-blend */
+    body.site-home .home-main-nav {
+      mix-blend-mode: difference;
+    }
+    body.site-home.onepager-active .home-main-nav {
+      mix-blend-mode: normal;
+    }
+    body.site-home .home-nav-desktop-inner {
+      mix-blend-mode: normal;
+    }
+    @media (min-width: 1024px) {
+      body.site-home .home-nav-desktop-inner .nav-links {
+        mix-blend-mode: difference !important;
+      }
+    }
+    /* Mobile menu pill */
+    body.site-home .panel-trigger {
+      mix-blend-mode: difference !important;
+      isolation: auto !important;
+    }
+    /* Corner cluster + subtitles */
+    body.site-home .home-corner-cluster {
+      mix-blend-mode: difference;
+    }
+    body.site-home .site-subtitles-home li {
+      color: #fff !important;
+      background: none !important;
+      -webkit-background-clip: unset !important;
+      background-clip: unset !important;
+      animation: none !important;
+      mix-blend-mode: difference;
+      border-bottom-color: rgba(255, 255, 255, 0.32) !important;
+    }
+    body.site-home .site-subtitles-home li:last-child {
+      border-bottom: none !important;
+    }
+    /* Lang switcher + player UI */
+    body.site-home #langSwitcher {
+      mix-blend-mode: difference;
+    }
+    body.site-home #player-ui {
+      mix-blend-mode: difference;
+    }
+  </style>
 </head>
 
 <body class="site-home">
@@ -75,7 +131,7 @@
     </nav>
 
   <div id="home-corner-cluster" class="home-corner-cluster">
-    <ul id="homeCornerSubtitles" class="site-subtitles-antfood" aria-hidden="true">
+    <ul id="homeCornerSubtitles" class="site-subtitles-home" aria-hidden="true">
       <li>music production</li>
       <li>film score</li>
       <li>sound design</li>

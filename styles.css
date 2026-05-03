@@ -41,6 +41,14 @@
 }
 
 @font-face {
+  font-family: 'Mina';
+  src: url(resources/fonts/Minaf.woff2) format('woff2');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: 'Legitima';
   src: url(resources/fonts/LegitimaItalic.woff2) format('woff2');
   font-weight: normal;
@@ -87,7 +95,7 @@
   /* Shared by index marquee, portfolio fixed h2, about onepager title band */
   --home-title-line-clamp: clamp(2.2rem, 8.2vw, 5rem);
   --title-band-extra: 0.85rem;
-  /* Mirrors .site-subtitles-antfood li padding-bottom — desktop sonic button offset */
+  /* Mirrors .site-subtitles-home li padding-bottom — desktop sonic button offset */
   --site-subtitle-li-gap: 0.52rem;
   --home-bottom-rail-inset: max(var(--page-edge), env(safe-area-inset-bottom, 0px));
 }
@@ -97,11 +105,11 @@
     --desktop-title-cap-height: calc(var(--home-title-line-clamp) * 0.95);
     /* .home-nav-desktop-inner vertical padding 0.38rem×2 + link line box (Inter ~1.02rem cap) */
     --desktop-nav-pill-outer-h: calc(0.76rem + clamp(0.86rem, 1.02vw, 1.02rem) * 1.22);
-    /* Pill bottom aligns with vertical midpoint of title cap line */
+    /* Nav pill vertical center aligns with title line vertical center */
     --desktop-menu-pill-top: calc(
       max(var(--page-edge), env(safe-area-inset-top, 0px)) +
       var(--desktop-title-cap-height) * 0.5 -
-      var(--desktop-nav-pill-outer-h)
+      var(--desktop-nav-pill-outer-h) * 0.5
     );
   }
 }
@@ -119,10 +127,15 @@
     --brand-title-inline-shift: 0.18rem;
     --title-top-inset: max(var(--page-edge), env(safe-area-inset-top, 0px));
     --mobile-title-cap-height: calc(var(--brand-title-size-mobile) * 0.95);
-    /* Menu / Fechar pill outer height ≈ vertical padding + label line box */
-    --mobile-menu-pill-outer-h: calc(1rem + 0.82rem * 1.2);
+    /* Menu / Fechar pill: padding 0.5rem×2 + label 0.82rem with line-height: 1 on label (matches .panel-trigger) */
+    --mobile-menu-pill-outer-h: calc(1rem + 0.82rem);
+    /* Same geometry as desktop (midline), then nudge down slightly — not full baseline lock */
+    --mobile-menu-pill-drop: clamp(3px, 0.28rem, 6px);
     --mobile-menu-pill-top: calc(
-      var(--title-top-inset) + var(--mobile-title-cap-height) - var(--mobile-menu-pill-outer-h)
+      var(--title-top-inset) +
+      var(--mobile-title-cap-height) * 0.5 -
+      var(--mobile-menu-pill-outer-h) * 0.5 +
+      var(--mobile-menu-pill-drop)
     );
   }
 }
@@ -685,7 +698,7 @@ body.site-home #langSwitcher .lang-dropdown a.active {
   pointer-events: none;
 }
 
-.site-subtitles-antfood {
+.site-subtitles-home {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -698,18 +711,18 @@ body.site-home #langSwitcher .lang-dropdown a.active {
   text-transform: lowercase;
 }
 
-.site-subtitles-antfood li {
+.site-subtitles-home li {
   line-height: 1.46;
   padding-bottom: 0.52rem;
   border-bottom: 1px solid rgba(15, 15, 14, 0.22);
 }
 
-.site-subtitles-antfood li:last-child {
+.site-subtitles-home li:last-child {
   padding-bottom: 0;
   border-bottom: none;
 }
 
-body.site-home .site-subtitles-antfood li {
+body.site-home .site-subtitles-home li {
   color: transparent;
   background: linear-gradient(
     100deg,
@@ -725,7 +738,7 @@ body.site-home .site-subtitles-antfood li {
   border-bottom: 1px solid rgba(255, 255, 255, 0.22);
 }
 
-body.site-home .site-subtitles-antfood li:last-child {
+body.site-home .site-subtitles-home li:last-child {
   border-bottom: none;
   padding-bottom: 0;
 }
@@ -739,7 +752,7 @@ body.site-home .site-subtitles-antfood li:last-child {
   }
 }
 
-body.site-home[data-world] .site-subtitles-antfood li {
+body.site-home[data-world] .site-subtitles-home li {
   color: transparent;
   background: linear-gradient(
     100deg,
@@ -755,7 +768,7 @@ body.site-home[data-world] .site-subtitles-antfood li {
   border-bottom: 1px solid rgba(245, 247, 240, 0.28);
 }
 
-body.site-home[data-world] .site-subtitles-antfood li:last-child {
+body.site-home[data-world] .site-subtitles-home li:last-child {
   border-bottom: none;
 }
 
@@ -1016,7 +1029,7 @@ body.site-home:not(.onepager-active) .nav-item--home-onepager {
     display: none !important;
   }
 
-  /* Antfood-style: light gray glass (#87878733) + 10px backdrop blur on a layer under links (see BZUXfGrw.js) */
+  /* Frosted glass: rgba(135,135,135,0.~0.19) + 10px backdrop blur on a layer under links */
   /* No isolation: isolate here — it traps mix-blend-mode inside the pill so links never blend with the canvas */
   body.site-home .home-nav-desktop-inner,
   body.nav-unified:not(.site-home) .home-nav-desktop-inner {
@@ -1117,7 +1130,7 @@ body.site-home:not(.onepager-active) .nav-item--home-onepager {
   body.nav-unified:not(.site-home) .panel-trigger {
     position: fixed;
     z-index: 301;
-    /* Bottom edge lines up with bottom of title cap line (see --mobile-menu-pill-top) */
+    /* Midline alignment + small --mobile-menu-pill-drop (not baseline-locked) */
     top: var(--mobile-menu-pill-top);
     right: calc(max(var(--page-edge), env(safe-area-inset-right, 0px)) - 0.5rem);
     left: auto;
@@ -1149,6 +1162,7 @@ body.site-home:not(.onepager-active) .nav-item--home-onepager {
     z-index: 1;
     font-size: 0.82rem;
     letter-spacing: 0.02em;
+    line-height: 1;
   }
 
   body.site-home .panel-trigger::before,
@@ -1186,6 +1200,7 @@ body.site-home:not(.onepager-active) .nav-item--home-onepager {
     font-size: 0.82rem;
     font-weight: 500;
     letter-spacing: 0.02em;
+    line-height: 1;
     text-transform: none;
     color: #0f0f0e;
     cursor: pointer;
@@ -1297,24 +1312,24 @@ body.site-home:not(.onepager-active) .nav-item--home-onepager {
     max-width: min(20rem, 88vw);
   }
 
-  body.home-menu-open:not([data-world]) .nav-links-social a {
+  body.home-menu-open:not([data-world]) .home-nav-desktop-inner .nav-links-social a {
     font-family: 'Inter', sans-serif;
     font-weight: 400;
-    font-size: max(9px, 0.34rem);
-    letter-spacing: 0.01em;
+    font-size: clamp(0.72rem, 2.8vw, 0.82rem);
+    letter-spacing: 0.02em;
     text-transform: none;
     color: rgba(255, 255, 255, 0.55) !important;
     text-decoration: none;
     padding: 0.02rem 0;
-    line-height: 1.05;
+    line-height: 1.35;
     mix-blend-mode: normal;
   }
 
-  body.home-menu-open:not([data-world]) .nav-links-social a:hover {
+  body.home-menu-open:not([data-world]) .home-nav-desktop-inner .nav-links-social a:hover {
     color: #fff !important;
   }
 
-  body.home-menu-open:not([data-world]) .nav-links-social a::after {
+  body.home-menu-open:not([data-world]) .home-nav-desktop-inner .nav-links-social a::after {
     display: none;
   }
 
@@ -1424,7 +1439,7 @@ dialog::backdrop {
   font-family: 'Legitima', 'Legitima Italic', serif;
   font-style: italic;
   font-weight: 700;
-  font-size: clamp(0.78rem, 2.1vw, 0.92rem);
+  font-size: clamp(0.68rem, 1.85vw, 0.82rem);
   letter-spacing: 0.05em;
   color: #000;
   text-transform: none;
@@ -1433,8 +1448,8 @@ dialog::backdrop {
 #contatoDialog .dialog-body--contato a {
   font-family: 'Legitima', 'Legitima Italic', serif;
   font-style: italic;
-  font-weight: 700;
-  font-size: clamp(0.88rem, 2.2vw, 1.02rem);
+  font-weight: 600;
+  font-size: clamp(0.72rem, 1.95vw, 0.84rem);
   color: #000 !important;
   border-bottom-color: rgba(0, 0, 0, 0.35);
 }
