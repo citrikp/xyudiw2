@@ -4,55 +4,44 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="lang-detect.js?v=202604295073"></script>
   <title>Mari Herzer</title>
-  <link rel="stylesheet" href="styles.css?v=202604212142">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap">
+  <link rel="stylesheet" href="styles.css?v=202605032400">
   <link rel="icon" href="resources/img/favicon1.ico" type="image/x-icon">
 </head>
-<body>
+<body class="site-home">
 
   <canvas id="bg-canvas"></canvas>
-  <canvas id="creature-canvas"></canvas>
   <canvas id="world-canvas"></canvas>
   <div class="noise"></div>
   <div id="cinema-veil"></div>
 
-  <div class="lang-switcher" id="langSwitcher">
-    <button class="lang-globe-btn" id="langGlobeBtn" aria-label="Selecionar idioma">
-      <img src="resources/img/globe.png" alt="idioma">
-    </button>
-    <div class="lang-dropdown" id="langDropdown">
-      <a href="index.html" class="active">Português</a>
-      <a href="index-en.html">English</a>
-    </div>
-  </div>
+  <header class="home-marquee-anchor">
+    <h1 class="site-title" id="homeSiteTitle" aria-label="Mari Herzer"><span class="site-title-chunk site-title-chunk--long" aria-hidden="true">Mari Herzer</span><span class="site-title-chunk site-title-chunk--short" aria-hidden="true"><span class="mh-letter">M</span><span class="mh-letter">H</span></span></h1>
+  </header>
 
-  <main class="container">
-    <header class="header">
-      <h1 class="site-title">Mari<br>Herzer</h1>
-      <p class="site-subtitle">
-        <span class="subtitle-line">produção musical · trilha sonora</span>
-        <span class="subtitle-line">sound design</span>
-      </p>
-    </header>
-
-    <nav class="sliding-panel">
-      <div class="panel-trigger">
-        <span class="trigger-label">menu</span>
-        <span class="trigger-arrow">↓</span>
-      </div>
-      <div class="panel-content">
-        <div class="nav-links">
+  <nav class="sliding-panel home-main-nav" aria-label="Primário">
+      <button type="button" class="panel-trigger" aria-expanded="false" aria-controls="homeNavPanelContent" id="homeNavTrigger">
+        <span class="trigger-label">Menu</span>
+      </button>
+      <div class="panel-content" id="homeNavPanelContent">
+        <button type="button" class="home-menu-close-mobile" id="homeMenuCloseMobile" aria-label="Fechar menu">Fechar</button>
+        <div class="home-nav-desktop-inner">
+        <div class="nav-links nav-links--home-desktop">
 
           <button class="btnColaborar nav-item" id="colaborarBtn" type="button">
-            <span class="nav-slash">///</span>sobre
+            Sobre
           </button>
 
           <a href="portfolio.html" class="nav-item" id="navPortfolioLink">
-            <span class="nav-slash">///</span>portfolio
+            Portfolio
           </a>
 
-          <button class="btnC nav-item">
-            <span class="nav-slash">///</span>contato
+          <button class="btnC nav-item" type="button">
+            Contato
           </button>
 
           <dialog id="contatoDialog">
@@ -66,16 +55,39 @@
           </dialog>
 
           <a href="substack.html" class="nav-item">
-            <span class="nav-slash">///</span>blog
+            Blog
           </a>
 
+          <button type="button" class="nav-item nav-item--home-onepager" id="homeFromOnepagerBtn">
+            Home
+          </button>
+
+          <div class="nav-links-social">
+            <a href="https://www.instagram.com/mariherzer/" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a href="https://mariherzer.bandcamp.com/" target="_blank" rel="noopener noreferrer">Bandcamp</a>
+          </div>
+
+        </div>
         </div>
       </div>
     </nav>
-  </main>
 
-  <span class="alhamdulillah">&#x0627;&#x0644;&#x062D;&#x0645;&#x062F;&#x0644;&#x0644;&#x0647;</span>
-
+  <div id="home-corner-cluster" class="home-corner-cluster">
+    <ul id="homeCornerSubtitles" class="site-subtitles-antfood" aria-hidden="true">
+      <li>produção musical</li>
+      <li>trilha sonora</li>
+      <li>sound design</li>
+    </ul>
+  </div>
+  <div class="lang-switcher site-home-lang-switcher" id="langSwitcher">
+    <button type="button" class="lang-globe-btn" id="langGlobeBtn" aria-label="Selecionar idioma">
+      <img src="resources/img/globe.png" alt="">
+    </button>
+    <div class="lang-dropdown" id="langDropdown">
+      <a href="index.html" data-lang-switch class="active">Português</a>
+      <a href="index-en.html" data-lang-switch>English</a>
+    </div>
+  </div>
   <div id="player-ui">
     <div id="world-controls">
       <button id="prev-world" aria-label="Mundo anterior">&#x2039;</button>
@@ -88,17 +100,13 @@
     </button>
   </div>
   <section id="colaborar-page" class="onepager" aria-hidden="true">
-    <button id="colaborar-back" class="onepager-back" type="button">fechar</button>
     <h2 class="onepager-sticky-title">Mari Herzer</h2>
     <div class="onepager-inner">
-      <div class="onepager-block onepager-block--media onepager-vimeo-wrap">
-        <iframe
-          id="introVimeo"
-          class="onepager-vimeo-frame"
-          src="https://player.vimeo.com/video/1185245821?background=1&autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0"
-          allow="autoplay; fullscreen; picture-in-picture"
-          title="showreel full"></iframe>
-        <button id="vimeoAudioToggle" class="onepager-vimeo-audio" type="button">som off</button>
+      <div class="onepager-block onepager-block--media onepager-block--video">
+        <video id="studioVideo" playsinline autoplay loop muted poster="resources/img/studio/maristudio1.jpg">
+          <source src="resources/img/studio/studio-reel3.mp4" type="video/mp4">
+        </video>
+        <p class="onepager-video-note">toque no video para ativar/desativar som</p>
       </div>
       <div class="onepager-block onepager-block--text onepager-block--intro-text">
         <p class="onepager-eyebrow">colaborar</p>
@@ -121,11 +129,14 @@
       <figure class="onepager-block onepager-block--media onepager-block--left">
         <img src="resources/img/studio/mari_profile.jpg" alt="Retrato de Mari Herzer no estúdio">
       </figure>
-      <div class="onepager-block onepager-block--media onepager-block--video">
-        <video id="studioVideo" playsinline autoplay loop muted poster="resources/img/studio/maristudio1.jpg">
-          <source src="resources/img/studio/studio-reel3.mp4" type="video/mp4">
-        </video>
-        <p class="onepager-video-note">toque no video para ativar/desativar som</p>
+      <div class="onepager-block onepager-block--media onepager-vimeo-wrap">
+        <iframe
+          id="introVimeo"
+          class="onepager-vimeo-frame"
+          src="https://player.vimeo.com/video/1185245821?background=1&autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0"
+          allow="autoplay; fullscreen; picture-in-picture"
+          title="showreel full"></iframe>
+        <button id="vimeoAudioToggle" class="onepager-vimeo-audio" type="button">som off</button>
       </div>
       <div class="onepager-block onepager-block--text">
         <p class="onepager-eyebrow">o que ofereço</p>
@@ -155,33 +166,29 @@
   </section>
   <div id="onepager-transition" class="onepager-transition" aria-hidden="true"></div>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="script.js"></script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="script.js?v=202604295077"></script>
   <script src="https://player.vimeo.com/api/player.js"></script>
   <script>
   (function() {
-    var btn      = document.getElementById('langGlobeBtn');
+    var btn = document.getElementById('langGlobeBtn');
     var dropdown = document.getElementById('langDropdown');
     var switcher = document.getElementById('langSwitcher');
+    if (!btn || !dropdown || !switcher) return;
     btn.addEventListener('click', function(e) {
       e.stopPropagation();
       dropdown.classList.toggle('open');
     });
     document.addEventListener('mousedown', function(e) {
-      if (!switcher.contains(e.target)) {
-        dropdown.classList.remove('open');
-      }
+      if (!switcher.contains(e.target)) dropdown.classList.remove('open');
     });
     document.addEventListener('touchstart', function(e) {
-      if (!switcher.contains(e.target)) {
-        dropdown.classList.remove('open');
-      }
+      if (!switcher.contains(e.target)) dropdown.classList.remove('open');
     }, { passive: true });
   })();
   </script>
   <script>
   (function() {
     var openBtn = document.getElementById('colaborarBtn');
-    var closeBtn = document.getElementById('colaborar-back');
     var page = document.getElementById('colaborar-page');
     var video = document.getElementById('studioVideo');
     var vimeoFrame = document.getElementById('introVimeo');
@@ -196,16 +203,54 @@
     var revealMediaItems = revealItems.filter(function(item) {
       return !item.classList.contains('onepager-block--text');
     });
-    if (!openBtn || !closeBtn || !page) return;
+    if (!openBtn || !page) return;
+
+    var vimeoAmbientSrc = 'https://player.vimeo.com/video/1185245821?background=1&autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0';
+    var vimeoAudioSrc = 'https://player.vimeo.com/video/1185245821?autoplay=1&loop=1&muted=0&title=0&byline=0&portrait=0';
+
+    function syncVimeoToggleUi(muted) {
+      if (!vimeoAudioToggle) return;
+      vimeoAudioToggle.classList.toggle('is-on', !muted);
+      vimeoAudioToggle.textContent = muted ? 'som off' : 'som on';
+    }
 
     if (vimeoPlayer) {
       vimeoPlayer.setMuted(true).catch(function() {});
       if (vimeoAudioToggle) {
         vimeoAudioToggle.addEventListener('click', function() {
-          var turnOn = !vimeoAudioToggle.classList.contains('is-on');
-          vimeoPlayer.setMuted(!turnOn).catch(function() {});
-          vimeoAudioToggle.classList.toggle('is-on', turnOn);
-          vimeoAudioToggle.textContent = turnOn ? 'som on' : 'som off';
+          var wantOn = !vimeoAudioToggle.classList.contains('is-on');
+          if (!wantOn) {
+            vimeoPlayer.setMuted(true).then(function() { syncVimeoToggleUi(true); }).catch(function() { syncVimeoToggleUi(true); });
+            return;
+          }
+          function tryUnmute() {
+            return vimeoPlayer.setMuted(false)
+              .then(function() { return vimeoPlayer.setVolume(1); })
+              .then(function() { return vimeoPlayer.play(); })
+              .then(function() { return vimeoPlayer.getMuted(); });
+          }
+          tryUnmute().then(function(m) {
+            if (!m) {
+              syncVimeoToggleUi(false);
+              return;
+            }
+            if (vimeoFrame && vimeoFrame.src.indexOf('background=1') !== -1) {
+              vimeoFrame.src = vimeoAudioSrc;
+              vimeoPlayer = new window.Vimeo.Player(vimeoFrame);
+              return vimeoPlayer.ready().then(function() {
+                return vimeoPlayer.setVolume(1);
+              }).then(function() {
+                return vimeoPlayer.play();
+              }).then(function() {
+                return vimeoPlayer.getMuted();
+              }).then(function(m2) {
+                syncVimeoToggleUi(!!m2);
+              });
+            }
+            syncVimeoToggleUi(!!m);
+          }).catch(function() {
+            vimeoPlayer.getMuted().then(function(m) { syncVimeoToggleUi(!!m); }).catch(function() {});
+          });
         });
       }
     }
@@ -232,7 +277,7 @@
     revealTextItems.forEach(function(item) { textObserver.observe(item); });
 
     function openOnepager() {
-      // Stop sonic ecosystems audio if playing
+      if (typeof window._closeHomeMobileMenu === 'function') window._closeHomeMobileMenu();
       if (typeof window._stopEcossistemas === 'function') {
         window._stopEcossistemas();
       }
@@ -250,9 +295,17 @@
           video.muted = true;
           video.play().catch(function() {});
         }
+        if (vimeoFrame && vimeoFrame.src.indexOf('background=1') === -1) {
+          vimeoFrame.src = vimeoAmbientSrc;
+          vimeoPlayer = (window.Vimeo && vimeoFrame) ? new window.Vimeo.Player(vimeoFrame) : null;
+        }
         if (vimeoPlayer) {
           vimeoPlayer.setMuted(true).catch(function() {});
           vimeoPlayer.play().catch(function() {});
+        }
+        if (vimeoAudioToggle) {
+          vimeoAudioToggle.classList.remove('is-on');
+          vimeoAudioToggle.textContent = 'som off';
         }
         if (transitionLayer) transitionLayer.classList.remove('is-active');
       }, transitionMs);
@@ -263,25 +316,59 @@
         video.muted = true;
         video.pause();
       }
+      if (vimeoFrame && vimeoFrame.src.indexOf('background=1') === -1) {
+        vimeoFrame.src = vimeoAmbientSrc;
+        vimeoPlayer = (window.Vimeo && vimeoFrame) ? new window.Vimeo.Player(vimeoFrame) : null;
+      }
       if (vimeoPlayer) {
         vimeoPlayer.setMuted(true).catch(function() {});
         vimeoPlayer.pause().catch(function() {});
+      }
+      if (vimeoAudioToggle) {
+        vimeoAudioToggle.classList.remove('is-on');
+        vimeoAudioToggle.textContent = 'som off';
       }
       if (transitionLayer) transitionLayer.classList.add('is-active');
       window.setTimeout(function() {
         document.body.classList.remove('onepager-active');
         page.setAttribute('aria-hidden', 'true');
         if (transitionLayer) transitionLayer.classList.remove('is-active');
+        if (/^#(colab|sobre|about)$/i.test(window.location.hash || '') && typeof history.replaceState === 'function') {
+          history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
       }, transitionMs);
     }
 
+    var langLinks = document.querySelectorAll('#langSwitcher a[data-lang-switch]');
+    Array.prototype.forEach.call(langLinks, function(link) {
+      link.addEventListener('click', function(e) {
+        if (!document.body.classList.contains('onepager-active')) return;
+        var raw = link.getAttribute('href') || '';
+        if (raw.indexOf('#') !== -1) return;
+        e.preventDefault();
+        window.location.href = raw + '#colab';
+      });
+    });
+
+    var hash = (window.location.hash || '').slice(1).toLowerCase();
+    if (hash === 'colab' || hash === 'sobre' || hash === 'about') {
+      window.setTimeout(function() { openOnepager(); }, 0);
+    }
+
     openBtn.addEventListener('click', openOnepager);
-    closeBtn.addEventListener('click', closeOnepager);
+
+    var homeFromOnepager = document.getElementById('homeFromOnepagerBtn');
+    if (homeFromOnepager) {
+      homeFromOnepager.addEventListener('click', function() {
+        if (typeof window._closeHomeMobileMenu === 'function') window._closeHomeMobileMenu();
+        closeOnepager();
+      });
+    }
+
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && document.body.classList.contains('onepager-active')) closeOnepager();
     });
 
-    // Stop audio on any nav link that navigates away
     var portfolioLink = document.getElementById('navPortfolioLink');
     if (portfolioLink) {
       portfolioLink.addEventListener('click', function(e) {
