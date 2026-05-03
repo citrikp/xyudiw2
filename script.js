@@ -5,6 +5,11 @@
 (function () {
   const canvas = document.getElementById('bg-canvas');
   if (!canvas) return;
+  /** portfolio.html: pure #000 backdrop — skip shader loop entirely (canvas element stays hidden) */
+  if (document.body && document.body.classList.contains('portfolio-page')) {
+    canvas.style.display = 'none';
+    return;
+  }
 
   const p = new Uint8Array(256);
   for (let i = 0; i < 256; i++) p[i] = i;
@@ -42,7 +47,7 @@
   }
 
   const ctx = canvas.getContext('2d');
-  const SCALE = 4;
+  const SCALE = window.matchMedia('(max-width: 768px)').matches ? 2 : 4;
   let W, H;
 
   function resize() {
@@ -58,54 +63,130 @@
   function noiseToColor(n) {
     const t = Math.max(0, Math.min(1, n * 1.8 + 0.5));
     let r, g, b;
-    if (t < 0.45) {
-      const s = t / 0.45;
-      r = Math.round(lerp(215, 228, s)); g = Math.round(lerp(228, 236, s)); b = Math.round(lerp(206, 224, s));
-    } else if (t < 0.75) {
-      const s = (t - 0.45) / 0.3;
-      r = Math.round(lerp(228, 210, s)); g = Math.round(lerp(236, 230, s)); b = Math.round(lerp(224, 190, s));
+    if (t < 0.3) {
+      // deep teal-green zone
+      const s = t / 0.3;
+      r = Math.round(lerp(170, 200, s)); g = Math.round(lerp(210, 222, s)); b = Math.round(lerp(195, 200, s));
+    } else if (t < 0.55) {
+      // yellow-green, slightly grey
+      const s = (t - 0.3) / 0.25;
+      r = Math.round(lerp(200, 220, s)); g = Math.round(lerp(222, 228, s)); b = Math.round(lerp(200, 172, s));
+    } else if (t < 0.78) {
+      // muted olive-green
+      const s = (t - 0.55) / 0.23;
+      r = Math.round(lerp(220, 204, s)); g = Math.round(lerp(228, 218, s)); b = Math.round(lerp(172, 150, s));
     } else {
-      const s = (t - 0.75) / 0.25;
-      r = Math.round(lerp(210, 185, s)); g = Math.round(lerp(230, 215, s)); b = Math.round(lerp(190, 155, s));
+      // warm grey-green highlight
+      const s = (t - 0.78) / 0.22;
+      r = Math.round(lerp(204, 182, s)); g = Math.round(lerp(218, 208, s)); b = Math.round(lerp(150, 138, s));
     }
     return [r, g, b];
   }
 
   // Slightly more saturated version for mobile left-side bias
   function noiseToColorMobile(n, xFrac) {
-    // bias: left side (xFrac→0) gets greener, right side fades to neutral
-    const boost = Math.max(0, 1 - xFrac * 1.6); // 1.0 at left edge, 0 at ~62% across
+    const boost = Math.max(0, 1 - xFrac * 1.6);
     const t = Math.max(0, Math.min(1, n * 1.8 + 0.5 + boost * 0.12));
     let r, g, b;
-    if (t < 0.45) {
-      const s = t / 0.45;
-      r = Math.round(lerp(215, 225, s)); g = Math.round(lerp(230, 240, s)); b = Math.round(lerp(200, 215, s));
-    } else if (t < 0.75) {
-      const s = (t - 0.45) / 0.3;
-      r = Math.round(lerp(225, 205, s)); g = Math.round(lerp(240, 234, s)); b = Math.round(lerp(215, 182, s));
+    if (t < 0.3) {
+      const s = t / 0.3;
+      r = Math.round(lerp(158, 195, s)); g = Math.round(lerp(208, 225, s)); b = Math.round(lerp(192, 202, s));
+    } else if (t < 0.55) {
+      const s = (t - 0.3) / 0.25;
+      r = Math.round(lerp(195, 216, s)); g = Math.round(lerp(225, 230, s)); b = Math.round(lerp(202, 168, s));
+    } else if (t < 0.78) {
+      const s = (t - 0.55) / 0.23;
+      r = Math.round(lerp(216, 198, s)); g = Math.round(lerp(230, 220, s)); b = Math.round(lerp(168, 144, s));
     } else {
-      const s = (t - 0.75) / 0.25;
-      r = Math.round(lerp(205, 178, s)); g = Math.round(lerp(234, 218, s)); b = Math.round(lerp(182, 148, s));
+      const s = (t - 0.78) / 0.22;
+      r = Math.round(lerp(198, 175, s)); g = Math.round(lerp(220, 210, s)); b = Math.round(lerp(144, 132, s));
     }
     return [r, g, b];
   }
 
+  // Darker slate / smoke versions of the canvas (portfolio.html) — same structure, lower luminance.
+  function noiseToColorPortfolio(n) {
+    const t = Math.max(0, Math.min(1, n * 1.82 + 0.44));
+    let r; let g; let b;
+    if (t < 0.3) {
+      const s = t / 0.3;
+      r = Math.round(lerp(22, 38, s)); g = Math.round(lerp(34, 58, s)); b = Math.round(lerp(40, 62, s));
+    } else if (t < 0.55) {
+      const s = (t - 0.3) / 0.25;
+      r = Math.round(lerp(38, 72, s)); g = Math.round(lerp(58, 86, s)); b = Math.round(lerp(62, 74, s));
+    } else if (t < 0.78) {
+      const s = (t - 0.55) / 0.23;
+      r = Math.round(lerp(72, 102, s)); g = Math.round(lerp(86, 98, s)); b = Math.round(lerp(74, 64, s));
+    } else {
+      const s = (t - 0.78) / 0.22;
+      r = Math.round(lerp(102, 118, s)); g = Math.round(lerp(98, 108, s)); b = Math.round(lerp(64, 58, s));
+    }
+    return [r, g, b];
+  }
+
+  function noiseToColorPortfolioMobile(n, xFrac) {
+    const boost = Math.max(0, 1 - xFrac * 1.6);
+    const t = Math.max(0, Math.min(1, n * 1.82 + 0.42 + boost * 0.1));
+    let r; let g; let b;
+    if (t < 0.3) {
+      const s = t / 0.3;
+      r = Math.round(lerp(18, 42, s)); g = Math.round(lerp(32, 58, s)); b = Math.round(lerp(36, 62, s));
+    } else if (t < 0.55) {
+      const s = (t - 0.3) / 0.25;
+      r = Math.round(lerp(42, 78, s)); g = Math.round(lerp(58, 94, s)); b = Math.round(lerp(62, 74, s));
+    } else if (t < 0.78) {
+      const s = (t - 0.55) / 0.23;
+      r = Math.round(lerp(78, 108, s)); g = Math.round(lerp(94, 104, s)); b = Math.round(lerp(74, 58, s));
+    } else {
+      const s = (t - 0.78) / 0.22;
+      r = Math.round(lerp(108, 124, s)); g = Math.round(lerp(104, 112, s)); b = Math.round(lerp(58, 52, s));
+    }
+    return [r, g, b];
+  }
+
+  /**
+   * Noise palette (matches xyudiw2/script.js before portfolio split):
+   * - "legacy-home": teal / olive FBM (original index #bg-canvas) — Substack + homepage mobile menu
+   * - "portfolio": dark slate / smoke — portfolio + index marquee when menu closed
+   */
+  function bgCanvasNoisePalette() {
+    const b = document.body;
+    if (!b) return 'legacy-home';
+    if (b.classList.contains('legacy-home-noise-bg')) return 'legacy-home';
+    if (b.classList.contains('site-home') && b.classList.contains('home-menu-open')) return 'legacy-home';
+    if (b.classList.contains('portfolio-page')) return 'portfolio';
+    if (b.classList.contains('site-home')) return 'portfolio';
+    return 'legacy-home';
+  }
+
   const isMobileCanvas = window.matchMedia('(pointer: coarse)').matches;
+
+  /** Substack: match xyudiw2 desktop ramp — skip noiseToColorMobile saturation boost on touch. */
+  function pickLegacyHomeRgb(n, xFrac, palette) {
+    const b = document.body;
+    if (palette === 'legacy-home' && b && b.classList.contains('legacy-home-noise-bg')) {
+      return noiseToColor(n);
+    }
+    return isMobileCanvas ? noiseToColorMobile(n, xFrac) : noiseToColor(n);
+  }
 
   let t = 0;
   function bgLoop() {
     const buf = ctx.createImageData(W, H);
     const data = buf.data;
-    const zoom = 0.003, speed = 0.00016;
+    const zoom = isMobileCanvas ? 0.006 : 0.0035, speed = 0.00038;
+    const palette = bgCanvasNoisePalette();
     for (let y = 0; y < H; y++) {
       for (let x = 0; x < W; x++) {
-        const nx = x * zoom, ny = y * zoom;
-        const wx = fbm(nx + 0.0, ny + 0.0, 4) * 1.2;
-        const wy = fbm(nx + 5.2, ny + 1.3, 4) * 1.2;
-        const n  = fbm(nx + wx + t * 0.5, ny + wy + t * 0.32, 4);
-        const [r, g, b] = isMobileCanvas
-          ? noiseToColorMobile(n, x / W)
-          : noiseToColor(n);
+        const nx = x * zoom; const ny = y * zoom;
+        const wx = fbm(nx + 0.0, ny + 0.0, 4) * 1.6;
+        const wy = fbm(nx + 5.2, ny + 1.3, 4) * 1.6;
+        const n  = fbm(nx + wx + t * 0.7, ny + wy + t * 0.45, 4);
+        const xFrac = x / W;
+        const [r, g, b] =
+          palette === 'portfolio'
+            ? (isMobileCanvas ? noiseToColorPortfolioMobile(n, xFrac) : noiseToColorPortfolio(n))
+            : pickLegacyHomeRgb(n, xFrac, palette);
         const i = (y * W + x) * 4;
         data[i] = r; data[i+1] = g; data[i+2] = b; data[i+3] = 255;
       }
@@ -363,24 +444,88 @@
 
 
 // ─────────────────────────────────────────
-// SLIDING PANEL
+// SLIDING PANEL — home index fullscreen mobile nav
 // ─────────────────────────────────────────
 
-const trigger = document.querySelector('.panel-trigger');
-const content = document.querySelector('.panel-content');
+(function () {
+  const trigger = document.getElementById('homeNavTrigger');
+  const content = document.getElementById('homeNavPanelContent');
+  const mqDesktop = window.matchMedia('(min-width: 1024px)');
+  const siteHome = document.body.classList.contains('site-home');
+  const navUnified = document.body.classList.contains('nav-unified');
+  const unifiedMenuPage = siteHome || navUnified;
 
-if (trigger && content) {
-  trigger.addEventListener('click', () => {
-    const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
-    if (isOpen) {
-      content.style.maxHeight = '0px';
+  function closeHomeMenu() {
+    document.body.classList.remove('home-menu-open');
+    if (trigger) {
       trigger.classList.remove('open');
-    } else {
-      content.style.maxHeight = content.scrollHeight + 'px';
+      trigger.setAttribute('aria-expanded', 'false');
+    }
+    if (content && unifiedMenuPage && !mqDesktop.matches) {
+      content.style.maxHeight = '0px';
+    }
+  }
+
+  function openHomeMenu() {
+    document.body.classList.add('home-menu-open');
+    if (trigger) {
       trigger.classList.add('open');
+      trigger.setAttribute('aria-expanded', 'true');
+    }
+    if (content && unifiedMenuPage) {
+      content.style.maxHeight = 'none';
+    }
+  }
+
+  function onDesktopChange() {
+    if (mqDesktop.matches) {
+      closeHomeMenu();
+      if (content) content.style.removeProperty('max-height');
+    }
+  }
+
+  if (trigger && content && unifiedMenuPage) {
+    mqDesktop.addEventListener('change', onDesktopChange);
+    onDesktopChange();
+
+    trigger.addEventListener('click', () => {
+      if (siteHome && document.body.hasAttribute('data-world')) return;
+      if (mqDesktop.matches) return;
+
+      const isOpen = document.body.classList.contains('home-menu-open');
+      if (isOpen) {
+        closeHomeMenu();
+      } else {
+        openHomeMenu();
+      }
+    });
+  }
+
+  const closeMob = document.getElementById('homeMenuCloseMobile');
+  if (closeMob && content) {
+    closeMob.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeHomeMenu();
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (
+      unifiedMenuPage &&
+      e.key === 'Escape' &&
+      document.body.classList.contains('home-menu-open') &&
+      !(siteHome && document.body.hasAttribute('data-world'))
+    ) {
+      closeHomeMenu();
     }
   });
-}
+
+  /** Expose so world engine / about Home can tear down menu on any unified mobile nav page */
+  window._closeHomeMobileMenu = function () {
+    if (unifiedMenuPage && document.body.classList.contains('home-menu-open')) closeHomeMenu();
+  };
+})();
 
 
 // ─────────────────────────────────────────
@@ -415,11 +560,12 @@ if (sobreDialog) {
 // ─────────────────────────────────────────
 
 const contatoDialog = document.getElementById('contatoDialog');
-const btnC          = document.querySelector('.btnC');
 const btnClose2     = document.querySelector('.btnClose2');
 
-if (btnC && contatoDialog) {
-  btnC.addEventListener('click', () => contatoDialog.showModal());
+if (contatoDialog) {
+  document.querySelectorAll('.btnC').forEach((btnC) => {
+    btnC.addEventListener('click', () => contatoDialog.showModal());
+  });
 }
 if (btnClose2 && contatoDialog) {
   btnClose2.addEventListener('click', (e) => {
@@ -554,7 +700,10 @@ makeDraggable(document.getElementById('embedDialog'));
   const prevBtn       = document.getElementById('prev-world');
   const nextBtn       = document.getElementById('next-world');
   const siteTitle     = document.querySelector('.site-title');
-  const siteSubtitle = document.querySelector('.site-subtitle');
+  const siteSubtitle = document.querySelector('#homeCornerSubtitles');
+  const playLabelIdle = playLabel && playLabel.textContent.trim()
+    ? playLabel.textContent.trim()
+    : 'ecossistemas sonoros';
   const navItems     = document.querySelectorAll('.nav-item, .nav-links a');
   const panelTrigger = document.querySelector('.panel-trigger');
   let isCinematic = false;
@@ -562,12 +711,14 @@ makeDraggable(document.getElementById('embedDialog'));
   // Override hover in JS so cinematic mode can control it
   if (panelTrigger) {
     panelTrigger.addEventListener('mouseenter', () => {
+      if (document.body.hasAttribute('data-world')) return;
       if (isCinematic) {
         panelTrigger.style.backgroundColor = 'rgba(255,255,255,0.15)';
         panelTrigger.style.color = '#f5f5f0';
       }
     });
     panelTrigger.addEventListener('mouseleave', () => {
+      if (document.body.hasAttribute('data-world')) return;
       if (isCinematic) {
         panelTrigger.style.backgroundColor = '#0a0a0a';
         panelTrigger.style.color = '#d8d8d0';
@@ -2747,21 +2898,26 @@ const LUT = new Uint8Array(MAX_ITER * 3);
 
     // Title + subtitle — same light color for ALL worlds including paleozoico
     const titleCol    = active ? '#eeffd3' : '';
-    const subtitleCol = active ? '#d8ddd0' : '';
     const navCol      = active ? '#9aa08e' : '';
     const worldCol    = active ? 'rgba(245,247,240,0.55)' : '';
 
     siteTitle.style.transition = 'color 3s ease';
-    siteTitle.style.color = titleCol;
+    if (titleCol) siteTitle.style.color = titleCol;
+    else siteTitle.style.removeProperty('color');
 
     if (siteSubtitle) {
-      siteSubtitle.style.transition = 'color 3s ease';
-      siteSubtitle.style.color = subtitleCol;
+      /* Subtitle visibility is CSS-driven on body[data-world]; keep transition for any future use */
+      siteSubtitle.style.transition = 'opacity 0.45s ease, visibility 0.45s ease';
     }
 
+    /* Default = CSS (#fff); cinematic = muted green-grey; inline overrides Antfood exclusion on desktop */
     navItems.forEach(el => {
       el.style.transition = 'color 3s ease';
-      el.style.color = navCol;
+      if (navCol) {
+        el.style.color = navCol;
+      } else {
+        el.style.removeProperty('color');
+      }
     });
 
     if (worldNameEl) {
@@ -2833,6 +2989,9 @@ const LUT = new Uint8Array(MAX_ITER * 3);
     }, 60);
   }
 
+  // Expose globally so nav links can stop audio before navigating
+  window._stopEcossistemas = function(cb) { fadeOutAudio(cb); };
+
   // ── Activate a world ──────────────────
   function setWorldPointerEvents(idx) {
     // Enable pointer events on world canvas only for Julia set (world 2)
@@ -2846,11 +3005,14 @@ const LUT = new Uint8Array(MAX_ITER * 3);
     WORLDS[idx].reset();
     worldNameEl.textContent = WORLD_NAMES[idx];
     worldCanvas.classList.add('active');
-    cinemaVeil.classList.add('active');
+    if (cinemaVeil) cinemaVeil.classList.add('active');
     worldControls.classList.add('visible');
     setTitleMode(true);
     loadAudio(idx);
     setWorldPointerEvents(idx);
+    // Always tear down home mobile nav / legacy menu-open before world attribute (canvas visibility)
+    if (typeof window._closeHomeMobileMenu === 'function') window._closeHomeMobileMenu();
+    document.body.classList.remove('menu-open', 'home-menu-open');
     document.body.dataset.world = idx;
   }
 
@@ -2875,22 +3037,24 @@ const LUT = new Uint8Array(MAX_ITER * 3);
     if (!isPlaying) {
       const startWorld = Math.floor(Math.random() * 4);
       isPlaying = true;
-      playLabel.textContent = 'ecossistemas sonoros';
+      playLabel.textContent = playLabelIdle;
       playIcon.textContent  = '■';
       playBtn.classList.add('playing');
       activateWorld(startWorld);
     } else {
       isPlaying = false;
-      playLabel.textContent = 'ecossistemas sonoros';
+      playLabel.textContent = playLabelIdle;
       playIcon.textContent  = '▶';
       playBtn.classList.remove('playing');
       worldCanvas.classList.remove('active');
-      cinemaVeil.classList.remove('active');
+      if (cinemaVeil) cinemaVeil.classList.remove('active');
       worldControls.classList.remove('visible');
       setTitleMode(false);
       fadeOutAudio();
       activeWorld = -1;
       worldCanvas.style.pointerEvents = 'none';
+      if (typeof window._closeHomeMobileMenu === 'function') window._closeHomeMobileMenu();
+      document.body.classList.remove('menu-open', 'home-menu-open');
       delete document.body.dataset.world;
     }
   });
