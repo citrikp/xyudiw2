@@ -5,7 +5,10 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mari Herzer · writings on sound</title>
-  <link rel="stylesheet" href="styles.css?v=202603191944">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap">
+  <link rel="stylesheet" href="styles.css?v=202605032200">
   <link rel="icon" href="resources/img/favicon1.ico" type="image/x-icon">
 
   <style>
@@ -13,59 +16,62 @@
     html, body             { overflow-y: auto !important; overflow-x: hidden; height: auto !important; }
     html, body, .container { overflow-y: auto !important; }
 
-    /* .container is position:fixed in styles.css — undo that here */
     .substack-page.container {
       position: relative !important;
       height: auto !important;
-      min-height: 10vh;
+      min-height: 100vh;
       overflow: visible !important;
-      max-width: 100vh;
-      padding: 1vh 8vw 10vh;
+      max-width: none;
+      padding: calc(5.8rem + env(safe-area-inset-top, 0)) max(5vw, env(safe-area-inset-right, 12px))
+               max(12vh, 5.5rem) max(5vw, env(safe-area-inset-left, 12px));
       gap: 0;
+      margin: 0;
+      left: auto;
+      top: auto;
+      z-index: 4;
+    }
+
+    /* Same horizontal rail as colaborar / about .onepager-inner */
+    .substack-inner {
+      width: min(1240px, 92vw);
+      margin: 0 auto;
     }
 
     #player-ui        { display: none !important; }
     .lang-switcher    { display: none !important; }
 
-    /* ── back link — matches portfolio style ── */
-    .back-link {
-      display: inline-block;
-      margin-bottom: 2.5rem;
-      font-size: 0.75rem;
-      letter-spacing: 0.12em;
-      color: var(--ink);
-      opacity: 0.7;
-      text-decoration: none;
-      transition: opacity 0.2s;
-      font-family: var(--mono);
-    }
-    .back-link:hover { opacity: 1; }
 
-    /* ── page title — matches portfolio h1 scale ── */
+
+    /* ── eyebrow rhythm like onepager ── */
+    .substack-eyebrow {
+      font-family: 'Brut Grotesque', 'Inter', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      opacity: 0.72;
+      margin-bottom: 1rem;
+    }
+
     .substack-header {
-      margin-bottom: 2.5rem;
-      border-bottom: 1px solid rgba(15,15,14,0.15);
-      padding-bottom: 1.2rem;
-      font-family: 'DM Serif Display', serif;
-    }
-    .substack-header h2 {
-      font-size: clamp(2.2rem, 9vw, 3.5rem);
-      font-weight: 400;
-      letter-spacing: 0.02em;
-      line-height: 1.05;
-      margin: 0;
-      text-transform: lowercase;
-      font-family: inherit;
-      font-family: 'DM Serif Display', serif;
+      margin-bottom: 3rem;
+      padding-bottom: 0;
+      border-bottom: none;
+      max-width: min(680px, 100%);
     }
 
-    /* ── posts ── */
-    .rss-post {
-      margin-bottom: 3.5rem;
-      padding-bottom: 3rem;
-      border-bottom: 1px solid rgba(15,15,14,0.1);
+    .substack-header h2 {
+      margin: 0;
+      color: var(--ink);
     }
-    .rss-post:last-child { border-bottom: none; }
+
+    .rss-post {
+      margin-bottom: 5.5rem;
+      padding-bottom: 0;
+      border-bottom: none;
+      max-width: min(680px, 100%);
+    }
+    .rss-post:last-child { margin-bottom: 0; }
 
     .rss-post-header {
       display: flex;
@@ -75,49 +81,62 @@
       flex-wrap: wrap;
     }
     .rss-post-title {
-      font-size: clamp(1rem, 2.5vw, 1.2rem);
-      font-weight: 400;
-      letter-spacing: 0.03em;
-      line-height: 1.2;
-      font-style: italic;
-      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.08rem, 2.25vw, 1.95rem);
+      font-weight: 500;
+      letter-spacing: -0.015em;
+      line-height: 1.22;
+      font-style: normal;
+      font-family: 'Brut Grotesque', 'Inter', sans-serif;
     }
     .rss-post-date {
       font-size: 0.68rem;
-      letter-spacing: 0.1em;
-      opacity: 0.4;
+      letter-spacing: 0.14em;
+      opacity: 0.5;
       white-space: nowrap;
-      font-family: var(--mono);
+      font-family: 'Brut Grotesque', 'Inter', sans-serif;
+      font-weight: 500;
+      text-transform: uppercase;
     }
 
     .rss-post-body {
-      font-size: 0.92rem;
-      line-height: 1.8;
-      opacity: 0.82;
+      font-family: 'Brut Grotesque', 'Inter', sans-serif;
+      font-size: clamp(1.08rem, 2.25vw, 1.95rem);
+      line-height: 1.22;
+      letter-spacing: -0.015em;
+      font-weight: 500;
+      color: rgba(15, 15, 14, 0.88);
       text-align: justify;
+      max-width: 30ch;
     }
-    .rss-post-body p { margin-bottom: 1em; }
+    .rss-post-body p { margin-bottom: 1.2rem; }
     .rss-post-body img { max-width: 100%; height: auto; margin: 1rem 0; }
     .rss-post-body h1,
     .rss-post-body h2,
-    .rss-post-body h3 { font-weight: 400; font-style: italic; margin: 1.4em 0 0.6em; text-align: left; }
+    .rss-post-body h3 {
+      font-family: 'Brut Grotesque', 'Inter', sans-serif;
+      font-weight: 700;
+      font-style: normal;
+      margin: 1.4em 0 0.6em;
+      text-align: left;
+    }
 
-    /* ── "read on substack" link — same family/size as portfolio nav ── */
     .rss-post-link {
       display: inline-block;
-      margin-top: 1rem;
+      margin-top: 1.2rem;
       font-size: 0.68rem;
-      letter-spacing: 0.12em;
-      opacity: 0.4;
+      letter-spacing: 0.14em;
+      opacity: 0.55;
       text-decoration: none;
-      color: inherit;
+      color: var(--accent-2);
       transition: opacity 0.2s;
-      font-family: var(--mono);
+      font-family: 'Brut Grotesque', 'Inter', sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
     }
     .rss-post-link:hover { opacity: 1; }
   </style>
 </head>
-<body>
+<body class="nav-unified legacy-home-noise-bg mh-substack">
 
   <canvas id="bg-canvas"></canvas>
   <canvas id="creature-canvas"></canvas>
@@ -125,18 +144,64 @@
   <div class="noise"></div>
   <div id="cinema-veil"></div>
 
-  <div class="lang-switcher" id="langSwitcher"></div>
+  <nav class="sliding-panel home-main-nav" aria-label="Primary">
+    <button type="button" class="panel-trigger" aria-expanded="false" aria-controls="homeNavPanelContent" id="homeNavTrigger">
+      <span class="trigger-label">Menu</span>
+    </button>
+    <div class="panel-content" id="homeNavPanelContent">
+      <button type="button" class="home-menu-close-mobile" id="homeMenuCloseMobile" aria-label="Close menu">Close</button>
+      <div class="home-nav-desktop-inner">
+        <div class="nav-links nav-links--home-desktop">
+
+          <a href="index-en.html#about" class="nav-item">
+            About
+          </a>
+
+          <a href="portfolio-en.html" class="nav-item">
+            Portfolio
+          </a>
+
+          <button class="btnC nav-item" type="button">
+            Contact
+          </button>
+
+          <dialog id="contatoDialog">
+            <button class="btnClose2 dialog-close">&#x2715;</button>
+            <div class="dialog-body dialog-body--contato">
+              <p><span class="contact-label">instagram</span><br>
+                <a href="https://instagram.com/mariherzer" target="_blank">@mariherzer</a></p>
+              <p><span class="contact-label">email</span><br>
+                <a href="mailto:mariherzer@gmail.com">mariherzer@gmail.com</a></p>
+            </div>
+          </dialog>
+
+          <a href="substack.html" class="nav-item">
+            Blog
+          </a>
+
+          <a href="index-en.html" class="nav-item nav-item--home-foot">Home</a>
+
+          <div class="nav-links-social">
+            <a href="https://www.instagram.com/mariherzer/" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a href="https://mariherzer.bandcamp.com/" target="_blank" rel="noopener noreferrer">Bandcamp</a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </nav>
 
   <main class="substack-page container">
 
-    <a href="index.html" class="back-link">← back</a>
+    <div class="substack-inner">
+      <div class="substack-header">
+        <p class="substack-eyebrow">blog</p>
+        <h2>writings on sound</h2>
+      </div>
 
-    <div class="substack-header">
-      <h2>writings on sound</h2>
-    </div>
-
-    <div id="rss-feed">
-      <p style="opacity:0.4; font-size:0.8rem; letter-spacing:0.1em;">loading...</p>
+      <div id="rss-feed">
+        <p style="opacity:0.4;font-size:0.8rem;letter-spacing:0.14em;text-transform:uppercase;font-family:'Brut Grotesque',sans-serif;font-weight:700;">loading…</p>
+      </div>
     </div>
 
     <script>
@@ -156,7 +221,7 @@
               <span class="rss-post-date">${dateStr}</span>
             </div>
             <div class="rss-post-body">${item.content || item.description}</div>
-            <a class="rss-post-link" href="${item.link}" target="_blank">read on substack ↗</a>
+            <a class="rss-post-link" href="${item.link}" target="_blank" rel="noopener">read on substack ↗</a>
           `;
           feed.appendChild(article);
         });
@@ -171,6 +236,6 @@
 
   <div id="player-ui"></div>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=202604295076"></script>
 </body>
 </html>
