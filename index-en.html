@@ -5,12 +5,12 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="lang-detect.js?v=202604295073"></script>
+  <script src="lang-detect.js?v=202605042100"></script>
   <title>Mari Herzer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap">
-  <link rel="stylesheet" href="styles.css?v=202605032800">
+  <link rel="stylesheet" href="styles.css?v=202605041330">
   <link rel="icon" href="resources/img/favicon1.ico" type="image/x-icon">
   <style id="home-blend">
     /* Title: blend on the anchor (fixed compositing element), not the title itself */
@@ -267,19 +267,63 @@
     var vimeoAmbientSrc = 'https://player.vimeo.com/video/1185245821?background=1&autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0';
     var vimeoAudioSrc = 'https://player.vimeo.com/video/1185245821?autoplay=1&loop=1&muted=0&title=0&byline=0&portrait=0';
 
+    var DBG_INGEST = 'http://127.0.0.1:7722/ingest/87e146c9-842a-4600-92ce-058bc194aafd';
+    function dbgVimeo(loc, msg, data, hid) {
+      fetch(DBG_INGEST, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '748776' },
+        body: JSON.stringify({
+          sessionId: '748776',
+          location: loc,
+          message: msg,
+          data: data || {},
+          hypothesisId: hid || 'V',
+          timestamp: Date.now()
+        })
+      }).catch(function() {});
+    }
+
     function syncVimeoToggleUi(muted) {
       if (!vimeoAudioToggle) return;
       vimeoAudioToggle.classList.toggle('is-on', !muted);
       vimeoAudioToggle.textContent = muted ? 'audio off' : 'audio on';
     }
 
+    function refreshVimeoToggleFromApi() {
+      if (!vimeoPlayer || !vimeoAudioToggle) return;
+      vimeoPlayer.getMuted().then(function(m) {
+        syncVimeoToggleUi(!!m);
+        dbgVimeo('index-en.html:vimeo', 'sync-from-api', { muted: !!m }, 'V2');
+      }).catch(function() {});
+    }
+
+    var vimeoVolHandler = null;
+    function bindAmbientVimeoPlayer(player) {
+      if (!player || typeof player.on !== 'function') return;
+      try {
+        if (vimeoVolHandler && typeof player.off === 'function') {
+          player.off('volumechange', vimeoVolHandler);
+        }
+      } catch (err) {}
+      vimeoVolHandler = function() {
+        refreshVimeoToggleFromApi();
+      };
+      player.on('volumechange', vimeoVolHandler);
+    }
+
     if (vimeoPlayer) {
+      bindAmbientVimeoPlayer(vimeoPlayer);
       vimeoPlayer.setMuted(true).catch(function() {});
       if (vimeoAudioToggle) {
         vimeoAudioToggle.addEventListener('click', function() {
           var wantOn = !vimeoAudioToggle.classList.contains('is-on');
+          dbgVimeo('index-en.html:vimeo', 'toggle-click', { wantOn: wantOn }, 'V3');
           if (!wantOn) {
-            vimeoPlayer.setMuted(true).then(function() { syncVimeoToggleUi(true); }).catch(function() { syncVimeoToggleUi(true); });
+            vimeoPlayer.setMuted(true).then(function() {
+              refreshVimeoToggleFromApi();
+            }).catch(function() {
+              refreshVimeoToggleFromApi();
+            });
             return;
           }
           function tryUnmute() {
@@ -290,25 +334,25 @@
           }
           tryUnmute().then(function(m) {
             if (!m) {
-              syncVimeoToggleUi(false);
+              refreshVimeoToggleFromApi();
               return;
             }
             if (vimeoFrame && vimeoFrame.src.indexOf('background=1') !== -1) {
               vimeoFrame.src = vimeoAudioSrc;
               vimeoPlayer = new window.Vimeo.Player(vimeoFrame);
+              bindAmbientVimeoPlayer(vimeoPlayer);
               return vimeoPlayer.ready().then(function() {
                 return vimeoPlayer.setVolume(1);
               }).then(function() {
                 return vimeoPlayer.play();
               }).then(function() {
-                return vimeoPlayer.getMuted();
-              }).then(function(m2) {
-                syncVimeoToggleUi(!!m2);
+                refreshVimeoToggleFromApi();
               });
             }
-            syncVimeoToggleUi(!!m);
-          }).catch(function() {
-            vimeoPlayer.getMuted().then(function(m) { syncVimeoToggleUi(!!m); }).catch(function() {});
+            refreshVimeoToggleFromApi();
+          }).catch(function(err) {
+            dbgVimeo('index-en.html:vimeo', 'try-unmute-catch', { err: String(err) }, 'V5');
+            refreshVimeoToggleFromApi();
           });
         });
       }
@@ -358,10 +402,20 @@
         if (vimeoFrame && vimeoFrame.src.indexOf('background=1') === -1) {
           vimeoFrame.src = vimeoAmbientSrc;
           vimeoPlayer = (window.Vimeo && vimeoFrame) ? new window.Vimeo.Player(vimeoFrame) : null;
+          bindAmbientVimeoPlayer(vimeoPlayer);
         }
         if (vimeoPlayer) {
-          vimeoPlayer.setMuted(true).catch(function() {});
-          vimeoPlayer.play().catch(function() {});
+          vimeoPlayer.ready().then(function() {
+            return vimeoPlayer.setMuted(true);
+          }).then(function() {
+            return vimeoPlayer.play();
+          }).then(function() {
+            dbgVimeo('index-en.html:vimeo', 'open-play-ok', {}, 'V4');
+          }).catch(function(err) {
+            dbgVimeo('index-en.html:vimeo', 'open-play-fail', { err: String(err) }, 'V4');
+          }).then(function() {
+            refreshVimeoToggleFromApi();
+          });
         }
         if (vimeoAudioToggle) {
           vimeoAudioToggle.classList.remove('is-on');
@@ -379,6 +433,7 @@
       if (vimeoFrame && vimeoFrame.src.indexOf('background=1') === -1) {
         vimeoFrame.src = vimeoAmbientSrc;
         vimeoPlayer = (window.Vimeo && vimeoFrame) ? new window.Vimeo.Player(vimeoFrame) : null;
+        bindAmbientVimeoPlayer(vimeoPlayer);
       }
       if (vimeoPlayer) {
         vimeoPlayer.setMuted(true).catch(function() {});
@@ -399,12 +454,22 @@
       }, transitionMs);
     }
 
+    var MH_LANG_PREF_KEY = 'mh-lang-pref';
+    function persistLangPreferenceFromHref(href) {
+      try {
+        if (!href || href.indexOf('#') !== -1) return;
+        if (href.indexOf('index-en.html') !== -1) localStorage.setItem(MH_LANG_PREF_KEY, 'en');
+        else if (href.indexOf('index.html') !== -1) localStorage.setItem(MH_LANG_PREF_KEY, 'pt');
+      } catch (_) {}
+    }
+
     /** About/onepager: language switch keeps overlay after reload (#colab) */
     var langLinks = document.querySelectorAll('#langSwitcher a[data-lang-switch]');
     Array.prototype.forEach.call(langLinks, function(link) {
       link.addEventListener('click', function(e) {
-        if (!document.body.classList.contains('onepager-active')) return;
         var raw = link.getAttribute('href') || '';
+        persistLangPreferenceFromHref(raw);
+        if (!document.body.classList.contains('onepager-active')) return;
         if (raw.indexOf('#') !== -1) return;
         e.preventDefault();
         window.location.href = raw + '#colab';

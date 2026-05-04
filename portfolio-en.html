@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="lang-detect.js?v=202604295073"></script>
+  <script src="lang-detect.js?v=202605042100"></script>
   <title>Mari Herzer — portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap">
-  <link rel="stylesheet" href="styles.css?v=202605032930">
+  <link rel="stylesheet" href="styles.css?v=202605041330">
   <link rel="icon" href="resources/img/favicon1.ico" type="image/x-icon">
   <style>
     /* solid #000 page background — styles.css hides #bg-canvas shader on portfolio */
@@ -129,21 +129,22 @@
       position: fixed;
       inset: 0;
       z-index: 0;
-      background: rgba(0, 0, 0, 0.95);
+      background: #000;
       pointer-events: auto;
       cursor: pointer;
     }
     .pf-modal-shell {
       position: relative;
       z-index: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      width: min(88vw, 1400px, calc(100dvh * 16 / 9));
+      max-width: 100%;
       flex: 0 0 auto;
       margin: 0;
-      max-width: 100%;
       pointer-events: none;
       box-sizing: border-box;
+      border: none;
+      outline: none;
+      box-shadow: none;
     }
     .pf-modal-shell > * {
       pointer-events: auto;
@@ -154,12 +155,15 @@
     }
     .pf-modal-stage {
       position: relative;
-      width: min(88vw, 1400px, calc(100dvh * 16 / 9));
-      max-width: 100%;
-      max-height: min(100dvh, 100vh);
+      width: 100%;
       flex-shrink: 0;
       aspect-ratio: 16 / 9;
+      max-height: min(100dvh, 100vh);
       background: #000;
+      overflow: hidden;
+      border: none;
+      outline: none;
+      box-shadow: none;
     }
     .pf-modal-iframe {
       position: absolute;
@@ -167,7 +171,15 @@
       width: 100%;
       height: 100%;
       border: 0;
+      outline: none;
       display: block;
+      box-shadow: none;
+      background: #000;
+      opacity: 0;
+      transition: opacity 0.14s ease-out;
+    }
+    .pf-modal-iframe.is-paint-ready {
+      opacity: 1;
     }
     .pf-modal-close {
       position: fixed;
@@ -196,12 +208,14 @@
       bottom: 0;
       z-index: 3;
       width: 100%;
+      border: none;
+      outline: none;
       margin-top: 0;
       padding: 0.45rem 0.75rem;
       padding-bottom: max(0.45rem, env(safe-area-inset-bottom, 0px));
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.58rem;
       font-family: 'Brut Grotesque', 'Inter', sans-serif;
       font-size: 0.7rem;
       letter-spacing: 0.04em;
@@ -289,7 +303,7 @@
     @media (max-width: 1023px) {
       .pf-modal-controls {
         font-size: 0.78rem;
-        gap: 1rem;
+        gap: 0.72rem;
         padding-left: 0.85rem;
         padding-right: 0.85rem;
         padding-top: 0.55rem;
@@ -307,7 +321,7 @@
     @media (orientation: landscape) and (max-height: 480px) {
       .pf-modal-controls {
         font-size: 0.8rem;
-        gap: 1.1rem;
+        gap: 0.62rem;
         padding: 0.38rem 0.65rem;
         padding-bottom: max(0.35rem, env(safe-area-inset-bottom, 0px));
       }
@@ -319,6 +333,49 @@
         min-height: 44px;
         display: inline-flex;
         align-items: center;
+      }
+    }
+    @media (max-width: 1023px) and (orientation: portrait) {
+      .pf-modal-shell {
+        width: min(94vw, 1400px);
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.42rem;
+        justify-content: center;
+        max-height: min(100dvh, 100vh);
+        overflow: visible;
+      }
+      .pf-modal-stage {
+        max-height: calc(100dvh - 7.75rem);
+        border-radius: 10px;
+      }
+      .pf-modal-controls {
+        position: relative;
+        flex: 0 0 auto;
+        bottom: auto;
+        margin-top: 0;
+        border-radius: 0;
+        padding: 0.52rem 0.72rem;
+        padding-bottom: max(0.52rem, env(safe-area-inset-bottom, 0px));
+        gap: 0.55rem;
+        font-size: 0.74rem;
+        background: transparent;
+        max-width: 100%;
+        overflow: hidden;
+        box-sizing: border-box;
+      }
+      .pf-modal-progress {
+        flex: 1 1 0%;
+        min-width: 0;
+        max-width: 100%;
+        height: 8px;
+      }
+      .pf-modal-stage .pf-modal-iframe {
+        border-radius: 10px;
+      }
+      .pf-modal-time {
+        min-width: 2rem;
       }
     }
 
@@ -595,13 +652,13 @@
       '<div class="pf-modal-shell">' +
       '<div class="pf-modal-stage">' +
         '<iframe class="pf-modal-iframe" src="" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>' +
-        '<div class="pf-modal-controls">' +
-        '<button class="pf-modal-play" type="button">Pause video</button>' +
+        '<div class="pf-modal-hit" aria-hidden="true"></div>' +
+      '</div>' +
+      '<div class="pf-modal-controls">' +
+        '<button class="pf-modal-play" type="button">Pause</button>' +
         '<div class="pf-modal-progress"><div class="pf-modal-progress-bar"></div></div>' +
         '<div class="pf-modal-time">0:00</div>' +
         '<div class="pf-modal-sound" role="button" tabindex="0">Sound on</div>' +
-        '</div>' +
-        '<div class="pf-modal-hit" aria-hidden="true"></div>' +
       '</div>' +
       '</div>';
     document.body.appendChild(modal);
@@ -615,12 +672,37 @@
     var modalProgressBar = modal.querySelector('.pf-modal-progress-bar');
     var modalTime = modal.querySelector('.pf-modal-time');
     var modalSound = modal.querySelector('.pf-modal-sound');
+    var modalShell = modal.querySelector('.pf-modal-shell');
+    // #region agent log
+    function dbgPf(loc, msg, data, hid) {
+      fetch('http://127.0.0.1:7722/ingest/87e146c9-842a-4600-92ce-058bc194aafd',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'748776'},body:JSON.stringify({sessionId:'748776',runId:'pf-modal',location:loc,message:msg,data:data,timestamp:Date.now(),hypothesisId:hid})}).catch(function(){});
+    }
+    // #endregion
     var modalPlayer = null;
     var modalMuted = false;
     var modalDuration = 0;
 
     var modalChromeHideTimer = null;
     var CHROME_HIDE_MS = 5000;
+    var modalIframeRevealTimer = null;
+    function cancelModalIframeRevealFallback() {
+      if (modalIframeRevealTimer) {
+        clearTimeout(modalIframeRevealTimer);
+        modalIframeRevealTimer = null;
+      }
+    }
+    function revealModalIframePaint() {
+      cancelModalIframeRevealFallback();
+      if (modalIframe) modalIframe.classList.add('is-paint-ready');
+    }
+    function armModalIframePaintGate() {
+      cancelModalIframeRevealFallback();
+      if (modalIframe) modalIframe.classList.remove('is-paint-ready');
+      modalIframeRevealTimer = window.setTimeout(function() {
+        modalIframeRevealTimer = null;
+        revealModalIframePaint();
+      }, 3200);
+    }
 
     function clearModalChromeTimer() {
       if (modalChromeHideTimer) {
@@ -657,7 +739,6 @@
     }
 
     function resetModalIframe() {
-      var controls = modalStage.querySelector('.pf-modal-controls');
       var hit = modalStage.querySelector('.pf-modal-hit');
       var oldIframe = modalStage.querySelector('.pf-modal-iframe');
       if (oldIframe) oldIframe.remove();
@@ -667,12 +748,10 @@
       newIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture');
       newIframe.setAttribute('allowfullscreen', '');
       newIframe.src = '';
-      if (controls) {
-        modalStage.insertBefore(newIframe, controls);
+      if (hit) {
+        modalStage.insertBefore(newIframe, hit);
       } else {
-        modalStage.insertBefore(newIframe, modalStage.firstChild);
-      }
-      if (!hit) {
+        modalStage.appendChild(newIframe);
         hit = document.createElement('div');
         hit.className = 'pf-modal-hit';
         hit.setAttribute('aria-hidden', 'true');
@@ -680,6 +759,22 @@
       }
       modalIframe = newIframe;
     }
+
+    function dbgPfFullscreenLayout() {
+      if (!modal.classList.contains('is-open') || !modalShell) return;
+      var sr = modalShell.getBoundingClientRect();
+      var fs = document.fullscreenElement || document.webkitFullscreenElement;
+      dbgPf('portfolio-en.html:modal', 'fullscreen-change', { fsEl: !!fs, iw: window.innerWidth, ih: window.innerHeight, shellW: Math.round(sr.width), gapL: Math.round(sr.left), gapR: Math.round(window.innerWidth - sr.right) }, 'PL2');
+    }
+    document.addEventListener('fullscreenchange', dbgPfFullscreenLayout);
+    document.addEventListener('webkitfullscreenchange', dbgPfFullscreenLayout);
+    window.addEventListener('orientationchange', function() {
+      window.setTimeout(function() {
+        if (!modal.classList.contains('is-open') || !modalShell) return;
+        var sr = modalShell.getBoundingClientRect();
+        dbgPf('portfolio-en.html:modal', 'orientation-change', { iw: window.innerWidth, ih: window.innerHeight, shellW: Math.round(sr.width), gapL: Math.round(sr.left), gapR: Math.round(window.innerWidth - sr.right) }, 'PL1');
+      }, 380);
+    });
 
     function fmtTime(sec) {
       var s = Math.max(0, Math.floor(sec || 0));
@@ -700,6 +795,7 @@
       // no autoplay in URL — trigger via API so browser allows unmuted sound
       var fullSrc = rawSrc + (rawSrc.includes('?') ? '&' : '?') +
         'controls=0&dnt=1&title=0&byline=0&portrait=0&autopause=0';
+      armModalIframePaintGate();
       modalIframe.src = fullSrc;
       modal.classList.add('is-open');
       modal.classList.remove('is-chrome-hidden');
@@ -712,9 +808,30 @@
       modalProgressBar.style.width = '0%';
       modalTime.textContent = '0:00';
       modalSound.textContent = 'Sound on';
+      window.requestAnimationFrame(function() {
+        window.requestAnimationFrame(function() {
+          if (!modalShell) return;
+          var sr = modalShell.getBoundingClientRect();
+          var ctrlEl = modal.querySelector('.pf-modal-controls');
+          var prEl = modalProgress;
+          var cr = ctrlEl ? ctrlEl.getBoundingClientRect() : null;
+          var pr = prEl ? prEl.getBoundingClientRect() : null;
+          dbgPf('portfolio-en.html:modal', 'modal-open-layout', {
+            iw: window.innerWidth,
+            ih: window.innerHeight,
+            shellW: Math.round(sr.width),
+            gapL: Math.round(sr.left),
+            gapR: Math.round(window.innerWidth - sr.right),
+            ctrlW: cr ? Math.round(cr.width) : null,
+            progW: pr ? Math.round(pr.width) : null,
+            progOverflowPx: cr && pr ? Math.round(pr.right - cr.right) : null
+          }, 'PL3');
+        });
+      });
       if (window.Vimeo && window.Vimeo.Player) {
         modalPlayer = new window.Vimeo.Player(modalIframe);
-        modalPlayBtn.textContent = 'Pause video';
+        modalPlayBtn.textContent = 'Pause';
+        modalPlayer.on('loaded', revealModalIframePaint);
         modalPlayer.ready().then(function() {
           return modalPlayer.setVolume(1);
         }).then(function() {
@@ -732,6 +849,7 @@
         });
         modalPlayer.on('volumechange', syncModalSoundFromPlayer);
         modalPlayer.on('play', function() {
+          revealModalIframePaint();
           modal.classList.remove('is-chrome-hidden');
           syncModalChromeTimerWithPlayback();
         });
@@ -746,12 +864,13 @@
           modalTime.textContent = fmtTime(data ? data.seconds : 0);
         });
         modalPlayer.on('ended', function() {
-          modalPlayBtn.textContent = 'Play video';
+          modalPlayBtn.textContent = 'Play';
         });
       }
     }
 
     function closeModal() {
+      cancelModalIframeRevealFallback();
       modal.classList.remove('is-open');
       modal.classList.remove('is-chrome-hidden');
       clearModalChromeTimer();
@@ -791,10 +910,10 @@
       modalPlayer.getPaused().then(function(paused) {
         if (paused) {
           modalPlayer.play().catch(function() {});
-          modalPlayBtn.textContent = 'Pause video';
+          modalPlayBtn.textContent = 'Pause';
         } else {
           modalPlayer.pause().catch(function() {});
-          modalPlayBtn.textContent = 'Play video';
+          modalPlayBtn.textContent = 'Play';
         }
       }).catch(function() {});
     });

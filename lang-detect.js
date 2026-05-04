@@ -1,13 +1,22 @@
-/* Auto locale routing: Portuguese devices → *PT* HTML; all others → *-en*. */
+/* Auto locale routing: Portuguese devices → *PT* HTML; all others → *-en*.
+ * Query ?lang=pt|en wins one-shot; explicit globe choice persists in localStorage. */
 (function () {
   try {
+    var STORAGE_KEY = 'mh-lang-pref';
     var qs = new URLSearchParams(window.location.search);
     if (qs.has('nolang')) return;
 
     var override = (qs.get('lang') || '').toLowerCase();
+    var stored = '';
+    try {
+      stored = (localStorage.getItem(STORAGE_KEY) || '').toLowerCase();
+    } catch (_) {}
+
     var wantPt;
     if (override === 'pt') wantPt = true;
     else if (override === 'en') wantPt = false;
+    else if (stored === 'pt') wantPt = true;
+    else if (stored === 'en') wantPt = false;
     else {
       var langs = navigator.languages && navigator.languages.length
         ? Array.prototype.slice.call(navigator.languages)
