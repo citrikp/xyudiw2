@@ -4,12 +4,13 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="lang-detect.js?v=202604295073"></script>
+  <meta http-equiv="Permissions-Policy" content="window-management=()">
+  <script src="lang-detect.js?v=202605042100"></script>
   <title>Mari Herzer — portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap">
-  <link rel="stylesheet" href="styles.css?v=202605032500">
+  <link rel="stylesheet" href="styles.css?v=202605121400">
   <link rel="icon" href="resources/img/favicon1.ico" type="image/x-icon">
   <style>
     /* solid #000 page background — styles.css hides #bg-canvas shader on portfolio */
@@ -49,19 +50,36 @@
       overflow: hidden;
       cursor: pointer;
       border-radius: 12px;
+      outline: none;
+      box-shadow: none;
+      transform: translateZ(0);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
     }
     .pf-vimeo-wrap iframe {
       position: absolute;
-      top: -10%; left: -10%;
-      width: 120%;
-      height: 120%;
+      inset: 0;
+      width: 100%;
+      height: 100%;
       border: 0;
       display: block;
       pointer-events: none;
+      outline: none;
+      background: #000;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      clip-path: inset(0 round 12px);
+    }
+    .pf-vimeo-wrap.pf-vimeo-iframe-armed iframe {
+      opacity: 1;
+      transition: none;
     }
     .pf-play-overlay {
       position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
       background: rgba(0,0,0,0.1); cursor: pointer; transition: background 0.22s; z-index: 5;
+    }
+    .pf-vimeo-wrap.is-previewing .pf-play-overlay {
+      background: rgba(0,0,0,0.02);
     }
     .pf-play-overlay:hover { background: rgba(0,0,0,0.03); }
     .pf-play-overlay.is-gone { display: none; }
@@ -71,7 +89,7 @@
       z-index: 4;
       overflow: hidden;
       border-radius: inherit;
-      transition: opacity 0.24s ease;
+      transition: opacity 0.4s ease;
       pointer-events: none;
     }
     .pf-video-thumb img {
@@ -80,71 +98,287 @@
       object-fit: cover;
       object-position: center center;
       display: block;
-      transform: scale(1.18);
-      transform-origin: center center;
     }
-    .pf-vimeo-wrap.is-previewing .pf-video-thumb { opacity: 0; }
+    .pf-vimeo-wrap.is-previewing .pf-video-thumb {
+      opacity: 0;
+      transition: opacity 0.55s ease 0.12s;
+    }
 
     /* shared modal player (fullscreen embed) */
     .pf-modal {
-      position: fixed; inset: 0; z-index: 9999;
-      display: none; flex-direction: column; align-items: center; justify-content: center;
-      background: rgba(0, 0, 0, 0.95);
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      pointer-events: none;
       animation: pf-modal-fade 0.26s ease;
     }
-    .pf-modal.is-open { display: flex; }
-    @keyframes pf-modal-fade { from { opacity: 0; } to { opacity: 1; } }
+    .pf-modal.is-open {
+      display: flex;
+      pointer-events: none;
+      overflow: hidden;
+      align-items: center;
+      justify-content: center;
+      padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+      box-sizing: border-box;
+    }
+    .pf-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: #000;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+    .pf-modal-shell {
+      position: relative;
+      z-index: 1;
+      width: min(88vw, 1400px, calc(100dvh * 16 / 9));
+      max-width: 100%;
+      flex: 0 0 auto;
+      margin: 0;
+      pointer-events: none;
+      box-sizing: border-box;
+      border: none;
+      outline: none;
+      box-shadow: none;
+    }
+    .pf-modal-shell > * {
+      pointer-events: auto;
+    }
+    @keyframes pf-modal-fade {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
     .pf-modal-stage {
       position: relative;
-      width: min(88vw, 1400px);
+      width: 100%;
+      flex-shrink: 0;
       aspect-ratio: 16 / 9;
+      max-height: min(100dvh, 100vh);
       background: #000;
+      overflow: hidden;
+      border: none;
+      outline: none;
+      box-shadow: none;
     }
     .pf-modal-iframe {
-      position: absolute; inset: 0; width: 100%; height: 100%;
-      border: 0; display: block;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      outline: none;
+      display: block;
+      box-shadow: none;
+      background: #000;
+      opacity: 0;
+      transition: opacity 0.14s ease-out;
+    }
+    .pf-modal-iframe.is-paint-ready {
+      opacity: 1;
     }
     .pf-modal-close {
-      position: fixed; top: 1.3rem; right: 1.4rem; z-index: 10001;
-      background: #fff; color: #111; border: 0; border-radius: 999px;
+      position: fixed;
+      top: max(1.3rem, env(safe-area-inset-top, 0px));
+      right: max(1.4rem, env(safe-area-inset-right, 0px));
+      z-index: 10001;
+      pointer-events: auto;
+      background: #fff;
+      color: #111;
+      border: 0;
+      border-radius: 999px;
       font-family: 'Brut Grotesque', 'Inter', sans-serif;
-      font-weight: 500; font-size: 0.82rem; letter-spacing: 0.02em;
-      padding: 0.5rem 1.1rem; cursor: pointer;
-      transition: background 0.18s ease;
+      font-weight: 500;
+      font-size: 0.82rem;
+      letter-spacing: 0.02em;
+      padding: 0.5rem 1.1rem;
+      cursor: pointer;
+      transition: background 0.18s ease, opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      transform: translateY(0);
     }
     .pf-modal-close:hover { background: #ddd; }
     .pf-modal-controls {
-      width: min(88vw, 1400px);
-      margin-top: 0.7rem;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 3;
+      width: 100%;
+      border: none;
+      outline: none;
+      margin-top: 0;
+      padding: 0.45rem 0.75rem;
+      padding-bottom: max(0.45rem, env(safe-area-inset-bottom, 0px));
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.58rem;
       font-family: 'Brut Grotesque', 'Inter', sans-serif;
       font-size: 0.7rem;
       letter-spacing: 0.04em;
       text-transform: uppercase;
       user-select: none;
+      box-sizing: border-box;
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      transform: translateY(0);
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0,0,0,0.5) 45%, transparent 100%);
+      pointer-events: auto;
+    }
+    .pf-modal.is-chrome-hidden .pf-modal-close {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-0.75rem);
+    }
+    .pf-modal.is-chrome-hidden .pf-modal-controls {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(1.1rem);
+    }
+    .pf-modal-hit {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      background: transparent;
+      pointer-events: none;
+      touch-action: manipulation;
+    }
+    .pf-modal.is-chrome-hidden.is-open .pf-modal-hit {
+      pointer-events: auto;
     }
     .pf-modal-play {
-      background: none; border: 0;
+      background: none;
+      border: 0;
       color: rgba(255,255,255,0.85);
-      font-family: inherit; font-size: inherit;
-      letter-spacing: inherit; text-transform: inherit;
-      cursor: pointer; padding: 0;
-      white-space: nowrap; flex-shrink: 0;
+      font-family: inherit;
+      font-size: inherit;
+      letter-spacing: inherit;
+      text-transform: inherit;
+      cursor: pointer;
+      padding: 0;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     .pf-modal-progress {
-      position: relative; flex: 1;
-      height: 2px; background: rgba(255,255,255,0.2);
+      position: relative;
+      flex: 1;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.2);
       cursor: pointer;
     }
-    .pf-modal-progress::after { content: ''; position: absolute; inset: -6px 0; }
-    .pf-modal-progress-bar {
-      position: absolute; top: 0; bottom: 0; left: 0;
-      width: 0%; background: rgba(255,255,255,0.9);
+    .pf-modal-progress::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: -14px;
+      bottom: -14px;
     }
-    .pf-modal-time { color: rgba(255,255,255,0.6); white-space: nowrap; flex-shrink: 0; min-width: 2.4rem; text-align: center; }
-    .pf-modal-sound { color: rgba(255,255,255,0.85); cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+    .pf-modal-progress-bar {
+      position: absolute;
+      top: 0; bottom: 0; left: 0;
+      width: 0%;
+      background: rgba(255,255,255,0.9);
+    }
+    .pf-modal-time {
+      color: rgba(255,255,255,0.6);
+      white-space: nowrap;
+      flex-shrink: 0;
+      min-width: 2.4rem;
+      text-align: center;
+    }
+    .pf-modal-sound {
+      color: rgba(255,255,255,0.85);
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      padding: 0.35rem 0.15rem;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+    }
+    @media (max-width: 1023px) {
+      .pf-modal-controls {
+        font-size: 0.78rem;
+        gap: 0.72rem;
+        padding-left: 0.85rem;
+        padding-right: 0.85rem;
+        padding-top: 0.55rem;
+      }
+      .pf-modal-progress {
+        height: 7px;
+      }
+      .pf-modal-play {
+        padding: 0.45rem 0.2rem;
+        min-height: 44px;
+        align-items: center;
+        display: inline-flex;
+      }
+    }
+    @media (orientation: landscape) and (max-height: 480px) {
+      .pf-modal-controls {
+        font-size: 0.8rem;
+        gap: 0.62rem;
+        padding: 0.38rem 0.65rem;
+        padding-bottom: max(0.35rem, env(safe-area-inset-bottom, 0px));
+      }
+      .pf-modal-progress {
+        height: 8px;
+      }
+      .pf-modal-play {
+        padding: 0.45rem 0.2rem;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+      }
+    }
+    @media (max-width: 1023px) and (orientation: portrait) {
+      .pf-modal-shell {
+        width: min(94vw, 1400px);
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.42rem;
+        justify-content: center;
+        max-height: min(100dvh, 100vh);
+        overflow: visible;
+      }
+      .pf-modal-stage {
+        max-height: calc(100dvh - 7.75rem);
+        border-radius: 10px;
+      }
+      .pf-modal-controls {
+        position: relative;
+        flex: 0 0 auto;
+        bottom: auto;
+        margin-top: 0;
+        border-radius: 0;
+        padding: 0.52rem 0.72rem;
+        padding-bottom: max(0.52rem, env(safe-area-inset-bottom, 0px));
+        gap: 0.55rem;
+        font-size: 0.74rem;
+        background: transparent;
+        max-width: 100%;
+        overflow: hidden;
+        box-sizing: border-box;
+      }
+      .pf-modal-progress {
+        flex: 1 1 0%;
+        min-width: 0;
+        max-width: 100%;
+        height: 8px;
+      }
+      .pf-modal-stage .pf-modal-iframe {
+        border-radius: 10px;
+      }
+      .pf-modal-time {
+        min-width: 2rem;
+      }
+    }
 
     .pf-play-circle { display: none; }
     .pf-bc-track { margin-bottom: 0.55rem; }
@@ -274,13 +508,31 @@
   <main class="pf-page">
     <div class="onepager-inner">
 
-      <div class="onepager-block onepager-block--media onepager-vimeo-wrap">
-        <div class="pf-video-label">showreel</div>
+      <!-- showreel — copy above the first video (same pattern as other sections) -->
+      <div class="onepager-block onepager-block--text">
+        <p class="onepager-eyebrow">showreel</p>
+        <p class="onepager-text">Showreel includes released works and others not yet distributed. Original soundtrack.</p>
+      </div>
+      <div class="onepager-block onepager-block--media onepager-block--media-single onepager-vimeo-wrap">
         <div class="pf-vimeo-wrap">
           <iframe data-src="https://player.vimeo.com/video/1185245821?badge=0&autopause=0&player_id=0&app_id=58479" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
           <div class="pf-play-overlay"><div class="pf-play-circle">&#x25B6;</div></div>
         </div>
       </div>
+
+      <!-- seu estilo, seu impacto -->
+      <div class="onepager-block onepager-block--text">
+        <p class="onepager-eyebrow">seu estilo, seu impacto [2024] - showreel</p>
+        <p class="onepager-text">Original score for documentary, 30'. Dir. Luciana Brafman and Ricardo Carioba, 2024.</p>
+      </div>
+      <div class="onepager-block onepager-block--media onepager-block--media-single">
+    
+        <div class="pf-vimeo-wrap">
+          <iframe data-src="https://player.vimeo.com/video/1191593221?badge=0&autopause=0&player_id=0&app_id=58479" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
+          <div class="pf-play-overlay"><div class="pf-play-circle">&#x25B6;</div></div>
+        </div>
+      </div>
+
 
       <!-- sofia foi -->
       <div class="onepager-block onepager-block--text">
@@ -323,7 +575,7 @@
         <p class="onepager-text">Original score for documentary. Dir. Eugenio Puppo, 2022.</p>
       </div>
       <div class="onepager-block onepager-block--media onepager-block--right">
-        <div class="pf-video-label">trailer</div>
+        <div class="pf-video-label">showreel</div>
         <div class="pf-vimeo-wrap">
           <iframe data-src="https://player.vimeo.com/video/1178063597?badge=0&autopause=0&player_id=0&app_id=58479" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
           <div class="pf-play-overlay"><div class="pf-play-circle">&#x25B6;</div></div>
@@ -370,7 +622,7 @@
       <!-- commissioned -->
       <div class="onepager-block onepager-block--text">
         <p class="onepager-eyebrow">commissioned electronic [2021–2024]</p>
-        <p class="onepager-text">Commercial electronic music, custom made for DJs and companies. Composed, produced and mixed by Mari Herzer. All tracks are short excerpts for copyright purposes.</p>
+        <p class="onepager-text">Commercial electronic music, custom made for DJs and companies for licensing. Composed, produced and mixed by Mari Herzer. Genres: tech house, house, organic house.</p>
       </div>
       <div class="onepager-block onepager-block--media onepager-block--left pf-audio-list" id="audio-list"></div>
 
@@ -379,7 +631,7 @@
         <p class="onepager-eyebrow">natura &amp; co [2020]</p>
         <p class="onepager-text">Original score for Natura &amp; CO brand film, 2020.</p>
       </div>
-      <div class="onepager-block onepager-block--media onepager-block--right">
+      <div class="onepager-block onepager-block--media onepager-block--media-single">
         <div class="pf-vimeo-wrap">
           <iframe data-src="https://player.vimeo.com/video/591961465?title=0&byline=0&portrait=0" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
           <div class="pf-play-overlay"><div class="pf-play-circle">&#x25B6;</div></div>
@@ -391,7 +643,7 @@
         <p class="onepager-eyebrow">natura — innovation centre [2020]</p>
         <p class="onepager-text">Original score for Natura brand film, 2020.</p>
       </div>
-      <div class="onepager-block onepager-block--media onepager-block--left">
+      <div class="onepager-block onepager-block--media onepager-block--media-single">
         <div class="pf-vimeo-wrap">
           <iframe data-src="https://player.vimeo.com/video/508575404?badge=0&autopause=0&player_id=0&app_id=58479" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
           <div class="pf-play-overlay"><div class="pf-play-circle">&#x25B6;</div></div>
@@ -414,18 +666,23 @@
     modal.className = 'pf-modal';
     modal.setAttribute('aria-hidden', 'true');
     modal.innerHTML =
+      '<div class="pf-modal-backdrop" aria-hidden="true"></div>' +
       '<button class="pf-modal-close" type="button" aria-label="Close video">Close</button>' +
+      '<div class="pf-modal-shell">' +
       '<div class="pf-modal-stage">' +
         '<iframe class="pf-modal-iframe" src="" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>' +
+        '<div class="pf-modal-hit" aria-hidden="true"></div>' +
       '</div>' +
       '<div class="pf-modal-controls">' +
-        '<button class="pf-modal-play" type="button">Pause video</button>' +
+        '<button class="pf-modal-play" type="button">Pause</button>' +
         '<div class="pf-modal-progress"><div class="pf-modal-progress-bar"></div></div>' +
         '<div class="pf-modal-time">0:00</div>' +
-        '<div class="pf-modal-sound" role="button" tabindex="0">Sound off</div>' +
+        '<div class="pf-modal-sound" role="button" tabindex="0">Sound on</div>' +
+      '</div>' +
       '</div>';
     document.body.appendChild(modal);
 
+    var modalBackdrop = modal.querySelector('.pf-modal-backdrop');
     var modalStage = modal.querySelector('.pf-modal-stage');
     var modalIframe = modal.querySelector('.pf-modal-iframe');
     var modalCloseBtn = modal.querySelector('.pf-modal-close');
@@ -434,14 +691,101 @@
     var modalProgressBar = modal.querySelector('.pf-modal-progress-bar');
     var modalTime = modal.querySelector('.pf-modal-time');
     var modalSound = modal.querySelector('.pf-modal-sound');
+    var modalShell = modal.querySelector('.pf-modal-shell');
     var modalPlayer = null;
     var modalMuted = false;
     var modalDuration = 0;
 
+    var modalChromeHideTimer = null;
+    var CHROME_HIDE_MS = 5000;
+    var modalIframeRevealTimer = null;
+    function cancelModalIframeRevealFallback() {
+      if (modalIframeRevealTimer) {
+        clearTimeout(modalIframeRevealTimer);
+        modalIframeRevealTimer = null;
+      }
+    }
+    function revealModalIframePaint() {
+      cancelModalIframeRevealFallback();
+      if (modalIframe) modalIframe.classList.add('is-paint-ready');
+    }
+    function armModalIframePaintGate() {
+      cancelModalIframeRevealFallback();
+      if (modalIframe) modalIframe.classList.remove('is-paint-ready');
+      modalIframeRevealTimer = window.setTimeout(function() {
+        modalIframeRevealTimer = null;
+        revealModalIframePaint();
+      }, 3200);
+    }
+
+    function clearModalChromeTimer() {
+      if (modalChromeHideTimer) {
+        clearTimeout(modalChromeHideTimer);
+        modalChromeHideTimer = null;
+      }
+    }
+
+    function scheduleModalChromeHide() {
+      clearModalChromeTimer();
+      modalChromeHideTimer = setTimeout(function() {
+        modalChromeHideTimer = null;
+        if (!modal.classList.contains('is-open')) return;
+        modal.classList.add('is-chrome-hidden');
+      }, CHROME_HIDE_MS);
+    }
+
+    function syncModalChromeTimerWithPlayback() {
+      clearModalChromeTimer();
+      if (!modalPlayer) return;
+      modalPlayer.getPaused().then(function(paused) {
+        if (!paused) scheduleModalChromeHide();
+      }).catch(function() {});
+    }
+
+    function onDesktopModalMouseMoveRevealChrome() {
+      if (!modal.classList.contains('is-open')) return;
+      if (!modal.classList.contains('is-chrome-hidden')) return;
+      if (!window.matchMedia || !window.matchMedia('(min-width: 1024px)').matches) return;
+      showModalChromeFromUser();
+    }
+    function attachDesktopModalMouseMoveReveal() {
+      detachDesktopModalMouseMoveReveal();
+      document.addEventListener('mousemove', onDesktopModalMouseMoveRevealChrome, { passive: true });
+    }
+    function detachDesktopModalMouseMoveReveal() {
+      document.removeEventListener('mousemove', onDesktopModalMouseMoveRevealChrome);
+    }
+
+    function showModalChromeFromUser() {
+      modal.classList.remove('is-chrome-hidden');
+      syncModalChromeTimerWithPlayback();
+    }
+
+    function onModalChromeControlUsed() {
+      modal.classList.remove('is-chrome-hidden');
+      syncModalChromeTimerWithPlayback();
+    }
+
     function resetModalIframe() {
-      modalStage.innerHTML =
-        '<iframe class="pf-modal-iframe" src="" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>';
-      modalIframe = modalStage.querySelector('.pf-modal-iframe');
+      var hit = modalStage.querySelector('.pf-modal-hit');
+      var oldIframe = modalStage.querySelector('.pf-modal-iframe');
+      if (oldIframe) oldIframe.remove();
+      var newIframe = document.createElement('iframe');
+      newIframe.className = 'pf-modal-iframe';
+      newIframe.setAttribute('frameborder', '0');
+      newIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture');
+      newIframe.setAttribute('allowfullscreen', '');
+      newIframe.src = '';
+      if (hit) {
+        modalStage.insertBefore(newIframe, hit);
+      } else {
+        modalStage.appendChild(newIframe);
+        hit = document.createElement('div');
+        hit.className = 'pf-modal-hit';
+        hit.setAttribute('aria-hidden', 'true');
+        modalStage.appendChild(hit);
+      }
+      modalIframe = newIframe;
     }
 
     function fmtTime(sec) {
@@ -451,23 +795,36 @@
       return m + ':' + r;
     }
 
+    function syncModalSoundFromPlayer() {
+      if (!modalPlayer || !modalSound) return;
+      modalPlayer.getMuted().then(function(m) {
+        modalMuted = !!m;
+        modalSound.textContent = modalMuted ? 'Sound off' : 'Sound on';
+      }).catch(function() {});
+    }
+
     function openModal(rawSrc, previewIframe) {
       // no autoplay in URL — trigger via API so browser allows unmuted sound
       var fullSrc = rawSrc + (rawSrc.includes('?') ? '&' : '?') +
         'controls=0&dnt=1&title=0&byline=0&portrait=0&autopause=0';
+      armModalIframePaintGate();
       modalIframe.src = fullSrc;
       modal.classList.add('is-open');
+      modal.classList.remove('is-chrome-hidden');
+      clearModalChromeTimer();
       modal.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
+      attachDesktopModalMouseMoveReveal();
       if (previewIframe) previewIframe.src = '';
-      modalMuted = true;
+      modalMuted = false;
       modalDuration = 0;
       modalProgressBar.style.width = '0%';
       modalTime.textContent = '0:00';
+      modalSound.textContent = 'Sound on';
       if (window.Vimeo && window.Vimeo.Player) {
         modalPlayer = new window.Vimeo.Player(modalIframe);
-        modalPlayBtn.textContent = 'Pause video';
-        modalSound.textContent = 'Sound off';
+        modalPlayBtn.textContent = 'Pause';
+        modalPlayer.on('loaded', revealModalIframePaint);
         modalPlayer.ready().then(function() {
           return modalPlayer.setVolume(1);
         }).then(function() {
@@ -477,15 +834,21 @@
         }).then(function() {
           return modalPlayer.getDuration().then(function(d) { modalDuration = d || 0; });
         }).then(function() {
-          return modalPlayer.getMuted();
-        }).then(function(m) {
-          modalMuted = !!m;
-          modalSound.textContent = modalMuted ? 'Sound off' : 'Sound on';
+          modalMuted = false;
+          modalSound.textContent = 'Sound on';
+          syncModalSoundFromPlayer();
         }).catch(function() {
-          modalPlayer.getMuted().then(function(m) {
-            modalMuted = !!m;
-            modalSound.textContent = modalMuted ? 'Sound off' : 'Sound on';
-          }).catch(function() {});
+          syncModalSoundFromPlayer();
+        });
+        modalPlayer.on('volumechange', syncModalSoundFromPlayer);
+        modalPlayer.on('play', function() {
+          revealModalIframePaint();
+          modal.classList.remove('is-chrome-hidden');
+          syncModalChromeTimerWithPlayback();
+        });
+        modalPlayer.on('pause', function() {
+          clearModalChromeTimer();
+          modal.classList.remove('is-chrome-hidden');
         });
         modalPlayer.on('timeupdate', function(data) {
           if (data && data.duration) modalDuration = data.duration;
@@ -494,14 +857,18 @@
           modalTime.textContent = fmtTime(data ? data.seconds : 0);
         });
         modalPlayer.on('ended', function() {
-          modalPlayBtn.textContent = 'Play video';
+          modalPlayBtn.textContent = 'Play';
         });
       }
     }
 
     function closeModal() {
+      cancelModalIframeRevealFallback();
       modal.classList.remove('is-open');
+      modal.classList.remove('is-chrome-hidden');
+      clearModalChromeTimer();
       modal.setAttribute('aria-hidden', 'true');
+      detachDesktopModalMouseMoveReveal();
       if (modalPlayer) {
         modalPlayer.pause().catch(function() {});
         modalPlayer.destroy().catch(function() {});
@@ -513,48 +880,69 @@
       modalTime.textContent = '0:00';
     }
 
-    modalCloseBtn.addEventListener('click', closeModal);
-    modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
+    modalCloseBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      closeModal();
+    });
+    modalBackdrop.addEventListener('click', function() {
+      closeModal();
+    });
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
     });
-    modalPlayBtn.addEventListener('click', function() {
+    modalStage.addEventListener('click', function(e) {
+      if (!modal.classList.contains('is-open') || !modal.classList.contains('is-chrome-hidden')) return;
+      var t = e.target;
+      if (!t || !t.closest || !t.closest('.pf-modal-hit')) return;
+      e.stopPropagation();
+      showModalChromeFromUser();
+    });
+    modalPlayBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      onModalChromeControlUsed();
       if (!modalPlayer) return;
       modalPlayer.getPaused().then(function(paused) {
         if (paused) {
           modalPlayer.play().catch(function() {});
-          modalPlayBtn.textContent = 'Pause video';
+          modalPlayBtn.textContent = 'Pause';
         } else {
           modalPlayer.pause().catch(function() {});
-          modalPlayBtn.textContent = 'Play video';
+          modalPlayBtn.textContent = 'Play';
         }
       }).catch(function() {});
     });
     modalProgress.addEventListener('click', function(e) {
+      e.stopPropagation();
+      onModalChromeControlUsed();
       if (!modalPlayer || !modalDuration) return;
       var rect = modalProgress.getBoundingClientRect();
       var ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
       modalPlayer.setCurrentTime(modalDuration * ratio).catch(function() {});
     });
-    modalSound.addEventListener('click', function() {
+    modalSound.addEventListener('click', function(e) {
+      e.stopPropagation();
+      onModalChromeControlUsed();
       if (!modalPlayer) return;
-      modalPlayer.getMuted().then(function(m) {
-        return modalPlayer.setMuted(!m);
-      }).then(function() {
-        return modalPlayer.setVolume(1);
-      }).then(function() {
-        return modalPlayer.play();
-      }).then(function() {
-        return modalPlayer.getMuted();
-      }).then(function(m) {
-        modalMuted = !!m;
-        modalSound.textContent = modalMuted ? 'Sound off' : 'Sound on';
-      }).catch(function() {
-        modalPlayer.getMuted().then(function(m) {
-          modalMuted = !!m;
-          modalSound.textContent = modalMuted ? 'Sound off' : 'Sound on';
-        }).catch(function() {});
-      });
+      var goMuted = !modalMuted;
+      if (goMuted) {
+        modalPlayer.setMuted(true).then(function() {
+          modalMuted = true;
+          modalSound.textContent = 'Sound off';
+        }).catch(function() {
+          syncModalSoundFromPlayer();
+        });
+      } else {
+        modalPlayer.setVolume(1).then(function() {
+          return modalPlayer.setMuted(false);
+        }).then(function() {
+          return modalPlayer.play();
+        }).then(function() {
+          modalMuted = false;
+          modalSound.textContent = 'Sound on';
+        }).catch(function() {
+          syncModalSoundFromPlayer();
+        });
+      }
     });
 
     // thumb + hover preview — hide poster after iframe paints (avoid white flash)
@@ -578,8 +966,20 @@
         (vimeoId ? ('https://vumbnail.com/' + vimeoId + '.jpg') : '') + '">';
       wrap.appendChild(thumb);
 
+      function armIframeThenRevealPoster() {
+        if (!wrap.matches(':hover')) return;
+        wrap.classList.add('pf-vimeo-iframe-armed');
+        window.requestAnimationFrame(function() {
+          window.requestAnimationFrame(function() {
+            window.setTimeout(function() {
+              if (wrap.matches(':hover')) wrap.classList.add('is-previewing');
+            }, 260);
+          });
+        });
+      }
+
       function finalizePreviewReveal() {
-        if (wrap.matches(':hover')) wrap.classList.add('is-previewing');
+        armIframeThenRevealPoster();
       }
 
       function ensurePreview() {
@@ -589,9 +989,9 @@
             if (finalized) return;
             finalized = true;
             window.clearTimeout(fallbackTimer);
-            finalizePreviewReveal();
+            window.setTimeout(armIframeThenRevealPoster, 1120);
           }
-          var fallbackTimer = window.setTimeout(finalize, 900);
+          var fallbackTimer = window.setTimeout(finalize, 2600);
           iframe.addEventListener('load', finalize, { once: true });
           iframe.src = previewSrc;
           loaded = true;
@@ -604,6 +1004,7 @@
         wrap.addEventListener('mouseenter', ensurePreview);
         wrap.addEventListener('mouseleave', function() {
           wrap.classList.remove('is-previewing');
+          wrap.classList.remove('pf-vimeo-iframe-armed');
         });
       }
 
@@ -612,6 +1013,7 @@
         e.stopPropagation();
         openModal(rawSrc, iframe);
         wrap.classList.remove('is-previewing');
+        wrap.classList.remove('pf-vimeo-iframe-armed');
         loaded = false;
       });
     });
