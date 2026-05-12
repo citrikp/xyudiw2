@@ -2433,6 +2433,16 @@ body.onepager-active .onepager {
   margin-right: 0;
 }
 
+/* One video beneath its copy — center horizontally with stacked text rail (portfolio + About). Multi-video stays L/R alternating. */
+.onepager-block--media.onepager-block--media-single {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.onepager-block--media.onepager-block--media-single .pf-video-label {
+  text-align: center;
+}
+
 .onepager-block--media img,
 .onepager-block--video video {
   width: 100%;
