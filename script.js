@@ -47,7 +47,7 @@
   }
 
   const ctx = canvas.getContext('2d');
-  const SCALE = window.matchMedia('(max-width: 768px)').matches ? 2 : 4;
+  const SCALE = 4;
   let W, H;
 
   function resize() {
