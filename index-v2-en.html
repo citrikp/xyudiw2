@@ -85,6 +85,18 @@
       body.site-home-video-bg.home-menu-open:not([data-world]) .nav-links-social a {
         mix-blend-mode: difference !important;
       }
+      /* Cancel difference blend on the nav itself when mobile menu is open so black bg shows */
+      body.site-home-video-bg.home-menu-open:not([data-world]) .home-main-nav {
+        mix-blend-mode: normal !important;
+      }
+      /* Fade-in animation for the mobile menu panel */
+      body.site-home-video-bg .home-main-nav .panel-content {
+        opacity: 0;
+        transition: opacity 0.35s ease;
+      }
+      body.site-home-video-bg.home-menu-open .home-main-nav .panel-content {
+        opacity: 1;
+      }
     }
   </style>
   <style id="home-video-blend">
@@ -189,7 +201,7 @@
   <div class="home-video-backdrop" aria-hidden="true">
     <video
       class="home-video-backdrop__frame"
-      src="resources/img/bgweb/bg-sitecolor3.mp4"
+      src="resources/img/bgweb/bg-sitecolor5.mp4"
       autoplay
       muted
       loop
