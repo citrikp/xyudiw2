@@ -4,51 +4,128 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Permissions-Policy" content="window-management=()">
-  <script src="lang-detect.js?v=202605042100"></script>
-  <title>Mari Herzer</title>
+  <script src="lang-detect.js?v=202604295073"></script>
+  <title>Mari Herzer (v2)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap">
-  <link rel="stylesheet" href="styles.css?v=202605042530">
+  <link rel="stylesheet" href="styles.css?v=202605032800">
   <link rel="icon" href="resources/img/favicon1.ico" type="image/x-icon">
-  <style id="home-blend">
-    /* Title: blend on the anchor (fixed compositing element), not the title itself */
-    body.site-home .home-marquee-anchor {
+  <style>
+    /* Vimeo full-viewport background (no chrome: background=1 on embed URL) */
+    .home-video-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+      background: #000;
+    }
+    .home-video-backdrop__frame {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      object-fit: cover;
+      object-position: center center;
+    }
+    /* Desktop: same cover behaviour — object-fit handles it natively */
+    @media (min-width: 1024px) {
+      .home-video-backdrop__frame {
+        width: 100%;
+        height: 100%;
+      }
+    }
+    /* Homepage UI: difference against moving video (this file only) */
+    body.site-home-video-bg .site-title {
       mix-blend-mode: difference;
+      color: #fff;
     }
-    body.site-home .home-marquee-anchor .site-title {
-      mix-blend-mode: normal !important;
-      color: #fff !important;
-    }
-    body.site-home .site-title .mh-letter {
-      mix-blend-mode: difference;
-    }
-    /* Nav: blend on the nav element, reset on inner to avoid double-blend */
-    body.site-home .home-main-nav {
-      mix-blend-mode: difference;
-    }
-    body.site-home.onepager-active .home-main-nav {
+    body.site-home-video-bg .site-title .mh-letter {
       mix-blend-mode: normal;
     }
-    body.site-home .home-nav-desktop-inner {
+    body.site-home-video-bg .home-corner-cluster {
+      mix-blend-mode: difference;
+    }
+    body.site-home-video-bg .site-subtitles-home,
+    body.site-home-video-bg .site-subtitles-home li {
+      color: #fff;
+      border-bottom-color: rgba(255, 255, 255, 0.35);
+    }
+    body.site-home-video-bg #langSwitcher {
+      mix-blend-mode: difference;
+    }
+    body.site-home-video-bg #player-ui {
+      mix-blend-mode: difference;
+    }
+    body.site-home-video-bg .panel-trigger {
+      mix-blend-mode: difference;
+    }
+    body.site-home-video-bg .home-main-nav {
+      mix-blend-mode: difference;
+    }
+    body.site-home-video-bg.onepager-active .home-main-nav {
+      mix-blend-mode: normal;
+    }
+    body.site-home-video-bg .home-nav-desktop-inner {
       mix-blend-mode: normal;
     }
     @media (min-width: 1024px) {
-      body.site-home .home-nav-desktop-inner .nav-links {
+      body.site-home-video-bg .home-nav-desktop-inner .nav-links {
         mix-blend-mode: difference !important;
       }
     }
-    /* Mobile menu pill */
-    body.site-home .panel-trigger {
-      mix-blend-mode: difference !important;
-      isolation: auto !important;
+    @media (max-width: 1023px) {
+      body.site-home-video-bg.home-menu-open:not([data-world]) .home-nav-desktop-inner,
+      body.site-home-video-bg.home-menu-open:not([data-world]) .home-nav-desktop-inner .nav-links,
+      body.site-home-video-bg.home-menu-open:not([data-world]) .home-nav-desktop-inner .nav-item,
+      body.site-home-video-bg.home-menu-open:not([data-world]) .home-nav-desktop-inner .nav-links a,
+      body.site-home-video-bg.home-menu-open:not([data-world]) .nav-links-social a {
+        mix-blend-mode: difference !important;
+      }
+      /* Cancel difference blend on the nav itself when mobile menu is open so black bg shows */
+      body.site-home-video-bg.home-menu-open:not([data-world]) .home-main-nav {
+        mix-blend-mode: normal !important;
+      }
+      /* Fade-in animation for the mobile menu panel */
+      body.site-home-video-bg .home-main-nav .panel-content {
+        opacity: 0;
+        transition: opacity 0.35s ease;
+      }
+      body.site-home-video-bg.home-menu-open .home-main-nav .panel-content {
+        opacity: 1;
+      }
     }
-    /* Corner cluster + subtitles */
-    body.site-home .home-corner-cluster {
+  </style>
+  <style id="home-video-blend">
+    /*
+     * <video> element is a same-origin compositor surface — unlike a cross-origin <iframe>,
+     * the browser CAN blend against its pixels. mix-blend-mode: difference on #fff text
+     * now genuinely reacts to the video content in real time.
+     *
+     * Key fix: styles.css sets `mix-blend-mode: normal` on body.site-home .site-title and
+     * `isolation: isolate` on the mobile panel-trigger — both must be overridden here.
+     */
+    body.site-home-video-bg .home-marquee-anchor {
       mix-blend-mode: difference;
     }
-    body.site-home .site-subtitles-home li {
+    body.site-home-video-bg .home-marquee-anchor .site-title {
+      mix-blend-mode: normal !important;
+      color: #fff !important;
+    }
+    body.site-home-video-bg .site-title .mh-letter {
+      mix-blend-mode: difference;
+    }
+
+    /* Corner cluster */
+    body.site-home-video-bg .home-corner-cluster {
+      mix-blend-mode: difference;
+    }
+
+    /* Subtitles: background-clip:text is incompatible with mix-blend-mode — drop gradient, use flat #fff */
+    body.site-home-video-bg .site-subtitles-home li {
       color: #fff !important;
       background: none !important;
       -webkit-background-clip: unset !important;
@@ -57,23 +134,84 @@
       mix-blend-mode: difference;
       border-bottom-color: rgba(255, 255, 255, 0.32) !important;
     }
-    body.site-home .site-subtitles-home li:last-child {
+    body.site-home-video-bg .site-subtitles-home li:last-child {
       border-bottom: none !important;
     }
-    /* Lang switcher + player UI */
-    body.site-home #langSwitcher {
+
+    /* Lang switcher */
+    body.site-home-video-bg #langSwitcher {
       mix-blend-mode: difference;
     }
-    body.site-home #player-ui {
+
+    /* Bottom player UI */
+    body.site-home-video-bg #player-ui {
       mix-blend-mode: difference;
+    }
+
+    /* Mobile menu pill: isolation: isolate (styles.css) traps the blend — remove it */
+    body.site-home-video-bg .panel-trigger {
+      mix-blend-mode: difference !important;
+      isolation: auto !important;
+    }
+
+    /* Desktop nav pill */
+    body.site-home-video-bg .home-nav-desktop-inner {
+      mix-blend-mode: difference;
+    }
+    @media (min-width: 1024px) {
+      body.site-home-video-bg .home-nav-desktop-inner .nav-links {
+        mix-blend-mode: difference !important;
+      }
+    }
+  </style>
+  <style id="home-header-geometry">
+    /*
+     * Nav pill placement — mirrors styles.css :root (index parity).
+     * Desktop: pill vertical center = title line vertical center.
+     * Mobile: same midline formula + small --mobile-menu-pill-drop (not baseline-locked).
+     */
+    @media (min-width: 1024px) {
+      body.site-home-video-bg {
+        --desktop-title-cap-height: calc(var(--home-title-line-clamp) * 0.95);
+        --desktop-nav-pill-outer-h: calc(0.76rem + clamp(0.86rem, 1.02vw, 1.02rem) * 1.22);
+        --desktop-menu-pill-top: calc(
+          max(var(--page-edge), env(safe-area-inset-top, 0px)) +
+          var(--desktop-title-cap-height) * 0.5 -
+          var(--desktop-nav-pill-outer-h) * 0.5
+        );
+      }
+    }
+    @media (max-width: 1023px) {
+      body.site-home-video-bg {
+        --mobile-title-cap-height: calc(var(--brand-title-size-mobile) * 0.95);
+        --mobile-menu-pill-outer-h: calc(1rem + 0.82rem);
+        --mobile-menu-pill-drop: clamp(3px, 0.28rem, 6px);
+        --mobile-menu-pill-top: calc(
+          var(--title-top-inset) +
+          var(--mobile-title-cap-height) * 0.5 -
+          var(--mobile-menu-pill-outer-h) * 0.5 +
+          var(--mobile-menu-pill-drop)
+        );
+      }
     }
   </style>
 </head>
-<body class="site-home">
+<body class="site-home site-home-video-bg">
 
-  <canvas id="bg-canvas"></canvas>
+  <div class="home-video-backdrop" aria-hidden="true">
+    <video
+      class="home-video-backdrop__frame"
+      src="resources/img/bgweb/bg-sitecolor7.mp4"
+      autoplay
+      muted
+      loop
+      playsinline
+      disablepictureinpicture
+      preload="auto"
+    ></video>
+  </div>
+
   <canvas id="world-canvas"></canvas>
-  <div class="noise"></div>
   <div id="cinema-veil"></div>
 
   <header class="home-marquee-anchor">
@@ -141,10 +279,11 @@
       <img src="resources/img/globe.png" alt="">
     </button>
     <div class="lang-dropdown" id="langDropdown">
-      <a href="index.html" data-lang-switch class="active">Português</a>
-      <a href="index-en.html" data-lang-switch>English</a>
+      <a href="index-v2.html" data-lang-switch class="active">Português</a>
+      <a href="index-v2-en.html" data-lang-switch>English</a>
     </div>
   </div>
+
   <div id="player-ui">
     <div id="world-controls">
       <button id="prev-world" aria-label="Mundo anterior">&#x2039;</button>
@@ -156,6 +295,7 @@
       <span id="play-icon">&#x25B6;</span>
     </button>
   </div>
+
   <section id="colaborar-page" class="onepager" aria-hidden="true">
     <h2 class="onepager-sticky-title">Mari Herzer</h2>
     <div class="onepager-inner">
@@ -265,63 +405,19 @@
     var vimeoAmbientSrc = 'https://player.vimeo.com/video/1185245821?background=1&autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0';
     var vimeoAudioSrc = 'https://player.vimeo.com/video/1185245821?autoplay=1&loop=1&muted=0&title=0&byline=0&portrait=0';
 
-    var DBG_INGEST = 'http://127.0.0.1:7722/ingest/87e146c9-842a-4600-92ce-058bc194aafd';
-    function dbgVimeo(loc, msg, data, hid) {
-      fetch(DBG_INGEST, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '748776' },
-        body: JSON.stringify({
-          sessionId: '748776',
-          location: loc,
-          message: msg,
-          data: data || {},
-          hypothesisId: hid || 'V',
-          timestamp: Date.now()
-        })
-      }).catch(function() {});
-    }
-
     function syncVimeoToggleUi(muted) {
       if (!vimeoAudioToggle) return;
       vimeoAudioToggle.classList.toggle('is-on', !muted);
       vimeoAudioToggle.textContent = muted ? 'som off' : 'som on';
     }
 
-    function refreshVimeoToggleFromApi() {
-      if (!vimeoPlayer || !vimeoAudioToggle) return;
-      vimeoPlayer.getMuted().then(function(m) {
-        syncVimeoToggleUi(!!m);
-        dbgVimeo('index.html:vimeo', 'sync-from-api', { muted: !!m }, 'V2');
-      }).catch(function() {});
-    }
-
-    var vimeoVolHandler = null;
-    function bindAmbientVimeoPlayer(player) {
-      if (!player || typeof player.on !== 'function') return;
-      try {
-        if (vimeoVolHandler && typeof player.off === 'function') {
-          player.off('volumechange', vimeoVolHandler);
-        }
-      } catch (err) {}
-      vimeoVolHandler = function() {
-        refreshVimeoToggleFromApi();
-      };
-      player.on('volumechange', vimeoVolHandler);
-    }
-
     if (vimeoPlayer) {
-      bindAmbientVimeoPlayer(vimeoPlayer);
       vimeoPlayer.setMuted(true).catch(function() {});
       if (vimeoAudioToggle) {
         vimeoAudioToggle.addEventListener('click', function() {
           var wantOn = !vimeoAudioToggle.classList.contains('is-on');
-          dbgVimeo('index.html:vimeo', 'toggle-click', { wantOn: wantOn }, 'V3');
           if (!wantOn) {
-            vimeoPlayer.setMuted(true).then(function() {
-              refreshVimeoToggleFromApi();
-            }).catch(function() {
-              refreshVimeoToggleFromApi();
-            });
+            vimeoPlayer.setMuted(true).then(function() { syncVimeoToggleUi(true); }).catch(function() { syncVimeoToggleUi(true); });
             return;
           }
           function tryUnmute() {
@@ -332,25 +428,25 @@
           }
           tryUnmute().then(function(m) {
             if (!m) {
-              refreshVimeoToggleFromApi();
+              syncVimeoToggleUi(false);
               return;
             }
             if (vimeoFrame && vimeoFrame.src.indexOf('background=1') !== -1) {
               vimeoFrame.src = vimeoAudioSrc;
               vimeoPlayer = new window.Vimeo.Player(vimeoFrame);
-              bindAmbientVimeoPlayer(vimeoPlayer);
               return vimeoPlayer.ready().then(function() {
                 return vimeoPlayer.setVolume(1);
               }).then(function() {
                 return vimeoPlayer.play();
               }).then(function() {
-                refreshVimeoToggleFromApi();
+                return vimeoPlayer.getMuted();
+              }).then(function(m2) {
+                syncVimeoToggleUi(!!m2);
               });
             }
-            refreshVimeoToggleFromApi();
-          }).catch(function(err) {
-            dbgVimeo('index.html:vimeo', 'try-unmute-catch', { err: String(err) }, 'V5');
-            refreshVimeoToggleFromApi();
+            syncVimeoToggleUi(!!m);
+          }).catch(function() {
+            vimeoPlayer.getMuted().then(function(m) { syncVimeoToggleUi(!!m); }).catch(function() {});
           });
         });
       }
@@ -399,20 +495,10 @@
         if (vimeoFrame && vimeoFrame.src.indexOf('background=1') === -1) {
           vimeoFrame.src = vimeoAmbientSrc;
           vimeoPlayer = (window.Vimeo && vimeoFrame) ? new window.Vimeo.Player(vimeoFrame) : null;
-          bindAmbientVimeoPlayer(vimeoPlayer);
         }
         if (vimeoPlayer) {
-          vimeoPlayer.ready().then(function() {
-            return vimeoPlayer.setMuted(true);
-          }).then(function() {
-            return vimeoPlayer.play();
-          }).then(function() {
-            dbgVimeo('index.html:vimeo', 'open-play-ok', {}, 'V4');
-          }).catch(function(err) {
-            dbgVimeo('index.html:vimeo', 'open-play-fail', { err: String(err) }, 'V4');
-          }).then(function() {
-            refreshVimeoToggleFromApi();
-          });
+          vimeoPlayer.setMuted(true).catch(function() {});
+          vimeoPlayer.play().catch(function() {});
         }
         if (vimeoAudioToggle) {
           vimeoAudioToggle.classList.remove('is-on');
@@ -430,7 +516,6 @@
       if (vimeoFrame && vimeoFrame.src.indexOf('background=1') === -1) {
         vimeoFrame.src = vimeoAmbientSrc;
         vimeoPlayer = (window.Vimeo && vimeoFrame) ? new window.Vimeo.Player(vimeoFrame) : null;
-        bindAmbientVimeoPlayer(vimeoPlayer);
       }
       if (vimeoPlayer) {
         vimeoPlayer.setMuted(true).catch(function() {});
@@ -451,21 +536,11 @@
       }, transitionMs);
     }
 
-    var MH_LANG_PREF_KEY = 'mh-lang-pref';
-    function persistLangPreferenceFromHref(href) {
-      try {
-        if (!href || href.indexOf('#') !== -1) return;
-        if (href.indexOf('index-en.html') !== -1) localStorage.setItem(MH_LANG_PREF_KEY, 'en');
-        else if (href.indexOf('index.html') !== -1) localStorage.setItem(MH_LANG_PREF_KEY, 'pt');
-      } catch (_) {}
-    }
-
     var langLinks = document.querySelectorAll('#langSwitcher a[data-lang-switch]');
     Array.prototype.forEach.call(langLinks, function(link) {
       link.addEventListener('click', function(e) {
-        var raw = link.getAttribute('href') || '';
-        persistLangPreferenceFromHref(raw);
         if (!document.body.classList.contains('onepager-active')) return;
+        var raw = link.getAttribute('href') || '';
         if (raw.indexOf('#') !== -1) return;
         e.preventDefault();
         window.location.href = raw + '#colab';
