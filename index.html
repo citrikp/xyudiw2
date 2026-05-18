@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#000000">
   <script src="lang-detect.js?v=202604295073"></script>
   <title>Mari Herzer (v2)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -192,6 +193,14 @@
           var(--mobile-menu-pill-outer-h) * 0.5 +
           var(--mobile-menu-pill-drop)
         );
+      }
+    }
+  </style>
+  <style id="mobile-ios-root-fill">
+    @media (max-width: 1023px) {
+      /* styles.css clears html/bg on homepage — opaque root prevents Safari’s white gutter under fixed backdrop + video */
+      html {
+        background-color: #000 !important;
       }
     }
   </style>
