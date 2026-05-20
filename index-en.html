@@ -419,13 +419,45 @@
       vimeoAudioToggle.textContent = muted ? 'audio off' : 'audio on';
     }
 
+    function refreshVimeoToggleFromApi() {
+      if (!vimeoPlayer || !vimeoAudioToggle) return;
+      Promise.all([
+        vimeoPlayer.getMuted().catch(function() { return true; }),
+        vimeoPlayer.getVolume().catch(function() { return 0; }),
+      ]).then(function(a) {
+        var m = !!a[0];
+        /* UI follows getMuted() only: Vimeo can keep volume>0 right after setMuted(true), which used to
+           let treatAsMuted=false survive and flip the label back to "audio on" while audio was muted. */
+        syncVimeoToggleUi(m);
+      });
+    }
+
+    var vimeoVolHandler = null;
+    function bindAmbientVimeoPlayer(player) {
+      if (!player || typeof player.on !== 'function') return;
+      try {
+        if (vimeoVolHandler && typeof player.off === 'function') {
+          player.off('volumechange', vimeoVolHandler);
+        }
+      } catch (err) {}
+      vimeoVolHandler = function() {
+        refreshVimeoToggleFromApi();
+      };
+      player.on('volumechange', vimeoVolHandler);
+    }
+
     if (vimeoPlayer) {
+      bindAmbientVimeoPlayer(vimeoPlayer);
       vimeoPlayer.setMuted(true).catch(function() {});
       if (vimeoAudioToggle) {
         vimeoAudioToggle.addEventListener('click', function() {
           var wantOn = !vimeoAudioToggle.classList.contains('is-on');
           if (!wantOn) {
-            vimeoPlayer.setMuted(true).then(function() { syncVimeoToggleUi(true); }).catch(function() { syncVimeoToggleUi(true); });
+            vimeoPlayer.setMuted(true).then(function() {
+              syncVimeoToggleUi(true);
+            }).catch(function() {
+              refreshVimeoToggleFromApi();
+            });
             return;
           }
           function tryUnmute() {
@@ -442,19 +474,18 @@
             if (vimeoFrame && vimeoFrame.src.indexOf('background=1') !== -1) {
               vimeoFrame.src = vimeoAudioSrc;
               vimeoPlayer = new window.Vimeo.Player(vimeoFrame);
+              bindAmbientVimeoPlayer(vimeoPlayer);
               return vimeoPlayer.ready().then(function() {
                 return vimeoPlayer.setVolume(1);
               }).then(function() {
                 return vimeoPlayer.play();
               }).then(function() {
-                return vimeoPlayer.getMuted();
-              }).then(function(m2) {
-                syncVimeoToggleUi(!!m2);
+                syncVimeoToggleUi(false);
               });
             }
-            syncVimeoToggleUi(!!m);
+            refreshVimeoToggleFromApi();
           }).catch(function() {
-            vimeoPlayer.getMuted().then(function(m) { syncVimeoToggleUi(!!m); }).catch(function() {});
+            syncVimeoToggleUi(true);
           });
         });
       }
@@ -503,10 +534,16 @@
         if (vimeoFrame && vimeoFrame.src.indexOf('background=1') === -1) {
           vimeoFrame.src = vimeoAmbientSrc;
           vimeoPlayer = (window.Vimeo && vimeoFrame) ? new window.Vimeo.Player(vimeoFrame) : null;
+          bindAmbientVimeoPlayer(vimeoPlayer);
         }
         if (vimeoPlayer) {
-          vimeoPlayer.setMuted(true).catch(function() {});
-          vimeoPlayer.play().catch(function() {});
+          vimeoPlayer.ready().then(function() {
+            return vimeoPlayer.setMuted(true);
+          }).then(function() {
+            return vimeoPlayer.play();
+          }).catch(function() {}).then(function() {
+            refreshVimeoToggleFromApi();
+          });
         }
         if (vimeoAudioToggle) {
           vimeoAudioToggle.classList.remove('is-on');
@@ -524,6 +561,7 @@
       if (vimeoFrame && vimeoFrame.src.indexOf('background=1') === -1) {
         vimeoFrame.src = vimeoAmbientSrc;
         vimeoPlayer = (window.Vimeo && vimeoFrame) ? new window.Vimeo.Player(vimeoFrame) : null;
+        bindAmbientVimeoPlayer(vimeoPlayer);
       }
       if (vimeoPlayer) {
         vimeoPlayer.setMuted(true).catch(function() {});

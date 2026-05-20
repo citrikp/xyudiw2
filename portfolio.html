@@ -649,7 +649,7 @@
         <p class="onepager-eyebrow">showreel</p>
         <p class="onepager-text">Showreel contém trabalhos já lançados e outros ainda não distribuídos. Trilha sonora original.</p>
       </div>
-      <div class="onepager-block onepager-block--media onepager-block--media-single onepager-vimeo-wrap">
+      <div class="onepager-block onepager-block--media onepager-block--media-single">
         <div class="pf-vimeo-wrap">
           <iframe data-src="https://player.vimeo.com/video/1185245821?badge=0&autopause=0&player_id=0&app_id=58479" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
           <div class="pf-play-overlay"><div class="pf-play-circle">&#x25B6;</div></div>
@@ -1093,11 +1093,32 @@
       var vimeoId = idMatch ? idMatch[1] : '';
       var loaded = false;
 
+      var cacheBust = '_=' + Date.now() + Math.floor(Math.random() * 1e6);
       var thumb = document.createElement('div');
       thumb.className = 'pf-video-thumb';
+      /* Immediate vumbnail.com poster so the tile never shows an empty/black box. Browser keeps it visible
+         until the hi-res Vimeo CDN image (fetched via oembed below) finishes loading, then swaps in place. */
       thumb.innerHTML = '<img alt="" loading="lazy" src="' +
-        (vimeoId ? ('https://vumbnail.com/' + vimeoId + '.jpg') : '') + '">';
+        (vimeoId ? ('https://vumbnail.com/' + vimeoId + '.jpg?' + cacheBust) : '') + '">';
       wrap.appendChild(thumb);
+
+      if (vimeoId) {
+        var imgEl = thumb.querySelector('img');
+
+        /* Hi-res: rewrite the size segment in the URL PATH (Vimeo CDN ignores mw/mh query; size lives in `_295x166`). */
+        function upscaleVimeoThumb(url) {
+          var withPath = url.replace(/_(\d+)x(\d+)(?=(\?|$))/, '_1920x1080');
+          return withPath + (withPath.indexOf('?') !== -1 ? '&' : '?') + cacheBust;
+        }
+
+        fetch('https://vimeo.com/api/oembed.json?url=' + encodeURIComponent('https://vimeo.com/' + vimeoId) + '&' + cacheBust, { cache: 'no-store' })
+          .then(function(r) { return r.ok ? r.json() : null; })
+          .then(function(d) {
+            if (!d || !d.thumbnail_url || !imgEl) return;
+            imgEl.src = upscaleVimeoThumb(d.thumbnail_url);
+          })
+          .catch(function() {});
+      }
 
       function armIframeThenRevealPoster() {
         if (!wrap.matches(':hover')) return;

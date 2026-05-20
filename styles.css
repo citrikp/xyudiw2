@@ -176,16 +176,24 @@ html:has(body.site-home) {
 /* About overlay: html stayed transparent → thin white bleed above black body */
 html:has(body.onepager-active) {
   background-color: #000;
+  color-scheme: dark;
+  /* Mirror portfolio scroll root (portfolio.html unlocks html+body) → same scrollbar as portfolio */
+  overflow-x: hidden;
+  overflow-y: auto !important;
+  height: auto !important;
 }
 
 body.onepager-active {
   background: #000;
   color: #fff;
-  overflow-y: auto;
+  color-scheme: dark;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
 }
 
 body.onepager-active .container,
 body.onepager-active .home-marquee-anchor,
+body.onepager-active .home-video-backdrop,
 body.onepager-active #player-ui,
 body.onepager-active #homeCornerSubtitles,
 body.onepager-active #bg-canvas,
