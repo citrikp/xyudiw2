@@ -1,4 +1,43 @@
 // ─────────────────────────────────────────
+// HOME BACKGROUND VIDEO — iOS Safari autoplay + hide native play overlay
+// ─────────────────────────────────────────
+
+(function () {
+  var video = document.querySelector('.home-video-backdrop__frame');
+  if (!video) return;
+
+  video.controls = false;
+  video.muted = true;
+  video.defaultMuted = true;
+  video.playsInline = true;
+  video.setAttribute('muted', '');
+  video.setAttribute('playsinline', '');
+  video.setAttribute('webkit-playsinline', '');
+
+  function tryPlay() {
+    if (!video.paused) return Promise.resolve();
+    return video.play().catch(function () {});
+  }
+
+  tryPlay();
+  video.addEventListener('loadeddata', function () { tryPlay(); }, { once: true });
+  video.addEventListener('canplay', function () { tryPlay(); }, { once: true });
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) tryPlay();
+  });
+  window.addEventListener('pageshow', function () { tryPlay(); });
+
+  var gestureDone = false;
+  function fromGesture() {
+    if (gestureDone) return;
+    gestureDone = true;
+    tryPlay();
+  }
+  document.addEventListener('touchstart', fromGesture, { once: true, passive: true });
+  document.addEventListener('click', fromGesture, { once: true });
+})();
+
+// ─────────────────────────────────────────
 // NOISE BACKGROUND CANVAS
 // ─────────────────────────────────────────
 

@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap">
-  <link rel="stylesheet" href="styles.css?v=202605032800">
+  <link rel="stylesheet" href="styles.css?v=202605211530">
   <link rel="icon" href="resources/img/favicon1.ico" type="image/x-icon">
   <style>
     /* Vimeo full-viewport background (no chrome: background=1 on embed URL) */
@@ -31,6 +31,14 @@
       border: 0;
       object-fit: cover;
       object-position: center center;
+      pointer-events: none;
+    }
+    /* iOS Safari: hide native paused-state play glyph when autoplay is deferred */
+    .home-video-backdrop__frame::-webkit-media-controls {
+      display: none !important;
+    }
+    .home-video-backdrop__frame::-webkit-media-controls-start-playback-button {
+      display: none !important;
     }
     /* Desktop: same cover behaviour — object-fit handles it natively */
     @media (min-width: 1024px) {
@@ -209,14 +217,18 @@
   <div class="home-video-backdrop" aria-hidden="true">
     <video
       class="home-video-backdrop__frame"
-      src="resources/img/bgweb/bg-site-final.mp4"
       autoplay
       muted
       loop
       playsinline
+      webkit-playsinline
       disablepictureinpicture
+      x-webkit-airplay="deny"
+      controlslist="nodownload noplaybackrate noremoteplayback"
       preload="auto"
-    ></video>
+    >
+      <source src="resources/img/bgweb/bg-site-final.mp4" type="video/mp4">
+    </video>
   </div>
 
   <canvas id="world-canvas"></canvas>
@@ -371,7 +383,7 @@
   </section>
   <div id="onepager-transition" class="onepager-transition" aria-hidden="true"></div>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="script.js?v=202604295077"></script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="script.js?v=202605211630"></script>
   <script src="https://player.vimeo.com/api/player.js"></script>
   <script>
   (function() {

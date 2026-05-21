@@ -1080,10 +1080,10 @@ body.site-home:not(.onepager-active) .nav-item--home-onepager {
     mix-blend-mode: exclusion;
   }
 
-  body.site-home .home-nav-desktop-inner .nav-item,
-  body.site-home .home-nav-desktop-inner .nav-links a,
-  body.nav-unified:not(.site-home) .home-nav-desktop-inner .nav-item,
-  body.nav-unified:not(.site-home) .home-nav-desktop-inner .nav-links a {
+  body.site-home .home-nav-desktop-inner .nav-links > .nav-item,
+  body.site-home .home-nav-desktop-inner .nav-links > a,
+  body.nav-unified:not(.site-home) .home-nav-desktop-inner .nav-links > .nav-item,
+  body.nav-unified:not(.site-home) .home-nav-desktop-inner .nav-links > a {
     font-family: 'Inter', sans-serif;
     font-weight: 500;
     font-size: clamp(0.86rem, 1.02vw, 1.02rem);
@@ -1102,10 +1102,10 @@ body.site-home:not(.onepager-active) .nav-item--home-onepager {
       0 1px 0 rgba(255, 255, 255, 0.2);
   }
 
-  body.site-home .home-nav-desktop-inner .nav-item::after,
-  body.site-home .home-nav-desktop-inner .nav-links a::after,
-  body.nav-unified:not(.site-home) .home-nav-desktop-inner .nav-item::after,
-  body.nav-unified:not(.site-home) .home-nav-desktop-inner .nav-links a::after {
+  body.site-home .home-nav-desktop-inner .nav-links > .nav-item::after,
+  body.site-home .home-nav-desktop-inner .nav-links > a::after,
+  body.nav-unified:not(.site-home) .home-nav-desktop-inner .nav-links > .nav-item::after,
+  body.nav-unified:not(.site-home) .home-nav-desktop-inner .nav-links > a::after {
     display: none;
   }
 
@@ -1292,8 +1292,8 @@ body.site-home:not(.onepager-active) .nav-item--home-onepager {
     width: 100%;
   }
 
-  body.home-menu-open:not([data-world]) .home-nav-desktop-inner .nav-item,
-  body.home-menu-open:not([data-world]) .home-nav-desktop-inner .nav-links a {
+  body.home-menu-open:not([data-world]) .home-nav-desktop-inner .nav-links > .nav-item,
+  body.home-menu-open:not([data-world]) .home-nav-desktop-inner .nav-links > a {
     font-family: 'Brut Grotesque', 'Inter', sans-serif;
     font-weight: 700;
     font-size: clamp(2rem, 8.5vw, 3rem);
@@ -1306,8 +1306,8 @@ body.site-home:not(.onepager-active) .nav-item--home-onepager {
     text-shadow: none;
   }
 
-  body.home-menu-open:not([data-world]) .home-nav-desktop-inner .nav-item::after,
-  body.home-menu-open:not([data-world]) .home-nav-desktop-inner .nav-links a::after {
+  body.home-menu-open:not([data-world]) .home-nav-desktop-inner .nav-links > .nav-item::after,
+  body.home-menu-open:not([data-world]) .home-nav-desktop-inner .nav-links > a::after {
     display: none;
   }
 
@@ -1380,6 +1380,15 @@ dialog {
   animation: dialog-in 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   position: relative;
   cursor: grab;
+}
+
+/* Contact dialog sits inside .nav-links (mix-blend / menu-open white link rules) — isolate + light scheme */
+#contatoDialog {
+  color-scheme: only light;
+  isolation: isolate;
+  mix-blend-mode: normal;
+  color: #000;
+  cursor: default;
 }
 
 @keyframes dialog-in {
@@ -1463,6 +1472,9 @@ dialog::backdrop {
   font-weight: 600;
   font-size: clamp(0.95rem, 2.5vw, 1.14rem);
   color: #000 !important;
+  -webkit-text-fill-color: #000 !important;
+  mix-blend-mode: normal !important;
+  text-shadow: none !important;
   border-bottom-color: rgba(0, 0, 0, 0.35);
 }
 
@@ -1494,9 +1506,32 @@ dialog::backdrop {
 #contatoDialog .dialog-body a:visited,
 #contatoDialog .dialog-body a:hover {
   color: #000 !important;
+  -webkit-text-fill-color: #000 !important;
+  mix-blend-mode: normal !important;
+  text-shadow: none !important;
 }
 #contatoDialog .dialog-body a * {
   color: inherit !important;
+}
+
+/*
+ * Mobile menu open cascades `color: #fff !important` to every .nav-links a (line ~1295). The contact
+ * dialog markup lives inside .nav-links, so its links would inherit white-on-cream. Force #000 there.
+ */
+body.home-menu-open #contatoDialog .dialog-body a,
+body.home-menu-open #contatoDialog .dialog-body a:link,
+body.home-menu-open #contatoDialog .dialog-body a:visited,
+body.home-menu-open #contatoDialog .dialog-body a:hover,
+body.home-menu-open #contatoDialog .dialog-body a:focus,
+body.home-menu-open #contatoDialog .dialog-body a:active {
+  color: #000 !important;
+  -webkit-text-fill-color: #000 !important;
+  mix-blend-mode: normal !important;
+  text-shadow: none !important;
+  font-size: clamp(0.95rem, 2.5vw, 1.14rem) !important;
+}
+body.home-menu-open #contatoDialog .dialog-body .contact-label {
+  color: #000 !important;
 }
 
 /* ─────────────────────────────────────────
