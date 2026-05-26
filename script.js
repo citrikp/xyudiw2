@@ -2400,253 +2400,517 @@ makeDraggable(document.getElementById('embedDialog'));
 
   // ═══════════════════════════════════════
   // WORLD 2 — PALEOZOICO
-  // Julia set — pixel buffer, renders only on user interaction
-  // Colors from microscopy photos: deep purple bg, magenta→violet→teal
+  // Dark cave abstraction: rain, fireflies, audio-reactive lightning
+  // Self-contained — no shared particle arrays with other worlds
   // ═══════════════════════════════════════
 
   const paleozoico = (() => {
+    const RAIN_ANGLE = -0.22;
+    const WIND_X = Math.sin(RAIN_ANGLE) * 0.00012;
+    let worldGust = 0.5;   // 0–1, updated each frame
 
-    // ── Render scale — draw at 1/3 res, CSS scales up ──
-    const SCALE = 3;
-
-    // ── Julia parameter — classic c = -0.7 + 0.27i ──
-    const CR = -0.7, CI = 0.27;
-    const MAX_ITER = 128;
-
-    // ── View state — complex plane bounds ──
-    // Classic Julia full view: [-2, 2] × [-1.5, 1.5]
-    let viewXmin = -2.0, viewXmax = 2.0;
-    let viewYmin = -1.5, viewYmax = 1.5;
-
-    // ── Dirty flag — only re-render when view changes ──
-    let dirty = true;
-
-    // ── Rain drops ──
-    const rainDrops = Array.from({ length: 200 }, (_, i) => ({
-      x:     Math.random(),
-      y:     Math.random(),
-      speed: 0.00042 + Math.random() * 0.00055,
-      len:   0.014 + Math.random() * 0.032,
-      alpha: i < 80 ? (0.12 + Math.random() * 0.18) : (0.04 + Math.random() * 0.08),
-      layer: i < 80 ? 'front' : 'back',
-    }));
-
-    // ── Off-screen pixel buffer ──
-    let pixW = 0, pixH = 0;
-    let imageData = null;
-
-
-    // -- fractal coloring LUT — precompute colors for each iteration count to avoid expensive color calculations in the inner loop --
-const LUT = new Uint8Array(MAX_ITER * 3);
-(function buildLUT() {
-  for (let i = 0; i < MAX_ITER; i++) {
-    const f = i / MAX_ITER;
-    let r, g, b;
-    if (i === 0) {
-      // Interior — matches teal background
-      r = 70; g = 160; b = 180;
-    } else if (f < 0.18) {
-      const s = f / 0.18;
-      // teal → purple-teal transition
-      r = _lerp(70,  105, s); g = _lerp(160, 145, s); b = _lerp(180, 175, s);
-    } else if (f < 0.40) {
-      const s = (f - 0.18) / 0.22;
-      // purple-teal → mid purple
-      r = _lerp(105, 110, s); g = _lerp(145, 120, s); b = _lerp(175, 175, s);
-    } else if (f < 0.62) {
-      const s = (f - 0.40) / 0.22;
-      // mid purple → deeper purple
-      r = _lerp(110,  90, s); g = _lerp(120, 100, s); b = _lerp(175, 170, s);
-    } else if (f < 0.82) {
-      const s = (f - 0.62) / 0.20;
-      // deeper purple → saturated purple
-      r = _lerp(90,  110, s); g = _lerp(100,  85, s); b = _lerp(170, 190, s);
-    } else {
-      const s = (f - 0.82) / 0.18;
-      // saturated purple → dark purple (outermost boundary)
-      r = _lerp(110, 120, s); g = _lerp(85,   65, s); b = _lerp(190, 170, s);
+    // ── Rain ──────────────────────────────
+    function makeRainDrop(i, front) {
+      const bright = Math.random() < 0.14;   // ~14% of drops are noticeably brighter
+      return {
+        x:         Math.random(),
+        y:         Math.random(),
+        speed:     0.00075 + Math.random() * 0.0011,
+        len:       front ? (0.022 + Math.random() * 0.048) : (0.014 + Math.random() * 0.028),
+        alpha:     front ? (0.18 + Math.random() * 0.28) : (0.08 + Math.random() * 0.14),
+        layer:     front ? 'front' : 'back',
+        drift:     (Math.random() - 0.5) * 0.000055,
+        windPhase: Math.random() * Math.PI * 2,
+        angleVar:  (Math.random() - 0.5) * 0.28,
+        bright,
+      };
     }
-    LUT[i*3]   = Math.round(r);
-    LUT[i*3+1] = Math.round(g);
-    LUT[i*3+2] = Math.round(b);
-  }
-})();
+    const rainDrops = Array.from({ length: 400 }, (_, i) => makeRainDrop(i, i < 130));
+    // Normal count: 260. Extra 140 activated during the 30 s–60 s burst.
 
+    // ── Névoa (smoke-like wind wisps) ─────
+    function makeNevoa(fromLeft) {
+      const x = fromLeft ? -(0.02 + Math.random() * 0.08) : Math.random() * 1.1 - 0.05;
+      return {
+        x,
+        y:         0.08 + Math.random() * 0.84,
+        rx:        0.018 + Math.random() * 0.022,
+        ry:        0.24  + Math.random() * 0.26,
+        alpha:     0.034 + Math.random() * 0.040,
+        vx:        0.000028 + Math.random() * 0.000032,  // faster: crosses ~4× sooner
+        vy:        (Math.random() - 0.5) * 0.0000015,
+        phase:     Math.random() * Math.PI * 2,
+        pulseFreq: 0.00016 + Math.random() * 0.00018,
+        life:      0,
+        maxLife:   7000 + Math.random() * 8000,          // 7–15 s lifespan
+      };
+    }
+    const nevoaBlobs = Array.from({ length: 7 }, () => makeNevoa(false));
 
-    // ── Core Julia iteration — inline, no function call overhead ──
-    function renderJulia(cW, cH) {
-      pixW = Math.ceil(cW / SCALE);
-      pixH = Math.ceil(cH / SCALE);
+    // ── Firefly types ─────────────────────
+    // 'title'  : green/fuchsia, slow drift + bounce across the title band
+    // 'drifter': amber/yellow, born center-bottom, drift right then fade out
+    // 'riser'  : green, born at bottom, rise slowly upward, rare
 
-      if (!imageData || imageData.width !== pixW || imageData.height !== pixH) {
-        // Create a temp canvas just for imageData
-        const tmp = document.createElement('canvas');
-        tmp.width  = pixW;
-        tmp.height = pixH;
-        imageData  = tmp.getContext('2d').createImageData(pixW, pixH);
+    function makeTitleFF() {
+      // 85% green / green-yellow, 15% fuchsia accent
+      const r = Math.random();
+      const hue = r < 0.52
+        ? (108 + Math.random() * 28)
+        : r < 0.85
+          ? (58  + Math.random() * 32)
+          : (295 + Math.random() * 28);
+
+      // Three screen zones — each firefly lives and bounces within its own zone
+      const zone = Math.random();
+      let x, y, xMin, xMax, yMin, yMax;
+      if (zone < 0.58) {
+        // Top band across full width (existing feel)
+        xMin = 0.02; xMax = 0.95; yMin = 0.01; yMax = 0.26;
+        x = xMin + Math.random() * (xMax - xMin);
+        y = yMin + Math.random() * (yMax - yMin);
+      } else if (zone < 0.80) {
+        // Right column
+        xMin = 0.66; xMax = 0.96; yMin = 0.08; yMax = 0.72;
+        x = xMin + Math.random() * (xMax - xMin);
+        y = yMin + Math.random() * (yMax - yMin);
+      } else {
+        // Middle scatter
+        xMin = 0.12; xMax = 0.84; yMin = 0.28; yMax = 0.72;
+        x = xMin + Math.random() * (xMax - xMin);
+        y = yMin + Math.random() * (yMax - yMin);
       }
 
-      const data  = imageData.data;
-      const xSpan = viewXmax - viewXmin;
-      const ySpan = viewYmax - viewYmin;
+      return {
+        kind: 'title',
+        x, y, xMin, xMax, yMin, yMax,
+        vx: (Math.random() - 0.5) * 0.000020,
+        vy: (Math.random() - 0.5) * 0.000014,
+        phase: Math.random() * Math.PI * 2,
+        pulseSpeed: 0.85 + Math.random() * 2.0,
+        size: 0.30 + Math.random() * 0.52,
+        hue,
+      };
+    }
 
-      for (let py = 0; py < pixH; py++) {
-        const ci0 = viewYmin + (py / pixH) * ySpan;
-        for (let px = 0; px < pixW; px++) {
-          let zr = viewXmin + (px / pixW) * xSpan;
-          let zi = ci0;
-          let iter = 0;
+    function makeDrifterFF() {
+      return {
+        kind: 'drifter',
+        x: -0.02 + Math.random() * 0.06,
+        y: 0.62 + Math.random() * 0.30,
+        vx: 0.000022 + Math.random() * 0.000018,  // slower
+        vy: 0,
+        alpha: 0,
+        fadeIn: true,
+        fadeSpeed: 0.0014 + Math.random() * 0.0010,
+        life: 0,
+        maxLife: 1400 + Math.random() * 1400,      // shorter life
+        size: 0.28 + Math.random() * 0.38,
+        hue: 44 + Math.random() * 22,
+        persistent: false,
+      };
+    }
 
-          // Tight inner loop — no function calls
-          while (iter < MAX_ITER && zr*zr + zi*zi < 4.0) {
-            const tmp2 = zr*zr - zi*zi + CR;
-            zi = 2.0*zr*zi + CI;
-            zr = tmp2;
-            iter++;
-          }
+    const titleFFs   = Array.from({ length: 280 }, makeTitleFF);
+    const drifterFFs = Array.from({ length: 6 }, makeDrifterFF);
 
-          const idx = (py * pixW + px) * 4;
-          if (iter === MAX_ITER) {
-           // Interior — soft purple-grey
-          data[idx]   = 125;
-          data[idx+1] = 115;
-          data[idx+2] = 160;
-          } else {
-            const li = iter * 3;
-            data[idx]   = LUT[li];
-            data[idx+1] = LUT[li+1];
-            data[idx+2] = LUT[li+2];
-          }
-          data[idx+3] = 255;
-        }
+    // ── Alternating swarm fireflies ────────────────────────────────────────
+    // Two tightly-zoned swarms that trade dominance on a slow sine cycle.
+    // Swarm A lives behind the website title (top-left).
+    // Swarm B lives on the right side of the screen.
+    // A slow envelope (period ≈ 7.85 s) brings one up while the other sleeps.
+    // Phase offset is slightly more than π so there is a brief dark gap between
+    // transitions — both swarms are never visible at the same time.
+    const SWARM_CYCLE   = 0.80;              // rad/s → period ≈ 7.85 s
+    const SWARM_PHASE_B = Math.PI + 0.55;    // slightly off perfect alternation
+
+    function makeSwarmFF(swarm) {
+      const hue = 78 + Math.random() * 50;   // green → yellow-green (78–128)
+      let xMin, xMax, yMin, yMax;
+      if (swarm === 'A') {
+        // Behind / around the title text (top-left region)
+        xMin = 0.01; xMax = 0.33; yMin = 0.00; yMax = 0.14;
+      } else {
+        // Right portion of the screen
+        xMin = 0.62; xMax = 0.99; yMin = 0.00; yMax = 0.20;
+      }
+      return {
+        swarm,
+        x: xMin + Math.random() * (xMax - xMin),
+        y: yMin + Math.random() * (yMax - yMin),
+        xMin, xMax, yMin, yMax,
+        vx: (Math.random() - 0.5) * 0.000020,
+        vy: (Math.random() - 0.5) * 0.000014,
+        phase: Math.random() * Math.PI * 2,
+        pulseSpeed: 14 + Math.random() * 14,  // fast blink: period 0.22–0.45 s
+        size: 0.24 + Math.random() * 0.34,
+        hue,
+      };
+    }
+
+    const swarmFFs = [
+      ...Array.from({ length: 55 }, () => makeSwarmFF('A')),
+      ...Array.from({ length: 55 }, () => makeSwarmFF('B')),
+    ];
+
+    function drawSwarmFireflies(cW, cH, t, dt, flashAmt) {
+      const envA = Math.max(0, Math.sin(t * SWARM_CYCLE));
+      const envB = Math.max(0, Math.sin(t * SWARM_CYCLE + SWARM_PHASE_B));
+
+      ctx.save();
+      for (const ff of swarmFFs) {
+        ff.x += ff.vx * dt;
+        ff.y += ff.vy * dt;
+        if (ff.x < ff.xMin || ff.x > ff.xMax) ff.vx *= -1;
+        if (ff.y < ff.yMin || ff.y > ff.yMax) ff.vy *= -1;
+        ff.x = Math.max(ff.xMin, Math.min(ff.xMax, ff.x));
+        ff.y = Math.max(ff.yMin, Math.min(ff.yMax, ff.y));
+
+        const env = ff.swarm === 'A' ? envA : envB;
+        if (env < 0.01) continue;
+
+        // Fast individual blink — sharper on/off than the slow-glow title flies
+        const pulse = Math.sin(t * ff.pulseSpeed + ff.phase);
+        const blink  = pulse > -0.15 ? Math.pow((pulse + 0.15) / 1.15, 1.8) : 0;
+        if (blink < 0.01) continue;
+
+        const alpha = env * blink * (0.72 + 0.28 * (1 - flashAmt * 0.6));
+        if (alpha < 0.015) continue;
+
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = `hsla(${ff.hue}, 68%, 80%, 1)`;
+        ctx.beginPath();
+        ctx.arc(ff.x * cW, ff.y * cH, ff.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // ── Audio / lightning ─────────────────
+    let _analyser   = null;
+    let _floatFreq  = null;
+    let prevPeakDb  = -90;
+    let peakEnvDb   = -90;
+    let flash       = 0;
+    let flashHold   = 0;   // ms to stay fully white after a strike
+
+    // Fallback timer: guarantee occasional strikes when analyser is absent / quiet
+    let _nextAutoStrike = 9000 + Math.random() * 8000; // ms from world start
+    let _worldElapsed = 0;
+
+    function ensureAnalyser() {
+      const live = window._paleoAnalyser;
+      if (!live) return false;
+      if (_analyser !== live) {
+        _analyser = live;
+        _floatFreq = new Float32Array(_analyser.frequencyBinCount);
+      }
+      return true;
+    }
+
+    function fireStrike(intensity) {
+      flash     = Math.min(1, intensity);
+      flashHold = 95 + intensity * 45;   // hold 95–140 ms fully white
+      _nextAutoStrike = Math.max(_nextAutoStrike, _worldElapsed + 7000);
+    }
+
+    function sampleLightning(dt) {
+      _worldElapsed += dt;
+
+      // Fallback timer — always some lightning even if analyser is quiet
+      if (_worldElapsed >= _nextAutoStrike && flashHold <= 0 && flash < 0.08) {
+        fireStrike(0.7 + Math.random() * 0.3);
+        _nextAutoStrike = _worldElapsed + 10000 + Math.random() * 12000;
+      }
+
+      if (typeof window._syncPaleoAnalyser === 'function') window._syncPaleoAnalyser();
+      if (!ensureAnalyser()) return;
+
+      _analyser.getFloatFrequencyData(_floatFreq);
+
+      // Sub-bass 20–60 Hz — where thunder's ground impact lives
+      const sr    = _analyser.context.sampleRate;
+      const binHz = sr / _analyser.fftSize;
+      const i0    = Math.max(0, Math.floor(20 / binHz));
+      const i1    = Math.min(_floatFreq.length - 1, Math.ceil(60 / binHz));
+
+      let peakDb = -90;
+      for (let i = i0; i <= i1; i++) {
+        if (_floatFreq[i] > peakDb) peakDb = _floatFreq[i];
+      }
+
+      peakEnvDb += (peakDb > peakEnvDb)
+        ? (peakDb - peakEnvDb) * 0.55
+        : (peakDb - peakEnvDb) * 0.06;
+
+      const deltaDb = peakDb - prevPeakDb;
+      prevPeakDb = peakDb;
+
+      // Hanning window attenuates peaks ~3-4 dB — a -2 dBFS audio peak reads ~-6 in FFT bins.
+      // Primary: fire when bin peak clears -6 dBFS (maps to your -2 to 0 dBFS audio peaks).
+      let strike = 0;
+      if (peakDb > -6) {
+        strike = Math.min(1, (peakDb + 6) / 6);        // 0 at −6 dBFS → 1 at 0 dBFS
+      } else if (peakDb > -12 && deltaDb > 9) {
+        strike = Math.min(0.8, (deltaDb - 7) / 8);     // violent sudden transient
+      }
+
+      if (strike > 0.05 && flash < strike) {
+        fireStrike(strike);
       }
     }
 
-    // ── Interaction handlers ──
-    let handlersAttached = false;
+    // ── Draw helpers ─────────────────────
 
-    function screenToComplex(sx, sy, cW, cH) {
-      return [
-        viewXmin + (sx / cW) * (viewXmax - viewXmin),
-        viewYmin + (sy / cH) * (viewYmax - viewYmin),
-      ];
+    function drawBackground(cW, cH) {
+      ctx.fillStyle = 'rgb(0, 2, 6)';
+      ctx.fillRect(0, 0, cW, cH);
+      const depth = ctx.createLinearGradient(0, 0, 0, cH);
+      depth.addColorStop(0,    'rgba(1, 6, 14, 0.55)');
+      depth.addColorStop(0.45, 'rgba(0, 3,  8, 0.30)');
+      depth.addColorStop(1,    'rgba(0, 0,  0, 0.94)');
+      ctx.fillStyle = depth;
+      ctx.fillRect(0, 0, cW, cH);
     }
 
-    function zoomAround(cx, cy, factor, cW, cH) {
-      const [rx, ry] = screenToComplex(cx, cy, cW, cH);
-      const xSpan = (viewXmax - viewXmin) * factor;
-      const ySpan = (viewYmax - viewYmin) * factor;
-      const fx = cx / cW;
-      const fy = cy / cH;
-      // Fix: compute both min and max from the anchor point
-      viewXmin = rx - fx * xSpan;
-      viewXmax = rx + (1 - fx) * xSpan;
-      viewYmin = ry - fy * ySpan;
-      viewYmax = ry + (1 - fy) * ySpan;
-      dirty = true;
+    function drawWhiteFlash(cW, cH, flashAmt) {
+      if (flashAmt < 0.01) return;
+      ctx.fillStyle = `rgba(255,255,255,${flashAmt})`;
+      ctx.fillRect(0, 0, cW, cH);
     }
 
-    function attachHandlers(canvas) {
-      if (handlersAttached) return;
-      handlersAttached = true;
+    function drawNevoa(cW, cH, t, dt) {
+      for (const n of nevoaBlobs) {
+        n.x    += n.vx * dt;
+        n.y    += n.vy * dt;
+        n.life += dt;
 
-      // ── Mouse wheel zoom only ──
-      canvas.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        const rect   = canvas.getBoundingClientRect();
-        const factor = e.deltaY < 0 ? 0.8 : 1.25;
-        zoomAround(e.clientX - rect.left, e.clientY - rect.top, factor,
-                   canvas.width, canvas.height);
-      }, { passive: false });
+        // Fade in over first 1.2 s, hold, fade out over last 25 % of maxLife
+        const fadeIn  = Math.min(1, n.life / 1200);
+        const fadeOut = n.life > n.maxLife * 0.75
+          ? Math.max(0, 1 - (n.life - n.maxLife * 0.75) / (n.maxLife * 0.25))
+          : 1;
+        const lifeFade = fadeIn * fadeOut;
 
-      // ── Pinch to zoom (touch only) ──
-      let lastDist = null;
-      let lastMx = 0, lastMy = 0;
-
-      canvas.addEventListener('touchstart', (e) => {
-        if (e.touches.length === 2) {
-          const dx = e.touches[0].clientX - e.touches[1].clientX;
-          const dy = e.touches[0].clientY - e.touches[1].clientY;
-          lastDist = Math.hypot(dx, dy);
-          lastMx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-          lastMy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        // Respawn from left when life ends or column drifts off-screen
+        if ((n.life >= n.maxLife && lifeFade < 0.01) || n.x - n.rx > 1.18) {
+          Object.assign(n, makeNevoa(true));
+          continue;
         }
-      }, { passive: true });
 
-      canvas.addEventListener('touchmove', (e) => {
-        if (e.touches.length !== 2 || !lastDist) return;
-        e.preventDefault();
-        const dx   = e.touches[0].clientX - e.touches[1].clientX;
-        const dy   = e.touches[0].clientY - e.touches[1].clientY;
-        const dist = Math.hypot(dx, dy);
-        const mx   = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-        const my   = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-        const rect = canvas.getBoundingClientRect();
-        zoomAround(mx - rect.left, my - rect.top, lastDist / dist,
-                   canvas.width, canvas.height);
-        lastDist = dist; lastMx = mx; lastMy = my;
-      }, { passive: false });
+        if (lifeFade < 0.005) continue;
 
-      canvas.addEventListener('touchend', () => { lastDist = null; }, { passive: true });
+        const pf = 0.72 + 0.28 * Math.sin(t * n.pulseFreq * 1000 + n.phase);
+        const a  = n.alpha * pf * lifeFade;
+
+        const px  = n.x  * cW;
+        const py  = n.y  * cH;
+        const rX  = n.rx * cW;   // narrow horizontal radius (screen px)
+        const rY  = n.ry * cH;   // tall   vertical  radius (screen px)
+
+        // ── Soft-edge technique ────────────────────────────────────────────────
+        // Instead of clipping a radial gradient to an ellipse path (which causes a
+        // hard edge exactly where the gradient reaches zero), we use a coordinate-
+        // space scale trick: stretch Y by (rY/rX) so a circular gradient becomes
+        // the right aspect-ratio column, and fill an unclipped rect.  The gradient
+        // fades to rgba(0,0,0,0) at its own radius — no path edge ever clips it.
+
+        // ── Layer 1: wide diffuse halo ──
+        const hRx = rX * 3.2;
+        const hRy = rY * 1.45;
+        ctx.save();
+        ctx.translate(px, py);
+        ctx.scale(1, hRy / hRx);
+        const hGrd = ctx.createRadialGradient(0, 0, 0, 0, 0, hRx);
+        hGrd.addColorStop(0,    `rgba(148,172,198,${(a * 0.28).toFixed(4)})`);
+        hGrd.addColorStop(0.38, `rgba(128,158,188,${(a * 0.10).toFixed(4)})`);
+        hGrd.addColorStop(0.72, `rgba(108,142,175,${(a * 0.025).toFixed(4)})`);
+        hGrd.addColorStop(1,    'rgba(0,0,0,0)');
+        ctx.fillStyle = hGrd;
+        ctx.fillRect(-hRx, -hRx, hRx * 2, hRx * 2);
+        ctx.restore();
+
+        // ── Layer 2: main column ──
+        ctx.save();
+        ctx.translate(px, py);
+        ctx.scale(1, rY / rX);
+        const grd = ctx.createRadialGradient(0, 0, 0, 0, 0, rX);
+        grd.addColorStop(0,    `rgba(172,192,212,${(a * 0.68).toFixed(4)})`);
+        grd.addColorStop(0.30, `rgba(155,178,200,${(a * 0.28).toFixed(4)})`);
+        grd.addColorStop(0.58, `rgba(132,160,188,${(a * 0.07).toFixed(4)})`);
+        grd.addColorStop(0.82, `rgba(110,145,178,${(a * 0.015).toFixed(4)})`);
+        grd.addColorStop(1,    'rgba(0,0,0,0)');
+        ctx.fillStyle = grd;
+        ctx.fillRect(-rX, -rX, rX * 2, rX * 2);
+        ctx.restore();
+      }
     }
 
-    // Temp canvas for upscaling the pixel buffer
-    const bufCanvas = document.createElement('canvas');
-    const bufCtx    = bufCanvas.getContext('2d');
+    function drawTitleFireflies(cW, cH, t, dt, flashAmt) {
+      ctx.save();
+      for (const ff of titleFFs) {
+        ff.x += ff.vx * dt;
+        ff.y += ff.vy * dt;
+        if (ff.x < ff.xMin || ff.x > ff.xMax) ff.vx *= -1;
+        if (ff.y < ff.yMin || ff.y > ff.yMax) ff.vy *= -1;
+        ff.x = Math.max(ff.xMin, Math.min(ff.xMax, ff.x));
+        ff.y = Math.max(ff.yMin, Math.min(ff.yMax, ff.y));
+
+        const pulse = Math.sin(t * ff.pulseSpeed + ff.phase);
+        const visible = pulse > -0.55 ? Math.pow((pulse + 0.55) / 1.55, 2.2) : 0;
+        if (visible < 0.012) continue;
+
+        const alpha = visible * (0.48 + 0.52 * (1 - flashAmt * 0.7));
+        if (alpha < 0.015) continue;
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = `hsla(${ff.hue},88%,62%,1)`;
+        ctx.beginPath();
+        ctx.arc(ff.x * cW, ff.y * cH, ff.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function drawDrifterFireflies(cW, cH, dt, flashAmt) {
+      ctx.save();
+      for (const ff of drifterFFs) {
+        ff.x += ff.vx * dt;
+        ff.y += ff.vy * dt;
+        ff.life += dt;
+
+        if (ff.fadeIn) {
+          ff.alpha = Math.min(1, ff.alpha + ff.fadeSpeed * dt);
+          if (ff.alpha >= 1) ff.fadeIn = false;
+        } else {
+          const shouldFade = ff.persistent ? ff.x > 0.90 : ff.life > ff.maxLife * 0.72;
+          if (shouldFade) {
+            ff.alpha = Math.max(0, ff.alpha - ff.fadeSpeed * 0.60 * dt);
+          }
+        }
+
+        if ((ff.life > ff.maxLife && ff.alpha < 0.02) || ff.x > 1.12) {
+          Object.assign(ff, makeDrifterFF());
+          continue;
+        }
+
+        if (ff.alpha < 0.01) continue;
+        const a = ff.alpha * (0.55 + 0.45 * (1 - flashAmt * 0.65));
+        ctx.globalAlpha = a;
+        ctx.fillStyle = `hsla(${ff.hue},80%,65%,1)`;
+        ctx.beginPath();
+        ctx.arc(ff.x * cW, ff.y * cH, ff.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function drawRainLayer(cW, cH, t, dt, rainAlpha, layer, activeCount) {
+      ctx.save();
+      ctx.lineCap = 'round';
+
+      for (let di = 0; di < activeCount; di++) {
+        const drop = rainDrops[di];
+        if (drop.layer !== layer) continue;
+
+        // Per-drop gust: global worldGust × individual phase offset
+        const dropGust = worldGust * (0.65 + 0.35 * Math.sin(t * 0.55 + drop.windPhase));
+        const effAngle = RAIN_ANGLE + drop.angleVar * dropGust;
+        const sinEff   = Math.sin(effAngle);
+        const cosEff   = Math.cos(effAngle);
+
+        drop.y += drop.speed * dt;
+        drop.x += (WIND_X * (0.4 + 0.6 * dropGust) + drop.drift) * dt;
+
+        if (drop.y > 1.05) {
+          drop.y = -0.04 - Math.random() * 0.08;
+          drop.x = Math.random();
+        }
+        if (drop.x < -0.06) drop.x += 1.1;
+        if (drop.x > 1.06) drop.x -= 1.1;
+
+        const a = drop.alpha * rainAlpha;
+        const x0 = drop.x * cW;
+        const y0 = drop.y * cH;
+        const len = drop.len * cH;
+
+        if (drop.bright) {
+          // Bright drops: near-white, slightly wider
+          ctx.strokeStyle = `rgba(230,242,255,${Math.min(1, a * 1.55)})`;
+          ctx.lineWidth   = layer === 'front' ? 1.3 : 0.7;
+        } else {
+          ctx.strokeStyle = layer === 'front'
+            ? `rgba(175,205,225,${a})`
+            : `rgba(130,165,190,${a * 0.55})`;
+          ctx.lineWidth = layer === 'front' ? 0.85 : 0.45;
+        }
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x0 + sinEff * len * 0.38, y0 + cosEff * len);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
 
     return {
       reset() {
-      // Tighter zoom — roughly 4× more zoomed than current default
-      viewXmin = -0.01; viewXmax =  0.04;
-      viewYmin = -0.03; viewYmax =  0.02;
-      dirty = true;
+        _analyser    = null;
+        _floatFreq   = null;
+        prevPeakDb   = -90;
+        peakEnvDb    = -90;
+        flash        = 0;
+        flashHold    = 0;
+        _worldElapsed  = 0;
+        _nextAutoStrike = 9000 + Math.random() * 8000;
+        worldGust = 0.5;
+        rainDrops.forEach(function (d)   { d.y = Math.random(); d.x = Math.random(); });
+        nevoaBlobs.forEach(function (n)  { Object.assign(n, makeNevoa(false)); });
+        drifterFFs.forEach(function (ff) { Object.assign(ff, makeDrifterFF());          });
+        titleFFs.forEach(function (ff)   { Object.assign(ff, makeTitleFF());             });
+        swarmFFs.forEach(function (ff)   { Object.assign(ff, makeSwarmFF(ff.swarm));    });
       },
       draw(t, dt, cW, cH) {
-        // Only attach interaction on non-touch devices
-        const isMobile = window.matchMedia('(pointer: coarse)').matches;
-        if (!isMobile) attachHandlers(worldCanvas);
+        sampleLightning(dt);
 
-        // Only re-render pixel buffer when view has changed
-        if (dirty) {
-          renderJulia(cW, cH);
-          bufCanvas.width  = pixW;
-          bufCanvas.height = pixH;
-          bufCtx.putImageData(imageData, 0, 0);
-          dirty = false;
+        // Flash: hold fully white, then slow fade to dark
+        if (flashHold > 0) {
+          flashHold = Math.max(0, flashHold - dt);
+          flash = 1.0;
+        } else if (flash > 0.002) {
+          // dt-normalised decay — ~1.8 s to reach near-zero at 60 fps
+          flash *= Math.pow(0.934, dt / 16.67);
+        } else {
+          flash = 0;
         }
 
-        // Upscale bufCanvas to full screen — one drawImage call
-        ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(bufCanvas, 0, 0, cW, cH);
+        // Slow sinusoidal gust — full cycle ~35 s
+        worldGust = 0.5 + 0.5 * Math.sin(t * 0.18 + 0.8);
 
-        // ── Rain ──
-        ctx.save();
-        ctx.lineCap = 'butt';
-        for (const drop of rainDrops) {
-          drop.y += drop.speed * dt;
-          if (drop.y > 1.02) { drop.y = -0.02; drop.x = Math.random(); }
-          const dx   = drop.x * cW;
-          const dy   = drop.y * cH;
-          const dlen = drop.len * cH;
-          ctx.strokeStyle = drop.layer === 'front'
-            ? `rgba(255,255,255,${drop.alpha})`
-            : `rgba(255,255,255,${drop.alpha * 0.5})`;
-          ctx.lineWidth = drop.layer === 'front' ? 0.5 : 0.25;
-          ctx.beginPath();
-          ctx.moveTo(dx, dy);
-          ctx.lineTo(dx, dy + dlen);
-          ctx.stroke();
+        // Rain intensity burst: ramps up 30–45 s, holds 45–60 s, ramps down 60–75 s
+        const el = _worldElapsed; // ms
+        let activeRainCount = 260;
+        if (el > 30000) {
+          if (el < 45000)      activeRainCount = 260 + Math.round((el - 30000) / 15000 * 140);
+          else if (el < 60000) activeRainCount = 400;
+          else if (el < 75000) activeRainCount = 400 - Math.round((el - 60000) / 15000 * 140);
         }
-        ctx.restore();
+
+        const rainAlpha = 0.62 + Math.min(0.2, flash * 0.3);
+
+        drawBackground(cW, cH);
+        drawNevoa(cW, cH, t, dt);
+        drawRainLayer(cW, cH, t, dt, rainAlpha, 'back', activeRainCount);
+        drawTitleFireflies(cW, cH, t, dt, flash);
+        drawSwarmFireflies(cW, cH, t, dt, flash);
+        drawDrifterFireflies(cW, cH, dt, flash);
+        drawRainLayer(cW, cH, t, dt, rainAlpha * 1.08, 'front', activeRainCount);
+        drawWhiteFlash(cW, cH, flash);
       }
     };
   })();
 
   // ═══════════════════════════════════════
   // WORLD 3 — SELVA DIGITAL (flowfield)
-  // The flow field runs on the world canvas directly.
-  // Audio reactivity is handled inside flowfield.html's IIFE via
-  // window._flowfieldAnalyser (set by loadAudio when worldIdx === 3).
+  // Audio: getAudioEnergy() reads window._flowfieldAnalyser only (never _paleoAnalyser).
   // ═══════════════════════════════════════
 
   const selvaDigital = (() => {
@@ -2990,24 +3254,135 @@ const LUT = new Uint8Array(MAX_ITER * 3);
 
   // ── Audio engine ──────────────────────
   let audioCtxShared = null;
-  let analyserShared = null;
+  let paleoTapEl = null;
+
+  function clearPaleoAudioGraph() {
+    window._paleoAnalyser = null;
+    if (paleoTapEl) {
+      paleoTapEl.pause();
+      paleoTapEl.src = '';
+      paleoTapEl = null;
+    }
+  }
+
+  function resumeAudioContext() {
+    if (audioCtxShared && audioCtxShared.state === 'suspended') {
+      return audioCtxShared.resume();
+    }
+    return Promise.resolve();
+  }
+
+  /* Analysis-only tap — main audioEl always uses plain HTML playback (worlds 0–3) */
+  function wirePaleoAnalyserTap(el) {
+    try {
+      if (!audioCtxShared) {
+        audioCtxShared = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      const analyser = audioCtxShared.createAnalyser();
+      analyser.fftSize = 4096;
+      analyser.smoothingTimeConstant = 0.05;
+      analyser.minDecibels = -90;
+      analyser.maxDecibels = 0;
+
+      const mute = audioCtxShared.createGain();
+      mute.gain.value = 0;
+
+      const src = audioCtxShared.createMediaElementSource(el);
+      src.connect(analyser);
+      analyser.connect(mute);
+      mute.connect(audioCtxShared.destination);
+
+      window._paleoAnalyser = analyser;
+      resumeAudioContext();
+      return true;
+    } catch (err) {
+      window._paleoAnalyser = null;
+      return false;
+    }
+  }
+
+  function syncPaleoAnalyserTap() {
+    if (!paleoTapEl || !audioEl) return;
+    resumeAudioContext();
+    if (audioEl.paused) return;
+    if (paleoTapEl.readyState >= 2) {
+      if (Math.abs(paleoTapEl.currentTime - audioEl.currentTime) > 0.1) {
+        try { paleoTapEl.currentTime = audioEl.currentTime; } catch (err) {}
+      }
+    }
+    if (paleoTapEl.paused) {
+      paleoTapEl.play().then(resumeAudioContext).catch(function () {});
+    }
+  }
+
+  window._syncPaleoAnalyser = syncPaleoAnalyserTap;
+
+  function playPaleoAnalyserTapSynced() {
+    if (!paleoTapEl || !audioEl) return;
+    resumeAudioContext();
+    try { paleoTapEl.currentTime = audioEl.currentTime; } catch (err) {}
+    paleoTapEl.play().then(resumeAudioContext).catch(function () {
+      setTimeout(function () {
+        if (paleoTapEl && audioEl && activeWorld === 2) {
+          try { paleoTapEl.currentTime = audioEl.currentTime; } catch (err) {}
+          paleoTapEl.play().then(resumeAudioContext).catch(function () {});
+        }
+      }, 280);
+    });
+  }
+
+  function startPaleoAnalyserTap(cb) {
+    paleoTapEl = new Audio(AUDIO_SRCS[2]);
+    paleoTapEl.loop = true;
+    paleoTapEl.volume = 1;
+    paleoTapEl.preload = 'auto';
+
+    function finish() {
+      if (!paleoTapEl) { cb && cb(false); return; }
+      const ok = wirePaleoAnalyserTap(paleoTapEl);
+      if (!ok) {
+        paleoTapEl.pause();
+        paleoTapEl.src = '';
+        paleoTapEl = null;
+      }
+      cb && cb(ok);
+    }
+
+    paleoTapEl.addEventListener('error', function () { finish(); }, { once: true });
+    if (paleoTapEl.readyState >= 2) finish();
+    else paleoTapEl.addEventListener('canplay', finish, { once: true });
+  }
 
   function loadAudio(worldIdx) {
     if (audioEl) { audioEl.pause(); audioEl.src = ''; audioEl = null; }
+    clearPaleoAudioGraph();
     window._flowfieldAnalyser = null;
 
-    // Plain Audio — no crossOrigin, works on all servers including GitHub Pages
     audioEl = new Audio(AUDIO_SRCS[worldIdx]);
-    audioEl.loop   = true;
+    audioEl.loop = true;
     audioEl.volume = 0;
 
-    audioEl.play().catch(err => {
-      // Retry once after a short delay (browser autoplay policy)
-      setTimeout(() => { if (audioEl) audioEl.play().catch(() => {}); }, 400);
+    if (worldIdx === 2) {
+      startPaleoAnalyserTap(function () {
+        playPaleoAnalyserTapSynced();
+      });
+    }
+
+    audioEl.play().then(function () {
+      resumeAudioContext();
+      if (worldIdx === 2) playPaleoAnalyserTapSynced();
+    }).catch(function () {
+      setTimeout(function () {
+        if (!audioEl) return;
+        audioEl.play().then(function () {
+          resumeAudioContext();
+          if (worldIdx === 2) playPaleoAnalyserTapSynced();
+        }).catch(function () {});
+      }, 400);
     });
 
     let vol = 0;
-    const fi = setInterval(() => {
+    const fi = setInterval(function () {
       vol = Math.min(1, vol + 0.02);
       if (audioEl) audioEl.volume = vol;
       if (vol >= 1) clearInterval(fi);
@@ -3017,12 +3392,13 @@ const LUT = new Uint8Array(MAX_ITER * 3);
   function fadeOutAudio(cb) {
     if (!audioEl) { cb && cb(); return; }
     let vol = audioEl.volume;
-    const fo = setInterval(() => {
+    const fo = setInterval(function () {
       vol = Math.max(0, vol - 0.04);
       if (audioEl) audioEl.volume = vol;
       if (vol <= 0) {
         clearInterval(fo);
         if (audioEl) { audioEl.pause(); audioEl.src = ''; audioEl = null; }
+        clearPaleoAudioGraph();
         cb && cb();
       }
     }, 60);
@@ -3033,9 +3409,7 @@ const LUT = new Uint8Array(MAX_ITER * 3);
 
   // ── Activate a world ──────────────────
   function setWorldPointerEvents(idx) {
-    // Enable pointer events on world canvas only for Julia set (world 2)
-    // Flowfield (world 3) handles its own click via its internal canvas listener
-    worldCanvas.style.pointerEvents = (idx === 2) ? 'auto' : 'none';
+    worldCanvas.style.pointerEvents = 'none';
   }
 
   function activateWorld(idx) {
@@ -3061,6 +3435,9 @@ const LUT = new Uint8Array(MAX_ITER * 3);
   function renderLoop(now) {
     animFrame = requestAnimationFrame(renderLoop);
     if (activeWorld < 0) return;
+    if (activeWorld === 2 && typeof window._syncPaleoAnalyser === 'function') {
+      window._syncPaleoAnalyser();
+    }
     const dt = Math.min(now - lastRenderTime, 80); // cap dt to avoid jumps
     lastRenderTime = now;
     worldT += dt * 0.001;
@@ -3074,6 +3451,12 @@ const LUT = new Uint8Array(MAX_ITER * 3);
   // ── Play button ───────────────────────
   playBtn.addEventListener('click', () => {
     if (!isPlaying) {
+      if (!audioCtxShared) {
+        try {
+          audioCtxShared = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (err) {}
+      }
+      resumeAudioContext();
       const startWorld = Math.floor(Math.random() * 4);
       isPlaying = true;
       playLabel.textContent = playLabelIdle;
@@ -3101,6 +3484,7 @@ const LUT = new Uint8Array(MAX_ITER * 3);
   // ── Cycle worlds ──────────────────────
   function cycleWorld(dir) {
     if (!isPlaying) return;
+    resumeAudioContext();
     const next = ((activeWorld + dir) + 4) % 4;
     fadeOutAudio(() => {
       activeWorld = next;

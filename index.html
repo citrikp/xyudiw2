@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#000000">
   <script src="lang-detect.js?v=202604295073"></script>
+  <script>/* Safari-mac detection — must run before first CSS paint */
+  (function(){var ua=navigator.userAgent;if(/Macintosh/.test(ua)&&/Safari\//.test(ua)&&!/Chrome\//.test(ua)&&!/Edg\//.test(ua)){document.documentElement.classList.add('safari-mac');}})();</script>
   <title>Mari Herzer (v2)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -266,7 +268,7 @@
               <p><span class="contact-label">instagram</span><br>
                 <a href="https://instagram.com/mariherzer" target="_blank">@mariherzer</a></p>
               <p><span class="contact-label">email</span><br>
-                <a href="mailto:mariherzer@gmail.com">mariherzer@gmail.com</a></p>
+                <a href="mailto:mari@mariherzer.org">mari@mariherzer.org</a></p>
             </div>
           </dialog>
 
@@ -384,7 +386,7 @@
   </section>
   <div id="onepager-transition" class="onepager-transition" aria-hidden="true"></div>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="script.js?v=202605211630"></script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="script.js?v=202605261855"></script>
   <script src="https://player.vimeo.com/api/player.js"></script>
   <script>
   (function() {
@@ -591,6 +593,9 @@
         if (transitionLayer) transitionLayer.classList.remove('is-active');
         if (/^#(colab|sobre|about)$/i.test(window.location.hash || '') && typeof history.replaceState === 'function') {
           history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+        if (typeof window._resumeHomeBackdrop === 'function') {
+          window._resumeHomeBackdrop();
         }
       }, transitionMs);
     }

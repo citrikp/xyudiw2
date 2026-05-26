@@ -469,6 +469,18 @@ body.site-home .site-title {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Safari on macOS desktop: the font has no true bold face, so styles.css uses
+   font-synthesis:weight + -webkit-text-stroke to fake it.  Safari's bold-synthesis
+   algorithm paints a second glyph pass internally; the 1.4px stroke then overlaps
+   it, producing the doubled look.  Also, Safari clips the italic overshoot of the
+   final "r" at the inline-block boundary — padding-inline-end gives it room.
+   Chrome is unaffected because .safari-mac is only added by the UA-sniff script. */
+html.safari-mac body.site-home .site-title {
+  font-synthesis: none;
+  -webkit-text-stroke: 0;
+  padding-inline-end: 0.22em;
+}
+
 body[data-world] #homeCornerSubtitles {
   opacity: 0;
   visibility: hidden;
@@ -1980,8 +1992,7 @@ body:has(.portfolio-header) {
 
 /* ─────────────────────────────────────────
    PALEOZOICO WORLD OVERRIDES
-   Scoped to body[data-world="2"] so they
-   only fire when paleozoico is active.
+   Dark cave abstraction — scoped to body[data-world="2"].
 ───────────────────────────────────────── */
 
 /* mais button — black background */
